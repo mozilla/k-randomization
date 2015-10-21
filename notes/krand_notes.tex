@@ -91,5 +91,11 @@ The randomization procedure $R$ is $\epsilon$-differentially private if
 \[ \log\left(\frac{P[R(T)\in S]}{P[R(T_v)\in S]}\right) \leq \epsilon \]
 for any set of bit vectors $S$.
 
+
+Anonymity:
+\[
+    A_p = \min_{v \in T, s \in \{0,1\}^L} \frac{P[s \in R(T_v)]}{P[s = R(v)]}
+\]
+
 \end{document}
 
