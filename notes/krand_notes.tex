@@ -16,7 +16,6 @@
 \usepackage{fullpage}
 %% Shows equation label keys
 %\usepackage[notref]{showkeys}
-
 %% Title matter
 \title{K-Randomization}
 \author{Maxim Zhilyaev \and David Zeber}
@@ -27,7 +26,7 @@
 \begin{document}
 \maketitle
 
-\section*{Outline of the procedure}
+\section{Outline of the procedure}
 \begin{itemize}
    \item 
 \end{itemize}
@@ -154,6 +153,287 @@ Anonymity:
 \[
     A_p = \min_{v \in T, s \in \{0,1\}^L} \frac{P[s \in R(T_v)]}{P[s = R(v)]}
 \]
+
+\section{Single bit case}
+
+\subsection{Estimating number of single bits}
+
+Suppose there are $T$ set bits in the original collection of $N$ single bit records. After randomization is performed the number of observed synthetic bits $S$ is a random variable which we express as:
+\[ S = p \cdot T + q \cdot (N-T) \]
+
+From here we can express an estimate for $T$, computed from observed value of $S$:
+\begin{align}
+\bar{T} = \frac{S-qN}{p-q}
+\end{align}
+
+The expectation, variance and deviation of $\bar{T}$ random variable are given by:
+\begin{align}
+E(\bar{T}) = T\\
+VAR(\bar{T}) = \frac{qpN}{(p-q)^2} \\
+\sigma(\bar{T}) = \sqrt{\frac{qpN}{(p-q)^2}}
+\end{align}
+
+
+\subsection{Local Differential Privacy}
+
+We now study how differential privacy ratio changes depending  on the configuration of underlying database  $D$.  
+Assuming that  $D$ consists of $N$ single bit records, we are interested in deriving the expression of differential probability ratio as a function of observed number of set bits after randomization is performed.
+
+
+\subsubsection{Choice of D}
+
+We are seeking collection $D$ that maximizes differential privacy ratio for any number of observed bits in the randomized collection $S$.   Since we initially consider $D$ to consists of single bits only, the modified record switches the original bit to an opposite value.   Without loss of generality, assume that the original record was 1 and it was modified to 0.  Hence the original collection $D$ contains at least one set bit, and the modified collection $D_m$ contains one less set bits.   Both collections generate synthetic collection $S$.   Call the number of set bits in the synthetic collection a random variable $s$.  Then, the differential privacy ratio when $s$ is equal a particular number $i$ of set bits is given by:
+
+\[
+R_i = \frac{P(s=i | D_m)}{P(s=i | D)}
+\]
+
+\begin{thm}
+$R_i$  is maximized when $D$ contains N set bits
+\end{thm}
+
+\begin{proof}
+
+Suppose there are $m$ set bits in the original collection $D_m$.  Consider generating function for the number of set bits $s$ in $S$.
+
+\[
+G_m(x) = (q + px)^m (p + qx)^{N-m} = \sum_{i=0}^{N} a_i^mx^i
+\]
+
+Note that coefficients $a_i^m$ in the expansion of the generating function $G_m$ represent probabilities of $P(s=i | D)$.  We prove that for any $i$, the differential privacy ratio grows with $m$:
+
+\[
+\frac{a_i^m}{a_i^{m+1}} > \frac{a_i^{m-1}}{a_i^{m}}
+\] 
+
+which holds when
+
+\begin{align}
+(a_i^m)^2 > a_i^{m-1}a_i^{m+1}  \\
+(a_i^m)^2  - a_i^{m-1}a_i^{m+1} > 0
+\end{align}
+
+Consider generating functions for $m+1$, $m$ and $m-1$ respectively:
+
+\begin{align}
+G_{m+1}(x) = (p + qx)^{m+1} (p + qx)^{N-m-1} \\
+G_m(x) = (p + qx)^m (p + qx)^{N-m} \\
+G_{m-1}(x) = (p + qx)^{m-1} (p + qx)^{N-m+1}
+\end{align}
+
+Define $Q(x)$ as:
+
+\[ 
+Q(x) = (p + qx)^{m-1} (p + qx)^{N-m-1} = \sum_{i=0}^{N-2} b_i x^i 
+\]
+
+Then generating functions above are expressed as:
+
+\begin{align}
+G_{m+1}(x) = Q(x) (q+px)^2 =  \sum_{i=0}^{N} [b_iq^2 + 2qp b_{i-1} + b_{i-2} p^2] x^i \\
+G_m(x) = Q(x) (q+px)(p + qx) =  \sum_{i=0}^{N} [b_iqp + (q^2 + p^2) b_{i-1} + b_{i-2} qp] x^i \\
+G_{m-1}(x) = Q(x) (p+qx)^2 = \sum_{i=0}^{N} [b_ip^2 + 2qp b_{i-1} + b_{i-2} q^2] x^i
+\end{align}
+
+From here we can express coefficients of each generating function through coefficients of $Q(x)$
+
+\begin{align}
+a_i^{m+1} = b_iq^2 + 2qp b_{i-1} + b_{i-2} p^2\\
+a_i^m = b_iqp + (q^2 + p^2) b_{i-1} + b_{i-2} qp \\
+a_i^{m-1}= b_ip^2 + 2qp b_{i-1} + b_{i-2} q^2
+\end{align}
+
+Now, replace the coefficients $a_i$ in the $3.2$ with their expressions through $b_i$.
+
+\[
+(a_i^m)^2  - a_i^{m-1}a_i^{m+1}  = 
+(b_iqp + (q^2 + p^2) b_{i-1} + b_{i-2} qp)^2 - (b_iq^2 + 2qp b_{i-1} + b_{i-2} p^2) \cdot (b_ip^2 + 2qp b_{i-1} + b_{i-2} q^2) 
+\]
+
+After trivial algebraic transformations the above expressions simplifies to:
+
+\[
+(a_i^m)^2  - a_i^{m-1}a_i^{m+1}  = 
+(p^2 - q^2)^2  \cdot (b_i^2 - b_{i+1}b_{i-1})  \ge 0
+\]
+
+Note that the first term of the product is always greater than 0, and we will show that the second term is greater or equal to zero as well.
+
+% total hack
+ \textbf{Lemma 1}  If a polynomial has the from bellow
+ 
+ \[
+ Q(x) =  \sum_{i=0}^{n} a_i x^i = a_n \prod_{i}^{n} (r_i + x), \; where \; \; r_i \ge 0
+\]
+
+Then  \[ (a_i^2 - a_{i+1}a_{i-1})  \ge 0 \]
+
+\begin{proof}
+Assume polynomial is monic (e.g. $a_n=1$), and prove lemma by induction.
+
+For n=2:
+
+\begin{align}
+(r_1 + x) (r_2 + x) = r_1*r_2 + (r_1 + r_2) x + x^2 \\
+a_1^2 - a_0a_2 =  (r_1 + r_2)^2 - r_1*r_2 = r_1^2 + r_2^2 + r_1r_2 > 0 \; , since \; r_1 > 0 \; and \; r_2 > 0
+\end{align}
+
+Assume that for n, the statement holds for all $i$, then for $n+1$ we can express the polynomial as:
+
+\begin{align}
+ Q^{n+1}(x) =  \sum_{i=0}^{n+1} a_i x^i  = \prod_{i}^{n+1} (r_i + x) = Q^n(x) \cdot (r_{n+1} + x) =  \left ( \sum_{i=0}^{n} b_i x^i \right ) \cdot  (r_{n+1}+ x) \\
+\sum_{i=0}^{n+1} a_i x^i   =  \sum_{i=0}^{n+1} [b_ir_{n+1} + b_{i-1}]x^i \\
+a_i = b_ir_{n+1} + b_{i-1}
+\end{align}
+
+The index of $r_{n+1}$ is irrelevant for the proof, hence we drop it.  We now express  $(a_i^2 - a_{i+1}a_{i-1})$ through coefficients of $Q^n(x)$ and preform algebraic simplifications:
+
+\begin{align}
+a_i^2 - a_{i+1}a_{i-1} =  [b_ir + b_{i-1}]^2 -  [b_{i+1}r + b_i] \cdot [b_{i-1}r + b_{i-2}]  \\
+a_i^2 - a_{i+1}a_{i-1} = r^2 (b_i^2 - b_{i+1}b_{i-1}) + r (b_i b_{i-1} - b_{i+1}b_{i-1}) + (b_{i-1}^2 - b_ib_{i-2}) \\
+b_i^2 - b_{i+1}b_{i-1} \ge 0 \; by \; induction \; hypothesis \\
+b_{i-1}^2 - b_ib_{i-2} \ge 0  \; by \; induction \; hypothesis \\
+\\
+b_i b_{i-1} - b_{i+1}b_{i-1} \ge 0 \; because \; all \; b_i \; are \; positive \; and \\
+b_i^2 \ge b_{i+1} b_{i-1} \; and \; b_{i-1}^2 > b_ib_{i-2} \\
+b_i^2 \cdot b_{i-1}^2 \ge b_{i+1} b_{i-1} b_ib_{i-2} \\
+b_i b_{i-1} \ge b_{i+1}b_{i-1}
+\end{align}
+
+This completes the proof of  \textbf{Lemma 1}  for monic polynomials.  Same result is true for non-monic polynomials because if   $ (a_i^2 - a_{i+1}a_{i-1})  \ge 0 $, then multiplying each coefficient by constant factor does not change the inequality.  
+
+We now ready to finish the proof of \textbf{Theorem 4.1}.  Consider the generating function $G_m(x)$ again:
+\[
+G_m(x) = (q + px)^m (p + qx)^{N-m} = p^m q^{N-m}  \left (\frac{q}{p} + x \right )^m \left (\frac{p}{q} + x \right )^{N-m}
+\]
+Note that since $p$ and $q$ are probabilities, the expressions in parenthesis are of the from necessary for \textbf{Lemma 1} to hold. Which proves that:
+\[
+\frac{a_i^m}{a_i^{m+1}} > \frac{a_i^{m-1}}{a_i^{m}}
+\] 
+
+Which in turn proves that the differential privacy ratio maximizes when $m=N$
+\end{proof}
+\end{proof}
+
+\subsection{Maximum and Local differential privacy}
+
+Since we established a notion of a differential privacy ratio $R_i$ to be a function of the observed number of set bits in the synthetic output, it's instructive to see how this ratio changes with $i$.   Since $D$ consists of set bits, we have for any $i$
+
+\begin{align}
+P(s=i | D ) = \binom{N}{i}p^iq^{N-i} \\
+P(s=i | D_m ) = \binom{N-1}{i}p^{i+1}q^{N-i} +   \binom{N-1}{i-1}p^{i-1}q^{N-i+1}  \\
+R_i = \frac{P(s=i | D_m)}{P(s=i | D)} = \frac{N-i}{N}\frac{p}{q} + \frac{i}{N} \frac{q}{p}
+\end{align}
+
+When all $i=0$ - all synthetic bits are 0, the ratio reaches its maximum:
+\[
+R_0 = \frac{p}{q}
+\]
+
+When $i=N$ - the synthetic output consists of set bits entirely, the privacy ratio reaches minimum:
+
+\[
+R_N = \frac{q}{p}
+\]
+The ratio reduces as $i$ increases, and becomes 1 when number of synthetic bits is equal to expected number of set synthetic bits after randomization:
+\[
+R_{pN} =  \frac{N-pN}{N}\frac{p}{q} + \frac{pN}{N} \frac{q}{p} =  (1-p)\frac{p}{q} + p \frac{q}{p} = p + q = 1
+\]
+
+This observation raises a question of reducing absolute theoretical bound of classical differential privacy by considering realistic values of $i$, rather then all possible outcomes of randomization.  Indeed, the probability of all $N$ bits of $D$ generating $N$ zeros is very low.  For example, assuming $p=0.7$,  $q=0.3$ and $N=100$,  the probability of seeing no synthetic ones is $q^{100} = 5e^{-53}$, which is improbable for any realistic scenario.  Instead, we should consider values of $i$ that are realistic, which ,in statistical sense, means those values of $i$ that lie within certain number of $\sigma$ away from the expected mean.  
+
+This brings about a notion of a  \textbf{local differential privacy}, whereby the probabilistic ratio is considered only for values of $i$ that have realistic chance of being observed.  Consider the expression for $R_i$ again.
+\[
+R_i = \frac{P(s=i | D_m)}{P(s=i | D)} = \frac{N-i}{N}\frac{p}{q} + \frac{i}{N} \frac{q}{p}
+\]
+
+The expected number of observed synthetic bits is $pN$, while the deviation of $S$ random variable is $\sigma=\sqrt{pqN}$.  Consider the interval $[pN - 3\sigma,  pN +3\sigma]$. Since the probabilistic ratio grows as $i$ decreased, the maximum ratio will be attained when $i= pN - 3\sigma$.  Hence, the local differential privacy reaches maximum at $i= pN - 3\sigma$, and we want to express analytically the relationship between the privacy ratio $\lambda$, number of records $N$, and RRT parameters $p$ and $q$:
+
+\begin{align}
+i = pN - 3\sigma = pN - 3\sqrt{pqN} \\
+R_i = \frac{P(s=i | D_m)}{P(s=i | D)} = \frac{N-i}{N}\frac{p}{q} + \frac{i}{N} \frac{q}{p} \le \lambda \\
+Max(R_i) = \frac{N-pN + 3\sqrt{pqN}}{N} \cdot \frac{p}{q} + \frac{pN + 3\sqrt{pqN}}{N} \cdot \frac{q}{p} \le \lambda
+\end{align}
+From here:
+\begin{align}
+\frac{N-pN + 3\sqrt{pqN}}{N} \cdot \frac{p}{q} + \frac{pN - 3\sqrt{pqN}}{N} \cdot \frac{q}{p} \le \lambda \\
+p + q  +  3\sqrt{\frac{pq}{N}} \left ( \frac{p}{q}  - \frac{q}{p} \right )  \le \lambda \\
+1 +  3\sqrt{\frac{pq}{N}} \frac{p^2 - q^2}{pq}  \le \lambda \\
+1 + 3\sqrt{\frac{1}{N}}  \cdot \frac{p - q}{\sqrt{pq}}  \le \lambda \\
+\frac{pqN}{(p-q)^2} \ge \frac{9}{(\lambda - 1)^2}
+\end{align}
+
+This is an interesting result. Note that left side of inequality is the variance of estimate $\bar{T}$.  The local differential privacy grantee simply places a lower bound on the variance of RRT estimates:
+
+\begin{align}
+VAR(\bar{T}) = \frac{pqN}{(p-q)^2} \ge \frac{9}{(\lambda - 1)^2}
+\end{align}
+
+For a randomization algorithm applied independently to $N$ bits to be $\epsilon$-differentially private in local sense, means that estimate deviation is lower-bounded by:
+
+\begin{align}
+\sigma(\bar{T})  \ge \frac{3}{\lambda - 1} =  \frac{3}{e^{\epsilon} - 1}
+\end{align}
+
+We can replace the local differential privacy bound with slightly less optimal, but more analytically convenient bound. Note that:
+
+\begin{align}
+\frac{q}{p} < \frac{pq}{(p-q)^2} \\
+(p-q)^2 < p^2 \\
+(1-2q)^2 < (1-q)^2
+\end{align}
+
+Hence, the local differential privacy holds when $N$ is large enough to guarantee:
+\begin{align}
+\frac{pqN}{(p-q)^2} > \frac{q}{p} N \ge \frac{9}{(\lambda - 1)^2} 
+\end{align}
+
+From here, we can express RRT noise parameter $q$ through $N$ and $\lambda$:
+
+\begin{align}
+q \ge \frac{1}{1 + \frac{(\lambda - 1)^2 N}{9}} 
+\end{align}
+
+Suppose  $\lambda=2$ and there 1000 single bits records in $D$.  The required noise is:
+\[
+q = \frac{1}{1 + \frac{(2 - 1)^2 1000}{9}} = 0.009
+\]
+Compare that to the level of noise that absolute differential privacy would require for $\epsilon=ln(2)$. 
+\begin{align}
+\frac{p}{q} \le 2 \\
+q \ge \frac{1}{3} =  0.333
+\end{align}
+
+The notion of local privacy allowed us to reduce RRT noise 37 times utilizing the noise created by 1000 records existing in the collection.  This also enabled drastic improvement in estimation accuracy.  In the classical case, the estimation deviation is $\sigma =  44.7$, while for the local privacy the deviation is $\sigma =  3$, meaning that precision of RRT estimates had grown 10 fold.  It's worth reflecting on what's  exactly going on and why such a drastic performance increase is achievable. 
+
+Consider confidence intervals for both an original collection $D$  and modified collection $D_m$.  $D$ contains 1000 set bits and $D_m$ contains 999 set bits.  Corresponding means and deviation for sum of observed synthetic bits in each case is given below:
+\begin{align}
+E(S) = p \cdot 1000 \\
+\sigma(S) = \sqrt{pq\cdot 1000} \\
+E(S_m) = p \cdot 999 + q \\
+\sigma(S_m) = \sqrt{pq\cdot 999 + pq}
+\end{align}
+
+We know consider the confidence intervals for both $S$ and $S_m$ for RRT under classical and local differential privacy constrains.  If $q=0.333$ the confidence interval for $S$ and $S_m$  are:
+\begin{align}
+S -> [621.98 , 711.42] \\
+S_m -> [621.65 , 711.09]
+\end{align}
+
+Under local differential privacy, the noise level $q= 0.009$, and the confidence intervals become:
+\begin{align}
+S -> [982.04 , 999.96] \\
+S_m -> [981.06 , 998.98]
+\end{align}
+
+Note that the intervals are nearly identical in either case.  Which illustrates the point - we do not need the full power of the absolute differential privacy bound: the local privacy bound will guarantee privacy ratio for 99.98\% of possible synthetic outcomes.  Effectively, we exploit the noise of large collection to reduce the RRT noise required to randomize each individual record.  Rephrasing this important idiom - hiding a record among other records needs less noise than obfuscating a single record.
+
+
+\section{K-randomization for a single bit case}
+
+We know consider an important technique for further increasing the estimation precision while providing same local privacy guarantees.  
+
+
 
 \end{document}
 
