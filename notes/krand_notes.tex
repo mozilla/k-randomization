@@ -243,14 +243,14 @@ a_i^m = b_iqp + (q^2 + p^2) b_{i-1} + b_{i-2} qp \\
 a_i^{m-1}= b_ip^2 + 2qp b_{i-1} + b_{i-2} q^2
 \end{align}
 
-Now, replace the coefficients $a_i$ in the $3.2$ with their expressions through $b_i$.
+Now, replace the coefficients $a_i$ in the $4.6$ with their expressions through $b_i$.
 
 \[
 (a_i^m)^2  - a_i^{m-1}a_i^{m+1}  = 
 (b_iqp + (q^2 + p^2) b_{i-1} + b_{i-2} qp)^2 - (b_iq^2 + 2qp b_{i-1} + b_{i-2} p^2) \cdot (b_ip^2 + 2qp b_{i-1} + b_{i-2} q^2) 
 \]
 
-After trivial algebraic transformations the above expressions simplifies to:
+After trivial algebraic transformations the above expression simplifies to:
 
 \[
 (a_i^m)^2  - a_i^{m-1}a_i^{m+1}  = 
@@ -340,14 +340,14 @@ The ratio reduces as $i$ increases, and becomes 1 when number of synthetic bits 
 R_{pN} =  \frac{N-pN}{N}\frac{p}{q} + \frac{pN}{N} \frac{q}{p} =  (1-p)\frac{p}{q} + p \frac{q}{p} = p + q = 1
 \]
 
-This observation raises a question of reducing absolute theoretical bound of classical differential privacy by considering realistic values of $i$, rather then all possible outcomes of randomization.  Indeed, the probability of all $N$ bits of $D$ generating $N$ zeros is very low.  For example, assuming $p=0.7$,  $q=0.3$ and $N=100$,  the probability of seeing no synthetic ones is $q^{100} = 5e^{-53}$, which is improbable for any realistic scenario.  Instead, we should consider values of $i$ that are realistic, which ,in statistical sense, means those values of $i$ that lie within certain number of $\sigma$ away from the expected mean.  
+This observation raises a question of reducing absolute theoretical bound of classical differential privacy by considering realistic values of $i$, rather then all possible outcomes of randomization.  Indeed, the probability of all $N$ bits of $D$ generating $N$ zeros is very low.  For example, assuming $p=0.7$,  $q=0.3$ and $N=100$,  the probability of seeing no synthetic ones is $q^{100} = 5e^{-53}$, which is improbable for any realistic scenario.  Instead, we should consider values of $i$ that are realistic.  In statistical sense, we should only consider values of $i$ that fall within certain number of $\sigma$ away from the expected mean.  
 
 This brings about a notion of a  \textbf{local differential privacy}, whereby the probabilistic ratio is considered only for values of $i$ that have realistic chance of being observed.  Consider the expression for $R_i$ again.
 \[
 R_i = \frac{P(s=i | D_m)}{P(s=i | D)} = \frac{N-i}{N}\frac{p}{q} + \frac{i}{N} \frac{q}{p}
 \]
 
-The expected number of observed synthetic bits is $pN$, while the deviation of $S$ random variable is $\sigma=\sqrt{pqN}$.  Consider the interval $[pN - 3\sigma,  pN +3\sigma]$. Since the probabilistic ratio grows as $i$ decreased, the maximum ratio will be attained when $i= pN - 3\sigma$.  Hence, the local differential privacy reaches maximum at $i= pN - 3\sigma$, and we want to express analytically the relationship between the privacy ratio $\lambda$, number of records $N$, and RRT parameters $p$ and $q$:
+The expected number of observed synthetic bits is $pN$, while the deviation of $S$ random variable is $\sigma=\sqrt{pqN}$.  Consider the interval $[pN - 3\sigma,  pN +3\sigma]$. Since the probabilistic ratio grows as $i$ decreased, the maximum ratio will be attained when $i= pN - 3\sigma$.  Hence, the local differential privacy reaches maximum at $i= pN - 3\sigma$, and we want to express analytically the relationship between the probabilistic privacy ratio $\lambda$, number of records $N$, and RRT parameters $p$ and $q$:
 
 \begin{align}
 i = pN - 3\sigma = pN - 3\sqrt{pqN} \\
@@ -378,9 +378,10 @@ For a randomization algorithm applied independently to $N$ bits to be $\epsilon$
 We can replace the local differential privacy bound with slightly less optimal, but more analytically convenient bound. Note that:
 
 \begin{align}
-\frac{q}{p} < \frac{pq}{(p-q)^2} \\
+(1-2q)^2 < (1-q)^2 \\
 (p-q)^2 < p^2 \\
-(1-2q)^2 < (1-q)^2
+q < \frac{p^2q}{(p-q)^2} \\
+\frac{q}{p} < \frac{pq}{(p-q)^2} \\
 \end{align}
 
 Hence, the local differential privacy holds when $N$ is large enough to guarantee:
@@ -394,17 +395,17 @@ From here, we can express RRT noise parameter $q$ through $N$ and $\lambda$:
 q \ge \frac{1}{1 + \frac{(\lambda - 1)^2 N}{9}} 
 \end{align}
 
-Suppose  $\lambda=2$ and there 1000 single bits records in $D$.  The required noise is:
+Suppose  $\lambda=2$ and there are 1000 single bits records in $D$.  The required noise is:
 \[
 q = \frac{1}{1 + \frac{(2 - 1)^2 1000}{9}} = 0.009
 \]
-Compare that to the level of noise that absolute differential privacy would require for $\epsilon=ln(2)$. 
+Compare that to the level of noise that absolute differential privacy bound would require for $\epsilon=ln(2)$. 
 \begin{align}
 \frac{p}{q} \le 2 \\
 q \ge \frac{1}{3} =  0.333
 \end{align}
 
-The notion of local privacy allowed us to reduce RRT noise 37 times utilizing the noise created by 1000 records existing in the collection.  This also enabled drastic improvement in estimation accuracy.  In the classical case, the estimation deviation is $\sigma =  44.7$, while for the local privacy the deviation is $\sigma =  3$, meaning that precision of RRT estimates had grown 10 fold.  It's worth reflecting on what's  exactly going on and why such a drastic performance increase is achievable. 
+The notion of local privacy allowed us to reduce RRT noise 37 times and enabled drastic improvement in estimation accuracy.  In the classical case, the estimation deviation is $\sigma =  44.7$, while for the local privacy the deviation is $\sigma =  3$, meaning that precision of RRT estimates had grown 10 fold.  It's worth reflecting on what's  exactly going on and why such a drastic performance increase is achievable. 
 
 Consider confidence intervals for both an original collection $D$  and modified collection $D_m$.  $D$ contains 1000 set bits and $D_m$ contains 999 set bits.  Corresponding means and deviation for sum of observed synthetic bits in each case is given below:
 \begin{align}
@@ -414,7 +415,7 @@ E(S_m) = p \cdot 999 + q \\
 \sigma(S_m) = \sqrt{pq\cdot 999 + pq}
 \end{align}
 
-We know consider the confidence intervals for both $S$ and $S_m$ for RRT under classical and local differential privacy constrains.  If $q=0.333$ the confidence interval for $S$ and $S_m$  are:
+Consider the confidence intervals for both $S$ and $S_m$ for RRT under classical and local differential privacy constrains.  If $q=0.333$ the confidence interval for $S$ and $S_m$  are:
 \begin{align}
 S -> [621.98 , 711.42] \\
 S_m -> [621.65 , 711.09]
@@ -426,12 +427,12 @@ S -> [982.04 , 999.96] \\
 S_m -> [981.06 , 998.98]
 \end{align}
 
-Note that the intervals are nearly identical in either case.  Which illustrates the point - we do not need the full power of the absolute differential privacy bound: the local privacy bound will guarantee privacy ratio for 99.98\% of possible synthetic outcomes.  Effectively, we exploit the noise of large collection to reduce the RRT noise required to randomize each individual record.  Rephrasing this important idiom - hiding a record among other records needs less noise than obfuscating a single record.
+The intervals are nearly identical in either case.  Which illustrates the point - we do not need the full power of the absolute differential privacy bound: the local privacy bound will guarantee privacy ratio for 99.98\% of possible synthetic outcomes.  Effectively, we exploit the noise of large collection to reduce the RRT noise required to randomize each individual record.  Rephrasing this important idiom - hiding a record among other records needs less noise than obfuscating a single record.
 
 
 \section{K-randomization for a single bit case}
 
-We know consider an important technique for further increasing the estimation precision while providing same local privacy guarantees.  
+We know consider an important technique for further increasing the estimation precision while providing same local privacy guarantees.  Recall from previous example, that if collection $D$ consists of $N$ records, the corresponding RRT noise at $\lambda = 2$ is $q=0.009$.  We saw that deviation in this case is $\sigma=3$.  Hence our estimation error will be roughly 9 in either direction.   We can increase the estimate precision by  
 
 
 
