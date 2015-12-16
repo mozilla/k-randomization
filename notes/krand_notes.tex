@@ -432,8 +432,89 @@ The intervals are nearly identical in either case.  Which illustrates the point 
 
 \section{K-randomization for a single bit case}
 
-We know consider an important technique for further increasing the estimation precision while providing same local privacy guarantees.  Recall from previous example, that if collection $D$ consists of $N$ records, the corresponding RRT noise at $\lambda = 2$ is $q=0.009$.  We saw that deviation in this case is $\sigma=3$.  Hence our estimation error will be roughly 9 in either direction.   We can increase the estimate precision by  
+We know consider an important technique for further increasing the estimation precision while providing same local privacy guarantees.  Recall from previous example, that if collection $D$ consists of $N=1000$ records, the corresponding RRT noise at $\lambda = 2$ is $q=0.009$.  We saw that deviation in this case is $\sigma=3$.  Hence our estimation error will be roughly 9 in either direction.   We can increase the estimate precision by  repeating randomization $k$ times, hence the name  \textbf{k-ranomization}.  
 
+It will be shown that repeating randomization $k$ times achieves increase in precision proportional to $\sqrt{k}$,  it also causes slight increase in RRT noise necessary to maintain same differential privacy guarantee.  However, the RRT noise increase is usually insignificant compared to the precision gain, which gives a nice dimension to the usual privacy vs. precision tradeoff.  K-randomization enables precision increase at the same privacy level for the expense of increasing synthetic record volume $k$ times.  Instead of trading privacy for precision, k-randomization allows to trade infrastructure cost for precision while keeping privacy the same.  This is especially apparent for long multivariate records,  but we will lay mathematical grounds starting from a single bit case.
+
+\subsection{Estimating number of single bits under k-randomization}
+
+Suppose there are $T$ set bits in the original collection of $N$ single bit records. Each record is randomized $k$-times.  The number of observed synthetic bits $S$ is a random variable expressed as:
+
+\[ S = p \cdot kT + q \cdot (kN-kT) \]
+
+The estimate for $T$, computed from observed value of $S$ is:
+\begin{align}
+\bar{T} = \frac{S-qkN}{k(p-q)}
+\end{align}
+
+The aggregator simply divides the estimate computed from $kN$ records by $k$.  The expectation, variance and deviation of $\bar{T}$ random variable are given by:
+\begin{align}
+E(\bar{T}) = T\\
+VAR(\bar{T}) = \frac{qpkN}{k^2 \cdot (p-q)^2} = \frac{qpN}{k\cdot (p-q)^2}\\
+\sigma(\bar{T}) = \sqrt{\frac{qpN}{k \cdot (p-q)^2}}
+\end{align}
+
+Note that deviation of the estimate is reduced by $\sqrt{k}$ compared to a single randomization case.
+
+\subsection{Choice of D}
+
+We now prove that $D$ consisting of only set bits maximizes local differential privacy ratio for any number of observed bits in the randomized collection $S$.  Recall that for a time randomization, the generating function for $S$ given that $D$ contains $m$ set bits is:
+
+\[
+G_m(x) = (q + px)^{km} (p + qx)^{k(N-m)} =  [(q + px)^{m} (p + qx)^{N-m}]^k = \left [ \sum_{i=0}^{N} a_i^mx^i \right ]^k =  \sum_{j=0}^{kN} b_i^mx^i
+\]
+
+The generating function for $S$ given that $D_m$ contains $m-1$ set bits is:
+
+\[
+G_{m-1}(x) = [(q + px)^{(m-1)} (p + qx)^{(N-m+1)}]^k =  \left [  \sum_{i=0}^{kN} a_i^{m-1}x^i \right ]^k = =  \sum_{j=0}^{kN} b_i^{m-1}x^i
+\]
+
+Note that each coefficients $b^m_j$ and $b_j^{m-1}$ are products of $a^m_i$ and $a^{m-1}_i$ with exact same indexes of $i$.  Hence, by Theorem 4.1:
+
+\begin{align}
+\frac{b_j^m}{b_j^{m+1}}  = \frac{\prod{a_i^m}}{\prod{a_i^{m+1}}}>   \frac{\prod{a_i^{m-1}}}{\prod{a_i^{m}}} = \frac{b_j^{m-1}}{b_j^{m}}
+\end{align}
+
+\subsection{Local differential privacy under k-randomization}
+
+Consider probabilities of seeing $s$ set bits in the synthetic output for $D$ and $D_m$ respectively:
+
+\begin{align}
+P(S=s | D ) = \binom{kN}{s}p^sq^{kN-s} \\
+P(S=s | D_m ) = \sum_{i=0}^{k} \binom{k(N-1)}{s - i}p^{s-i}q^{k(N-1) - s + i} \cdot \binom{k}{i}p^{k-i}q^{i}  \\
+P(S=s | D_m ) = \sum_{i=0}^{k}  \binom{k(N-1)}{s - i} \binom{k}{i} p^{s+k - 2i} q^{kN - s - (k-2i)}
+\end{align}
+
+Expressing the privacy ratio at given $s$, we have:
+\begin{align}
+R_s =  \sum_{i=0}^{k}  \frac{ \binom{k(N-1)}{s - i} \cdot \binom{k}{i} }{  \binom{kN}{s} }  \cdot \frac{p^{k-2i}} {q^{k-2i}}
+\end{align}
+
+Consider the binomial ratio in the sum:
+\begin{align}
+\frac{\binom{k(N-1)}{s - i} }{  \binom{kN}{s} } = \frac{(kN-k)!}{(kN)!}  \cdot \frac{s!}{(s-i)!}  \cdot \frac{(kN -s)!}{(kN - s - (k-i))!} = \frac{ \prod_{j=0}^{i-1} (S-j) \cdot \prod_{j=0}^{k-i-1} (kN - S-j) }{  \prod_{j=0}^{k-1} (kN -j) }
+\end{align}
+
+For positive $B$,  $A$ and $e$ such that $A < B$ the following holds:  
+\begin{align}
+\frac{A-e}{B-e} < \frac{A}{B}
+\end{align}
+
+Hence the expression in 5.10 is upper bounded by:
+
+\begin{align}
+\frac{ \prod_{j=0}^{i-1} (s-j) \cdot \prod_{j=0}^{k-i-1} (kN - s-j) }{  \prod_{j=0}^{k-1} (kN -j) }  < \frac{ \prod_{j=0}^{i-1} s \cdot \prod_{j=0}^{k-i-1} (kN - s)}{  \prod_{j=0}^{k-1} kN } = \frac{s^i \cdot (kN - S)^{k-i} } { (kN)^k }
+\end{align}
+
+Dividing each numerator term by $kN$ we arrive to an upper bound of the privacy ratio:
+
+\begin{align}
+R_s < \sum_{i=0}^{k}  \left ( \frac{s}{kN} \right )^i \left ( 1 - \frac{s}{kN} \right )^{k-i} \cdot \binom{k}{i}  \cdot \frac{p^{k-2i}} {q^{k-2i}}
+\end{align}
+
+Again, under local privacy constrains we compute privacy ration for $s$ located $3 \sigma$ bellow the mean:
+\[ s = pkN - 3 \sqrt{pqkN} \]
 
 
 \end{document}
