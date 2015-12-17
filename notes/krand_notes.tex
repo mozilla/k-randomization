@@ -375,29 +375,17 @@ For a randomization algorithm applied independently to $N$ bits to be $\epsilon$
 \sigma(\bar{T})  \ge \frac{3}{\lambda - 1} =  \frac{3}{e^{\epsilon} - 1}
 \end{align}
 
-We can replace the local differential privacy bound with slightly less optimal, but more analytically convenient bound. Note that:
-
-\begin{align}
-(1-2q)^2 < (1-q)^2 \\
-(p-q)^2 < p^2 \\
-q < \frac{p^2q}{(p-q)^2} \\
-\frac{q}{p} < \frac{pq}{(p-q)^2} \\
-\end{align}
-
-Hence, the local differential privacy holds when $N$ is large enough to guarantee:
-\begin{align}
-\frac{pqN}{(p-q)^2} > \frac{q}{p} N \ge \frac{9}{(\lambda - 1)^2} 
-\end{align}
-
 From here, we can express RRT noise parameter $q$ through $N$ and $\lambda$:
 
 \begin{align}
-q \ge \frac{1}{1 + \frac{(\lambda - 1)^2 N}{9}} 
+ \frac{pqN}{(p-q)^2} \ge \frac{9}{(\lambda - 1)^2} \\
+ \frac{(1-q)q}{(1-2q)^2} \ge \frac{9}{(\lambda - 1)^2N} \\
+q \ge \frac{1}{2} \left (1 -  \frac{1}{\sqrt{ 1 + 4 \frac{9}{(\lambda - 1)^2N} } } \right ) 
 \end{align}
 
 Suppose  $\lambda=2$ and there are 1000 single bits records in $D$.  The required noise is:
 \[
-q = \frac{1}{1 + \frac{(2 - 1)^2 1000}{9}} = 0.009
+q = 0.009
 \]
 Compare that to the level of noise that absolute differential privacy bound would require for $\epsilon=ln(2)$. 
 \begin{align}
@@ -504,7 +492,7 @@ For positive $B$,  $A$ and $e$ such that $A < B$ the following holds:
 Hence the expression in 5.10 is upper bounded by:
 
 \begin{align}
-\frac{ \prod_{j=0}^{i-1} (s-j) \cdot \prod_{j=0}^{k-i-1} (kN - s-j) }{  \prod_{j=0}^{k-1} (kN -j) }  < \frac{ \prod_{j=0}^{i-1} s \cdot \prod_{j=0}^{k-i-1} (kN - s)}{  \prod_{j=0}^{k-1} kN } = \frac{s^i \cdot (kN - S)^{k-i} } { (kN)^k }
+\frac{ \prod_{j=0}^{i-1} (s-j) \cdot \prod_{j=0}^{k-i-1} (kN - s-j) }{  \prod_{j=0}^{k-1} (kN -j) }  < \frac{ \prod_{j=0}^{i-1} s \cdot \prod_{j=0}^{k-i-1} (kN - s)}{  \prod_{j=0}^{k-1} kN } = \frac{s^i \cdot (kN - s)^{k-i} } { (kN)^k }
 \end{align}
 
 Dividing each numerator term by $kN$ we arrive to an upper bound of the privacy ratio:
@@ -513,8 +501,37 @@ Dividing each numerator term by $kN$ we arrive to an upper bound of the privacy 
 R_s < \sum_{i=0}^{k}  \left ( \frac{s}{kN} \right )^i \left ( 1 - \frac{s}{kN} \right )^{k-i} \cdot \binom{k}{i}  \cdot \frac{p^{k-2i}} {q^{k-2i}}
 \end{align}
 
-Again, under local privacy constrains we compute privacy ration for $s$ located $3 \sigma$ bellow the mean:
+Again, under local privacy constrains we compute privacy ratio for $s$ located $3 \sigma$ bellow the mean:
 \[ s = pkN - 3 \sqrt{pqkN} \]
+
+Replacing $s$ in formula 5.13, we get:
+\begin{align}
+\sum_{i=0}^{k}  \left ( \frac{pkN - 3 \sqrt{pqkN} }{kN} \right )^i \left ( 1 - \frac{pkN - 3 \sqrt{pqkN} }{kN} \right )^{k-i} \cdot \binom{k}{i}  \cdot \frac{p^{k-2i}} {q^{k-2i}} = \\
+\sum_{i=0}^{k}  \left ( p - 3 \sqrt{\frac{pq}{kN}} \right )^i \left ( 1 - p + 3 \sqrt{\frac{pq}{kN}} \right )^{k-i} \cdot \binom{k}{i}  \cdot \frac{p^{k-2i}} {q^{k-2i}} = \\
+\sum_{i=0}^{k}  \frac{q^i}{p^i} \left ( p - 3 \sqrt{\frac{pq}{kN}} \right )^i  \cdot \frac{p^{k-i}}{q^{k-i}} \left ( q + 3 \sqrt{\frac{pq}{kN}} \right )^{k-i} \cdot \binom{k}{i} = \\
+\sum_{i=0}^{k}   \binom{k}{i} \left ( q - 3q \sqrt{\frac{q}{pkN}} \right )^i  \cdot  \left ( p + 3p \sqrt{\frac{p}{qkN}} \right )^{k-i} = \\
+\left ( q - 3q \sqrt{\frac{q}{pkN}} + p + 3p \sqrt{\frac{p}{qkN}}  \right )^k = \\
+\left ( q + p + 3p \sqrt{\frac{p}{qkN}}  - 3q \sqrt{\frac{q}{pkN}} \right )^k = \\
+\left ( 1 + \frac{3(p-q)}{\sqrt{qpkN}} \right )^k
+\end{align}
+
+Should the differential privacy ratio limit be $\lambda$ we have the lower bound below:
+\begin{align}
+R_s < \left ( 1 + \frac{3(p-q)}{\sqrt{qpkN}} \right )^k  \le \lambda
+\end{align}
+
+From here we have:
+\begin{align}
+\left ( 1 + \frac{3(p-q)}{\sqrt{qpkN}} \right )^k  \le \lambda \\
+\frac{qpkN}{(p-q)^2} \ge  \frac{9}{(\sqrt[k]{\lambda} - 1)^2}
+\end{align}
+
+From here we express required RRT noise through $\lambda$, $N$ and $k$.
+
+\begin{align}
+q \ge \frac{1}{2} \left (1 -  \frac{1}{\sqrt{ 1 + 4 \frac{9}{(\sqrt[k]{\lambda} - 1)^2kN} } } \right ) 
+\end{align}
+
 
 
 \end{document}
