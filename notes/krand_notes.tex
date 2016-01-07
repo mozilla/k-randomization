@@ -28,6 +28,7 @@
 \maketitle
 
 \section{Differential Privacy}
+\label{sec:dp}
 
 \newcommand{\Dsp}{\mathcal{D}}
 \newcommand{\Ssp}{\mathcal{S}}
@@ -93,50 +94,57 @@ using Lemma (need ref).\\
 
 
 
-\section{Theoretical setup}
+\section{Bit vector randomization}
 
-In the following we work with data in the form of bit vectors.
-A \textbf{bit vector} is a vector $v \in \{0,1\}^L$.
+Our goal is to establish differential privacy properties for user data reported in the form of vectors of bits.
+To protect user privacy, each user record is randomized prior to leaving the client and anonymized on reaching the server.
+We now describe the randomization procedure, and place ourselves in the setting of Section \ref{sec:dp} by representing it as a query applied to a database.
 
-First we define the randomization procedure we will be applying.
+For our purposes, a \textbf{bit} is an integer $b \in \{0,1\}$, and a \textbf{bit vector} is a vector $x \in \{0,1\}^L$.
+Bits and bit vectors are randomized in the following way.
 
 \begin{defn}
-The randomization procedure $R$ with \textbf{lie probability} $0 < q < 1/2$ flips a bit with probability $q$, and leaves it as-is with probability $1-q$.
-In other words, for a bit $b \in \{0,1\}$,
-\[ R(b) = R(b; X) = (1-b)\cdot X + b \cdot (1-X) \quad\text{where } X\sim Ber(q). \]
-When applied to a vector, each bit is randomized independently:
-\[ R(v) = R\big(v; (X_1,\dots,X_L)\big) = 
-    \big(R(v_1; X_1),\dots,R(v_L; X_L)\big) 
-\quad\text{where } X \iid Ber(q). \]
+The \textbf{bit randomization} procedure $R$ with \textbf{lie probability} $0 < q < 1/2$ flips a bit $b$ with probability $q$, and leaves it as-is with probability $p := 1-q$:
+\[ R(b) =
+\begin{cases}
+b & \text{with prob }p \\
+1-b & \text{with prob }q
+\end{cases}.
+\]
+This can be expressed concisely as
+\[ R(b) = R(b; \xi) = b \cdot \xi + (1-b) \cdot (1-\xi)
+\quad\text{where } \xi\sim Ber(p). \]
+We extend the procedure to \textbf{bit vector randomization} by applying the randomization independently to each bit in the vector.
+Given a bit vector $x = (b_1,\dots,b_L)$, define
+\[ R(x) = \big(R(b_1;\xi_1), \dots, R(b_L;\xi_L)\big)
+\quad\text{where } (\xi_1,\dots,\xi_L) \iid Ber(p). \]
 \end{defn}
 
 \begin{rmk}
-The randomization $R$ reports the original bit value with probability $1-q > q$, and lies with probability $q$.
+Note that $R$ reports the original bit value with probability $p = 1-q > q$, and lies with probability $q$.
 This is equivalent to the randomized response procedure where the value is reported as-is with probability $1-f$, and with probability $f$ the reported value is the outcome of the toss of a fair coin.
-In this case, $q = f/2$.
+In our case, $q = f/2$.
 \end{rmk}
 \begin{rmk}
 If $q = 1/2$, then $R(0)\eqdist R(1)$, and the reported value is ``completely'' randomly generated, \ie independently of the original value.
 \end{rmk}
 
-Distribution of $R(v)$.
+%%% Distribution of randomized bit vectors.
 
-For a bit $b$, the randomization lies iff $R(b) \neq b$: 
-\[
-    P[R(b) = s] = q^{\ind{b \neq s}}(1-q)^{\ind{b = s}}
+We now consider the distribution of the randomized bit vectors.
+It can be expressed in terms of the Hamming distance between the original and randomized vectors:
+\[ \delta(x,x') = \sum_{j = 1}^L I(x_j \neq x'_j)
+= \sum_{j = 1}^L |x_j - x'_j|. \]
+For a single bit, the randomization has lied when the outcome is different from the original value: 
+\[ \P[R(b) = s] = p^{I(b = s)}\cdot q^{I(b \neq s)}
+= (1-q)^{1 - \delta(b,s)}\cdot q^{\delta(b,s)}. \]
+For a bit vector $x$, this becomes
+\[ \P[R(x) = s] = p^{\sum I(x_j = s_j)}\cdot q^{\sum I(x_j \neq s_j)}
+= (1-q)^{L-\delta(x,s)}\cdot q^{\delta(x,s)}.
 \]
-Hence, for a bit vector $v$, 
-\[ P[R(v) = s] = q^{\sum\ind{b_i \neq s_i}}(1-q)^{\sum\ind{b_i = s_i}} 
-    = q^{L-m(v,s)}(1-q)^{m(v,s)}, \]
-where $m(v,s) = |\{i: v_i = s_i\}|$. 
-Note that this probability is maximized when $m(v,s) = L$ (the reported vector $s$ is identical to the original vector $v$), and minimized when $m(v,s) = 0$.
+Note that this probability is maximized when $\delta(x,s) = 0$ (the randomized vector $s$ is identical to the original vector $x$), and minimized when $\delta(x,s) = L$.
+In the latter case, we say that $s$ is the \textbf{opposite} of $x$.
 In other words, the most likely outcome of randomizing a bit vector is obtaining an identical vector.
-
-For a collection $T$,
-\[ 
-    P[s \in R(T)] = 1-P[s \not\in R(T)] = 1-\prod_{v \in T} P[R(v) \neq s]
-    = 1-\prod_{v \in T} \big[1 - q^{L-m(v,s)}(1-q)^{m(v,s)} \big].
-\]
 
 
 \section{Old stuff}
