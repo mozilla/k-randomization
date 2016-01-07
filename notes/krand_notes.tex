@@ -27,24 +27,16 @@
 \begin{document}
 \maketitle
 
-\section*{Outline of the procedure}
-\begin{itemize}
-   \item 
-\end{itemize}
-
 \section{Theoretical setup}
-In the following we work with data in the form of bit vectors. A \textbf{bit
-vector} is a vector $v \in \{0,1\}^L$.
+In the following we work with data in the form of bit vectors.
+A \textbf{bit vector} is a vector $v \in \{0,1\}^L$.
 
 First we define the randomization procedure we will be applying.
 
 \begin{defn}
-    The randomization procedure $R$ with \textbf{lie probability} $0 < q < 1/2$
-    flips a bit with probability $q$, and leaves
-it as-is with probability $1-q$. 
+The randomization procedure $R$ with \textbf{lie probability} $0 < q < 1/2$ flips a bit with probability $q$, and leaves it as-is with probability $1-q$.
 In other words, for a bit $b \in \{0,1\}$,
-\[ R(b) = R(b; X) = (1-b)\cdot X + b \cdot (1-X) \quad\text{where } 
-X\sim Ber(q). \]
+\[ R(b) = R(b; X) = (1-b)\cdot X + b \cdot (1-X) \quad\text{where } X\sim Ber(q). \]
 When applied to a vector, each bit is randomized independently:
 \[ R(v) = R\big(v; (X_1,\dots,X_L)\big) = 
     \big(R(v_1; X_1),\dots,R(v_L; X_L)\big) 
@@ -52,16 +44,12 @@ When applied to a vector, each bit is randomized independently:
 \end{defn}
 
 \begin{rmk}
-    The randomization $R$ reports the original bit value with probability 
-    $1-q > q$, and lies with probability $q$. 
-    This is equivalent to the randomized response procedure where the value is 
-    reported as-is with probability $1-f$, and with probability $f$ the reported 
-    value is the outcome of the toss of a fair coin. 
-    In this case, $q = f/2$.
+The randomization $R$ reports the original bit value with probability $1-q > q$, and lies with probability $q$.
+This is equivalent to the randomized response procedure where the value is reported as-is with probability $1-f$, and with probability $f$ the reported value is the outcome of the toss of a fair coin.
+In this case, $q = f/2$.
 \end{rmk}
 \begin{rmk}
-    If $q = 1/2$, then $R(0)\eqdist R(1)$, and the reported value is 
-    ``completely'' randomly generated, \ie independently of the original value.
+If $q = 1/2$, then $R(0)\eqdist R(1)$, and the reported value is ``completely'' randomly generated, \ie independently of the original value.
 \end{rmk}
 
 Distribution of $R(v)$.
@@ -74,10 +62,8 @@ Hence, for a bit vector $v$,
 \[ P[R(v) = s] = q^{\sum\ind{b_i \neq s_i}}(1-q)^{\sum\ind{b_i = s_i}} 
     = q^{L-m(v,s)}(1-q)^{m(v,s)}, \]
 where $m(v,s) = |\{i: v_i = s_i\}|$. 
-Note that this probability is maximized when $m(v,s) = L$ (the reported vector
-$s$ is identical to the original vector $v$), and minimized when $m(v,s) = 0$.
-In other words, the most likely outcome of randomizing a bit vector is obtaining
-an identical vector.
+Note that this probability is maximized when $m(v,s) = L$ (the reported vector $s$ is identical to the original vector $v$), and minimized when $m(v,s) = 0$.
+In other words, the most likely outcome of randomizing a bit vector is obtaining an identical vector.
 
 For a collection $T$,
 \[ 
@@ -89,32 +75,25 @@ For a collection $T$,
 
 The typical setting for differential privacy is the following. 
 We consider a \textbf{database} as a collection of records. 
-The records are elements of some space $D$, and a database $\boldsymbol{x}$
-is a vector of $n$ records: $\boldsymbol{x} \in D^n$. 
+The records are elements of some space $D$, and a database $\boldsymbol{x}$ is a vector of $n$ records: $\boldsymbol{x} \in D^n$.
 
-We wish to release information based on the database by applying a 
-\textbf{query} to it. 
+We wish to release information based on the database by applying a \textbf{query} to it.
 This is a function $A$ mapping the database into another space: 
 $\map{A}{D^n}{\boldsymbol{S}}$. 
-If the function $A$ is random, \ie $A(\boldsymbol{x}) = A(\boldsymbol{x}, X)$
-for a random element $X$, then the output $A(\boldsymbol{x})$ is a random 
-element of $\boldsymbol{S}$.
+If the function $A$ is random, \ie $A(\boldsymbol{x}) = A(\boldsymbol{x}, X)$ for a random element $X$, then the output $A(\boldsymbol{x})$ is a random element of $\boldsymbol{S}$.
 
-In considering the differential privacy of $A$, we compare the result of 
-applying $A$ to two very similar databases $\boldsymbol{x},\ \boldsymbol{x'} 
+In considering the differential privacy of $A$, we compare the result of applying $A$ to two very similar databases $\boldsymbol{x},\ \boldsymbol{x'}
 \in D^n$.
 We say the databases \textbf{differ in one row} if 
 $\sum_{i=1}^n \ind{x_i \neq x'_i} = 1$.
-The random query $A$ is said to be $\epsilon$-\textbf{differentially private} if,
-for any two databases $\boldsymbol{x},\ \boldsymbol{x'} \in D^n$ differing in
+The random query $A$ is said to be $\epsilon$-\textbf{differentially private} if, for any two databases $\boldsymbol{x},\ \boldsymbol{x'} \in D^n$ differing in
 one row,
 \[ P[A(\boldsymbol{x}) \in S] \leq \epsilon \cdot P[A(\boldsymbol{x'}) \in S] \]
 for all $S \cont \boldsymbol{S}$ (measurable).
 An alternative notion of differing in one row that is sometimes used is that
-$\boldsymbol{x} \in D^n$, $\boldsymbol{x'} \in D^{n+1}$, and $x_i = x'_i$ for 
-$i = 1,\dots,n$. 
-In other words, $\boldsymbol{x'}$ includes an additional record that is not
-in $\boldsymbol{x}$.
+$\boldsymbol{x} \in D^n$, $\boldsymbol{x'} \in D^{n+1}$,
+and $x_i = x'_i$ for $i = 1,\dots,n$.
+In other words, $\boldsymbol{x'}$ includes an additional record that is not in $\boldsymbol{x}$.
 
 If $\boldsymbol{S}$ is countable, then we can write 
 \[ P[A(\boldsymbol{x}) \in S] = \sum_{s \in S} P[A(\boldsymbol{x}) = s]. \]
@@ -127,20 +106,21 @@ by the Lemma (need reference).
 
 Furthermore, if $A$ randomizes each record in the database independently,
 \ie $A(\boldsymbol{x}) = A(\boldsymbol{x}, \boldsymbol{X}) := 
-\big(A_0(x_1, X_1),\dots,A_0(x_n,X_n)\big)$ where $X_i$ are independent,
+\big(A_0(x_1, X_1),\dots,A_0(x_n,X_n)\big)$
+where $X_i$ are independent,
 then $\boldsymbol{S} = \boldsymbol{S}_0^n$ and $s = (s_1,\dots,s_n)$ with 
 $s_i \in \boldsymbol{S}_0$. 
-In this case $P[A(\boldsymbol{x}) = s] = 
-P[A_0(x_1) = s_1,\dots,A_0(x_n) = s_n] = \prod P[A_0(x_i) = s_i]$.
-If $\boldsymbol{x}$ and $\boldsymbol{x'}$ differ in one row (wlog 
-$x_1 \neq x'_1$ and $x_i = x'_i$ for $i = 2,\dots,n$), then
+In this case
+$P[A(\boldsymbol{x}) = s] = P[A_0(x_1) = s_1,\dots,A_0(x_n) = s_n]
+= \prod P[A_0(x_i) = s_i]$.
+If $\boldsymbol{x}$ and $\boldsymbol{x'}$ differ in one row (wlog $x_1 \neq x'_1$ and $x_i = x'_i$ for $i = 2,\dots,n$),
+then
 \[ \frac{P[A(\boldsymbol{x}) = s]}{P[A(\boldsymbol{x'}) = s]} = 
 \frac{P[A_0(x_1) = s_1]}{P[A_0(x'_1) = s_1]}. \]
 Therefore, in this case, the query $A$ will satisfy differential privacy if
-\[ P[A_0(x) = s] \leq \epsilon \cdot P[A_0(x') = s] \] for all $x,x' \in D$
-and $s \in \boldsymbol{S}_0$.
-This is the formulation used in the RAPPOR paper that applies to differences
-between individual records rather than collections differing on a single element.
+\[ P[A_0(x) = s] \leq \epsilon \cdot P[A_0(x') = s] \]
+for all $x,x' \in D$ and $s \in \boldsymbol{S}_0$.
+This is the formulation used in the RAPPOR paper that applies to differences between individual records rather than collections differing on a single element.
 
 
 -------------------------------------------------------
@@ -156,4 +136,18 @@ Anonymity:
 \]
 
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
