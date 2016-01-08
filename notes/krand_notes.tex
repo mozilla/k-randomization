@@ -94,11 +94,14 @@ using Lemma (need ref).\\
 
 
 
-\section{Bit vector randomization}
+\section{Bit vector reporting}
 
 Our goal is to establish differential privacy properties for user data reported in the form of vectors of bits.
 To protect user privacy, each user record is randomized prior to leaving the client and anonymized on reaching the server.
 We now describe the randomization procedure, and place ourselves in the setting of Section \ref{sec:dp} by representing it as a query applied to a database.
+
+
+\subsection{Bit randomization}
 
 For our purposes, a \textbf{bit} is an integer $b \in \{0,1\}$, and a \textbf{bit vector} is a vector $x \in \{0,1\}^L$.
 Bits and bit vectors are randomized in the following way.
@@ -116,8 +119,8 @@ This can be expressed concisely as
 \quad\text{where } \xi\sim Ber(p). \]
 We extend the procedure to \textbf{bit vector randomization} by applying the randomization independently to each bit in the vector.
 Given a bit vector $x = (b_1,\dots,b_L)$, define
-\[ R(x) = \big(R(b_1;\xi_1), \dots, R(b_L;\xi_L)\big)
-\quad\text{where } (\xi_1,\dots,\xi_L) \iid Ber(p). \]
+\[ R(x) = R(x;\xi) = \big(R(b_1;\xi_1), \dots, R(b_L;\xi_L)\big)
+\quad\text{where } \xi = (\xi_1,\dots,\xi_L) \iid Ber(p). \]
 \end{defn}
 
 \begin{rmk}
@@ -145,6 +148,42 @@ For a bit vector $x$, this becomes
 Note that this probability is maximized when $\delta(x,s) = 0$ (the randomized vector $s$ is identical to the original vector $x$), and minimized when $\delta(x,s) = L$.
 In the latter case, we say that $s$ is the \textbf{opposite} of $x$.
 In other words, the most likely outcome of randomizing a bit vector is obtaining an identical vector.
+
+\subsection{Reporting for bit records}
+
+We now place ourselves in the setting of Section \ref{sec:dp} for bit-vector user records, as required in the sequel.
+
+Set $\Dsp = \{0,1\}^L$. We use the term \textbf{collection} (of records) interchangeably with ``database''.
+We consider a randomized query $A$ that randomizes each record in the collection independently, and aggregates the results by reporting occurrence counts for every possible randomization outcome.
+We adopt this aggregation step as a model for anonymization. After anonymization, any link to the original collection or ordering is lost, and the information contained in the results is embodied solely by the reported values.
+
+In the following, we rely on the fact that $\Dsp$ is finite, and we assume a specific enumeration $\Dsp = (d_1,\dots,d_{2^L})$. The ordering is unimportant at this point, although it will be convenient to assume that $d_1 =  (1,\dots,1)$ and $d_{2^L} = (0,\dots,0)$.
+
+\begin{defn}
+The randomized query $\map{A}{\Dsp^n}{\Ssp = \{0,\dots,n\}^{2^L}}$ maps collections of bit vectors to occurrence counts as follows.
+\begin{enumerate}
+\renewcommand{\labelenumi}{(\alph{enumi})}
+\item Extend the bit randomization $R$ to collections $\xv$ by applying it independently to each vector:
+\[ R(\xv) = R(\xv;\boldsymbol{\xi})
+= \big(R(x_1;\xi_1),\dots,R(x_n; \xi_n)\big)
+\quad\text{where } \xi_i = (\xi_{i1},\dots,\xi_{iL}) \text{ and }
+\xi_{ij} \iid Ber(p). \]
+We call $R(\xv)$ the \textbf{synthetic} collection obtained from the \textbf{original} collection $\xv$.
+\item Define the function $\Phi$ that counts occurrences of the elements of $\Dsp = (d_1,\dots,d_{2^L})$ in a collection $\mathbf{y}$:
+\[ \Phi(\mathbf{y}) := \left(\sum_{i = 1}^n I(y_i = d_1),\dots,
+\sum_{i = 1}^n I(y_i = d_{2^L}).
+\right)
+\]
+Note that, if $\Phi(\mathbf{y}) = (s_1,\dots,s_{2^L})$, then $s_1 + \cdots + s_{2^L} = n$.
+\end{enumerate}
+Finally,
+\[ A  = \Phi \circ R. \]
+\end{defn}
+
+
+\section{Maximal collections}
+
+
 
 
 \section{Old stuff}
