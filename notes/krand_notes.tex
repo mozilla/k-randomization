@@ -94,7 +94,7 @@ Otherwise, if $\P[A(\xv') \in S] > 0$,
 = \frac{\sum_{s \in S} \P[A(\xv) = s]}{\sum_{s \in S} \P[A(\xv') = s]}
 \leq \max_{s \in S} \frac{\P[A(\xv) = s]}{\P[A(\xv') = s]}
 \leq \exp(\epsilon), \]
-using Lemma (need ref).\\
+using Lemma \ref{lem:rsbound}.\\
 \pfrightdir Take $S = \{s\}$ in \eqref{eq:dpdef}.
 \end{pf}
 
@@ -196,16 +196,17 @@ The distribution of $A(\xv)$ is given by
 q^{\delta(x_i,y_i)}
 = \sum_{\yv:\Phi(\yv) = s} p^{nL - \delta(\xv,\yv)}\cdot
 q^{\delta(\xv,\yv)}  \nonumber
-\end{align} 
+\end{align}
+Note that the support of $A$ is the support of a multinomial rv with $n$ trials: \[\Ssp_n := \bigg\{s \in \Ssp : \sum_j s_j = n \bigg\}.\]
 
 \section{Maximal collections}
 
 We will study the differential privacy of the query $A$ in terms of the \textbf{privacy ratio}
-\[ \pi(\sv) := \frac{\P[A(\xv') = \sv]}{\P[A(\xv) = \sv]} \]
-for two collections $\xv,\xv'\in\Dsp^n$ differing in one row and $\sv \in\Ssp$.
-Note that $\pi$ is well-defined, since any outcome $\sv$ occurs with non-zero probability starting from any collection $\xv$.
+\[ \pi(\sv,\xv,\xv') := \frac{\P[A(\xv') = \sv]}{\P[A(\xv) = \sv]} \]
+for two collections $\xv,\xv'\in\Dsp^n$ differing in one row and $\sv \in\Ssp_n$.
+Note that $\pi$ is well-defined, since any outcome in $\Ssp_n$ occurs with non-zero probability starting from any collection $\xv$.
 By Proposition \ref{prop:dpcnt}, $A$ is $\epsilon$-differentially private if $\pi$ is bounded everywhere on $\Ssp$,
-with $\epsilon = \max_{\sv\in\Ssp} \log\pi(\sv)$.
+with $\epsilon = \max_{\xv,\xv' \in \Dsp^n;\,\sv\in\Ssp} \log\pi$.
 
 Without loss of generality (in light of \eqref{eq:Adist}), assume that the element differing between $\xv$ and $\xv'$ is the first one, and denote $\xvt = (x_2,\dots,x_n)$.
 In other words, $\xv = (x_1,\xvt)$ and $\xv' = (x'_1, \xvt)$.
@@ -215,15 +216,17 @@ We also write $\iv_j = (0,\dots,0,1,0,\dots,0)$, the vector with a 1 in the $j$-
 
 Conditioning on its value, we can write
 \begin{equation} \label{eq:prcond}
-\pi(s) = \frac{\displaystyle\sum_{j=1}^{2^L}
+\pi(\sv,\xv,\xv') = \frac{\displaystyle\sum_{j=1}^{2^L}
 \P[A(x'_1) = \iv_j] \P[A(\xvt) = \sv - \iv_j]}
 {\displaystyle\sum_{j=1}^{2^L}
 \P[A(x_1) = \iv_j] \P[A(\xvt) = \sv - \iv_j]}
 = \frac{\displaystyle\sum_{j=1}^{2^L}
 \P[R(x'_1) = d_j] \P[A(\xvt) = \sv - \iv_j]}
 {\displaystyle\sum_{j=1}^{2^L}
-\P[R(x_1) = d_j] \P[A(\xvt) = \sv - \iv_j]}.
+\P[R(x_1) = d_j] \P[A(\xvt) = \sv - \iv_j]},
 \end{equation}
+implying that $\pi$ only depends on the modified collection through the modified record: $\pi = \pi(\sv,\xv,x_1')$.
+
 TODO: consequences of this: \\
 - difference between numerator and denominator is basically a reweighting of the same terms in the sum \\
 - max value of ratio
@@ -233,8 +236,151 @@ The first question we address is for which pair of original and modified collect
 \subsection{The case $L = 1$}
 
 It is instructive to first consider the case where each record in the collection consists of a single bit, as the expressions simplify considerably.
-In this case, the outcome of $A$ essentially reduces to the number of 1s obtained in the synthetic collection $R(\xv)$.
+In this case, the outcome of $A$ essentially reduces to the number of 1s obtained in the synthetic collection $R(\xv)$, since $\sv\in\Ssp_n$ can be written as $(s_1,s_2)$ with $s_1\in\{0,\dots,n\}$ and $s_2 = n-s_1$. 
+Using this fact, we interpret $A(\xv)$ as $\sum_{i=1}^n I(R(x_i) = 1)$,
+and express the privacy ratio as
+\[ \pi(s,\xv,x_1') = \frac{\P[R(x'_1) = 1] \P[A(\xvt) = s-1] +
+\P[R(x'_1) = 0] \P[A(\xvt) = s]}
+{\P[R(x_1) = 1] \P[A(\xvt) = s-1] + \P[R(x_1) = 0] \P[A(\xvt) = s]}
+\]
+for $s \in \{0,\dots,n\}$. Furthermore, the requirement that $x_1 \neq x'_1$ in the single-bit case implies that $x'_1 = 1-x_1$, so
+\[ \pi(s,\xv,x_1') = \frac{(1-\P[R(x_1) = 1]) \P[A(\xvt) = s-1] +
+(1-\P[R(x_1) = 0]) \P[A(\xvt) = s]}
+{\P[R(x_1) = 1] \P[A(\xvt) = s-1] + \P[R(x_1) = 0] \P[A(\xvt) = s]}.
+\]
+%Hence, $\pi(s; x_1 = 0) = 1/\pi(s; x_1 = 1)$, and so 
+%\[ \max_{\xv,\xv';\,\sv} \pi = \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \max_{\xvt;\,s} \pi(s;x_1 = 0)\right)
+%=  \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \min_{\xvt;\,s} \pi(s;x_1 = 1)\right)
+%\]
+We fix $s$ and investigate which choice of collection $\xv = (x_1,\xvt)$ maximizes $\pi(s,\xv,x_1')$.
+Assume first $x_1 = 1$. (TODO: what about when $x_1 = 0$?) Then
+\[ \pi(s,\xvt,0) = \frac{q \P[A(\xvt) = s-1] + p \P[A(\xvt) = s]}
+{p \P[A(\xvt) = s-1] + q \P[A(\xvt) = s]}.
+\]
 
+\section{Ratios of sums: properties}
+
+Here we establish some results around bounding and comparing ratios of sums, which will be useful in working with the privacy ratio.
+
+%%% Bounding ratio of sums by max ratio of terms
+
+\begin{lem} \label{lem:rsbound}
+Suppose $a_1,\dots,a_m,b_1,\dots,b_m \in \R$ with $b_i > 0$ all $i$.
+Then 
+\[ \frac{a_1 + \cdots + a_m}{b_1 + \cdots + b_m} \leq
+\max\left(\frac{a_1}{b_1},\dots,\frac{a_m}{b_m}\right). \]
+\end{lem}
+\begin{pf}
+Write
+\[ \frac{a_1 + \cdots + a_m}{b_1 + \cdots + b_m}
+= \frac{a_1}{b_1}\frac{b_1}{b_1+\cdots+b_m} +
+%\frac{a_2}{b_2}\frac{b_2}{b_1+\cdots+b_m} +
+\cdots + \frac{a_m}{b_m}\frac{b_m}{b_1+\cdots+b_m} =
+\sum_{i=1}^m \frac{a_i}{b_i} \lambda_i
+\]
+where $\lambda_1 + \cdots + \lambda_m = 1$.
+The result follows since each $a_i/b_i$ is bounded by $\max_i a_i/b_i$.
+\end{pf}
+
+%%% Comparing ratios of sums by comparing ratios of terms
+
+%\begin{lem} \label{lem:rscomp}
+%Suppose $a_i,b_i,a'_i,b'_i > 0$ for $i=1,\dots,m$.
+%Then
+%\begin{equation} \label{eq:rscomp}
+%\frac{a_1 + \cdots + a_m}{b_1 + \cdots + b_m} \geq
+%\frac{a'_1 + \cdots + a'_m}{b'_1 + \cdots + b'_m}
+%\end{equation}
+%if
+%\begin{equation} \label{eq:lambdamucond}
+%a_i/b_i \geq  a_j/b_j,\quad a'_i/b'_i \geq a'_j/b'_j
+%\end{equation}
+%and
+%\begin{equation} \label{eq:aapcond}
+%a_i/a_j \geq a'_i/a'_j,\quad b_i/b_j \geq b'_i/b'_j
+%\end{equation}
+%whenever $1 \leq i < j \leq m$.
+%\end{lem}
+%It is easy to see that \eqref{eq:lambdamucond} is satisfied when
+%$a_1 \geq a_2 \geq \cdots \geq a_m$ and $b_1 \leq b_2 \leq \cdots \leq b_m$, and analogously for $a'$ and $b'$.
+%It is also clear from the proof that \eqref{eq:rscomp} still holds if all the inequalities in \eqref{eq:lambdamucond} and \eqref{eq:aapcond} are reversed.
+%\begin{pf}
+%Cross-multiplying, we see that \eqref{eq:rscomp} is equivalent to
+%\[ \sum_i \sum_j a_i b'_j \geq \sum_i \sum_j a'_i b_j \iff
+%\sum_i \sum_{j \neq i} (a_ib'_j - a'_ib_j) \geq 0.
+%\]
+%Furthermore,
+%\begin{align*}
+%\sum_i \sum_{j \neq i} (a_ib'_j - a'_ib_j)
+%&= \sum_i \sum_{j > i} (a_ib'_j - a'_ib_j) +
+%\sum_i \sum_{j < i} (a_ib'_j - a'_ib_j) \\
+%%% relabel the indices
+%&= \sum_i \sum_{j > i} a_i a'_j (\lambda_i\mu_j - \lambda_j\mu_i) +
+%\sum_j \sum_{i < j} a_j a'_i (\lambda_j\mu_i - \lambda_i\mu_j) \\
+%%% reverse the sums
+%&= \sum_i \sum_{j > i} a_i a'_j (\lambda_i\mu_j - \lambda_j\mu_i) +
+%\sum_i \sum_{j > i} a_j a'_i (\lambda_j\mu_i - \lambda_i\mu_j) \\
+%%% factor out -1 from the second term and combine
+%&= \sum_i \sum_{j > i} (a_i a'_j - a_j a'_i)(\lambda_i\mu_j - \lambda_j\mu_i),
+%\end{align*}
+%where the second equality follows from relabeling the summation indices, and the third from reversing the sums.
+%It follows that \eqref{eq:rscomp} will hold if
+%$(a_i a'_j - a_j a'_i)(\lambda_i\mu_j - \lambda_j\mu_i) \geq 0$ for all  $1 \leq i < j \leq m$, which is implied by \eqref{eq:lambdamucond} and \eqref{eq:aapcond}.
+%\end{pf}
+
+
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{lem} \label{lem:rscomp2}
+Suppose $a_i,a'_i,\lambda_i,\mu_i > 0$ for $i=1,\dots,m$.
+Then
+\begin{equation} \label{eq:rscomp2}
+\frac{a_1\lambda_1 + \cdots + a_m\lambda_m}
+{a_1\mu_1 + \cdots + a_m\mu_m} \geq
+\frac{a'_1\lambda_1 + \cdots + a'_m\lambda_m}
+{a'_1\mu_1 + \cdots + a'_m\mu_m}
+\end{equation}
+if
+\begin{equation} \label{eq:lambdamucond2}
+\lambda_i/\mu_i \geq  \lambda_j/\mu_j
+% \frac{\lambda_i}{\mu_i} \geq \frac{\lambda_j}{\mu_j}
+%\quad\quad\text{and}\quad\quad \frac{a_i}{a_j} \geq \frac{a'_i}{a'_j}
+\end{equation}
+and
+\begin{equation} \label{eq:aapcond2}
+a_i/a_j \geq a'_i/a'_j
+\end{equation}
+whenever $1 \leq i < j \leq m$.
+\end{lem}
+Note that numerator and denominator have the same index \eqref{eq:lambdamucond2}, and different indices in \eqref{eq:aapcond2}.
+It is easy to see that \eqref{eq:lambdamucond2} is satisfied when
+$\lambda_1 \geq \lambda_2 \geq \cdots \geq \lambda_m$ and
+$\mu_1 \leq \mu_2 \leq \cdots \leq \mu_m$.
+It is also clear from the proof that \eqref{eq:rscomp2} still holds if all the inequalities in \eqref{eq:lambdamucond2} and \eqref{eq:aapcond2} are reversed.
+\begin{pf}
+Cross-multiplying, we see that \eqref{eq:rscomp2} is equivalent to
+\[ \sum_i \sum_j a_i a'_j \lambda_i \mu_j \geq
+\sum_i \sum_j a_i a'_j \lambda_j \mu_i \iff
+\sum_i \sum_{j \neq i} a_i a'_j (\lambda_i\mu_j - \lambda_j\mu_i) \geq 0.
+\]
+Furthermore,
+\begin{align*}
+\sum_i \sum_{j \neq i} a_i a'_j (\lambda_i\mu_j - \lambda_j\mu_i)
+&= \sum_i \sum_{j > i} a_i a'_j (\lambda_i\mu_j - \lambda_j\mu_i) +
+\sum_i \sum_{j < i} a_i a'_j (\lambda_i\mu_j - \lambda_j\mu_i) \\
+%% relabel the indices
+&= \sum_i \sum_{j > i} a_i a'_j (\lambda_i\mu_j - \lambda_j\mu_i) +
+\sum_j \sum_{i < j} a_j a'_i (\lambda_j\mu_i - \lambda_i\mu_j) \\
+%% reverse the sums
+&= \sum_i \sum_{j > i} a_i a'_j (\lambda_i\mu_j - \lambda_j\mu_i) +
+\sum_i \sum_{j > i} a_j a'_i (\lambda_j\mu_i - \lambda_i\mu_j) \\
+%% factor out -1 from the second term and combine
+&= \sum_i \sum_{j > i} (a_i a'_j - a_j a'_i)(\lambda_i\mu_j - \lambda_j\mu_i),
+\end{align*}
+where the second equality follows from relabeling the summation indices, and the third from reversing the sums.
+It follows that \eqref{eq:rscomp2} will hold if
+$(a_i a'_j - a_j a'_i)(\lambda_i\mu_j - \lambda_j\mu_i) \geq 0$ for all  $1 \leq i < j \leq m$, which is implied by \eqref{eq:lambdamucond2} and \eqref{eq:aapcond2}.
+\end{pf}
 
 \section{Old stuff}
 
