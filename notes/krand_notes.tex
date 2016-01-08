@@ -8,7 +8,7 @@
 \documentclass[11pt,draft]{article}
 %\documentclass[11pt,draft]{amsart}
 
-% Custom styling.
+%% Custom styling.
 \usepackage{mozdp}
 %% Controls enumeration labels
 %\usepackage{enumerate}
@@ -16,6 +16,16 @@
 \usepackage{fullpage}
 %% Shows equation label keys
 %\usepackage[notref]{showkeys}
+
+%% Some convenience aliases.
+\newcommand{\Dsp}{\mathcal{D}}
+\newcommand{\Ssp}{\mathcal{S}}
+\newcommand{\xv}{\mathbf{x}}
+\newcommand{\yv}{\mathbf{y}}
+\newcommand{\sv}{\mathbf{s}}
+\newcommand{\xvt}{\tilde{\xv}}
+\newcommand{\sm}{\sv^-}
+\newcommand{\iv}{\mathbf{i}}
 
 %% Title matter
 \title{K-Randomization}
@@ -29,10 +39,6 @@
 
 \section{Differential Privacy}
 \label{sec:dp}
-
-\newcommand{\Dsp}{\mathcal{D}}
-\newcommand{\Ssp}{\mathcal{S}}
-\newcommand{\xv}{\mathbf{x}}
 
 The typical setting for differential privacy is as follows. 
 We consider a \textbf{database} as a collection of records. 
@@ -70,7 +76,7 @@ $\xv\in \Dsp^n$, $\xv' \in \Dsp^{n+1}$, and $x_i = x'_i$ for $i = 1,\dots,n$.
 
 If $\Ssp$ is finite, which is common in cases where the transcript involves integer counts, then the distribution of the transcript $A(\xv)$ can be represented using its pmf $\P[A(\xv) = s]$ for $s \in \Ssp$.
 In this case, the differential privacy condition can also be expressed in terms of the pmf.
-\begin{prop}
+\begin{prop} \label{prop:dpcnt}
 If $\Ssp$ is finite, then $A$ is $\epsilon$-\textbf{differentially private} if and only if
 \begin{equation} \label{eq:dpcnt}
 \P[A(\xv) = s] \leq \exp(\epsilon) \cdot \P[A(\xv') = s]
@@ -136,17 +142,17 @@ If $q = 1/2$, then $R(0)\eqdist R(1)$, and the reported value is ``completely'' 
 
 We now consider the distribution of the randomized bit vectors.
 It can be expressed in terms of the Hamming distance between the original and randomized vectors:
-\[ \delta(x,x') = \sum_{j = 1}^L I(x_j \neq x'_j)
-= \sum_{j = 1}^L |x_j - x'_j|. \]
+\[ \delta(x,x') = \sum_{\ell = 1}^L I(x_\ell \neq x'_\ell)
+= \sum_{\ell = 1}^L |x_\ell - x'_\ell|. \]
 For a single bit, the randomization has lied when the outcome is different from the original value: 
-\[ \P[R(b) = s] = p^{I(b = s)}\cdot q^{I(b \neq s)}
-= (1-q)^{1 - \delta(b,s)}\cdot q^{\delta(b,s)}. \]
+\[ \P[R(b) = y] = p^{I(b = y)}\cdot q^{I(b \neq y)}
+= (1-q)^{1 - \delta(b,y)}\cdot q^{\delta(b,y)}. \]
 For a bit vector $x$, this becomes
-\[ \P[R(x) = s] = p^{\sum I(x_j = s_j)}\cdot q^{\sum I(x_j \neq s_j)}
-= (1-q)^{L-\delta(x,s)}\cdot q^{\delta(x,s)}.
+\[ \P[R(x) = y] = p^{\sum I(x_\ell = y_\ell)}\cdot q^{\sum I(x_\ell \neq y_\ell)}
+= (1-q)^{L-\delta(x,y)}\cdot q^{\delta(x,y)}.
 \]
-Note that this probability is maximized when $\delta(x,s) = 0$ (the randomized vector $s$ is identical to the original vector $x$), and minimized when $\delta(x,s) = L$.
-In the latter case, we say that $s$ is the \textbf{opposite} of $x$.
+Note that this probability is maximized when $\delta(x,y) = 0$ (the randomized vector $y$ is identical to the original vector $x$), and minimized when $\delta(x,y) = L$.
+In the latter case, we say that $y$ is the \textbf{opposite} of $x$.
 In other words, the most likely outcome of randomizing a bit vector is obtaining an identical vector.
 
 \subsection{Reporting for bit records}
@@ -167,23 +173,67 @@ The randomized query $\map{A}{\Dsp^n}{\Ssp = \{0,\dots,n\}^{2^L}}$ maps collecti
 \[ R(\xv) = R(\xv;\boldsymbol{\xi})
 = \big(R(x_1;\xi_1),\dots,R(x_n; \xi_n)\big)
 \quad\text{where } \xi_i = (\xi_{i1},\dots,\xi_{iL}) \text{ and }
-\xi_{ij} \iid Ber(p). \]
+\xi_{i\ell} \iid Ber(p). \]
 We call $R(\xv)$ the \textbf{synthetic} collection obtained from the \textbf{original} collection $\xv$.
-\item Define the function $\Phi$ that counts occurrences of the elements of $\Dsp = (d_1,\dots,d_{2^L})$ in a collection $\mathbf{y}$:
-\[ \Phi(\mathbf{y}) := \left(\sum_{i = 1}^n I(y_i = d_1),\dots,
+\item Define the function $\Phi$ that counts occurrences of the elements of $\Dsp = (d_1,\dots,d_{2^L})$ in a collection $\yv$:
+\[ \Phi(\yv) := \left(\sum_{i = 1}^n I(y_i = d_1),\dots,
 \sum_{i = 1}^n I(y_i = d_{2^L}).
 \right)
 \]
-Note that, if $\Phi(\mathbf{y}) = (s_1,\dots,s_{2^L})$, then $s_1 + \cdots + s_{2^L} = n$.
+Note that, if $\Phi(\yv) = (s_1,\dots,s_{2^L})$, then $s_1 + \cdots + s_{2^L} = n$.
 \end{enumerate}
 Finally,
 \[ A  = \Phi \circ R. \]
 \end{defn}
 
+The distribution of $A(\xv)$ is given by
+\begin{align}
+\P[A(\xv) = \sv] &= \P[\Phi(R(\xv)) = s]
+= \sum_{\yv:\Phi(\yv) = s} \P[R(\xv) = \yv] \nonumber\\
+&= \sum_{\yv:\Phi(\yv) = s} \prod_{i=1}^n \P[R(x_i) = y_i]
+\label{eq:Adist}\\
+&= \sum_{\yv:\Phi(\yv) = s} \prod_{i=1}^n p^{L - \delta(x_i,y_i)}\cdot
+q^{\delta(x_i,y_i)}
+= \sum_{\yv:\Phi(\yv) = s} p^{nL - \delta(\xv,\yv)}\cdot
+q^{\delta(\xv,\yv)}  \nonumber
+\end{align} 
 
 \section{Maximal collections}
 
+We will study the differential privacy of the query $A$ in terms of the \textbf{privacy ratio}
+\[ \pi(\sv) := \frac{\P[A(\xv') = \sv]}{\P[A(\xv) = \sv]} \]
+for two collections $\xv,\xv'\in\Dsp^n$ differing in one row and $\sv \in\Ssp$.
+Note that $\pi$ is well-defined, since any outcome $\sv$ occurs with non-zero probability starting from any collection $\xv$.
+By Proposition \ref{prop:dpcnt}, $A$ is $\epsilon$-differentially private if $\pi$ is bounded everywhere on $\Ssp$,
+with $\epsilon = \max_{\sv\in\Ssp} \log\pi(\sv)$.
 
+Without loss of generality (in light of \eqref{eq:Adist}), assume that the element differing between $\xv$ and $\xv'$ is the first one, and denote $\xvt = (x_2,\dots,x_n)$.
+In other words, $\xv = (x_1,\xvt)$ and $\xv' = (x'_1, \xvt)$.
+We also write $\iv_j = (0,\dots,0,1,0,\dots,0)$, the vector with a 1 in the $j$-th position and the rest 0.
+%For convenience, introduce the notation
+%$\sm_j = (s_1,\dots,s_{j-1},s_j - 1,s_{j+1},\dots,s_{2^L})$.
+
+Conditioning on its value, we can write
+\begin{equation} \label{eq:prcond}
+\pi(s) = \frac{\displaystyle\sum_{j=1}^{2^L}
+\P[A(x'_1) = \iv_j] \P[A(\xvt) = \sv - \iv_j]}
+{\displaystyle\sum_{j=1}^{2^L}
+\P[A(x_1) = \iv_j] \P[A(\xvt) = \sv - \iv_j]}
+= \frac{\displaystyle\sum_{j=1}^{2^L}
+\P[R(x'_1) = d_j] \P[A(\xvt) = \sv - \iv_j]}
+{\displaystyle\sum_{j=1}^{2^L}
+\P[R(x_1) = d_j] \P[A(\xvt) = \sv - \iv_j]}.
+\end{equation}
+TODO: consequences of this: \\
+- difference between numerator and denominator is basically a reweighting of the same terms in the sum \\
+- max value of ratio
+
+The first question we address is for which pair of original and modified collections $\xv$ and $\xv'$ does $\pi$ obtain its maximum.
+
+\subsection{The case $L = 1$}
+
+It is instructive to first consider the case where each record in the collection consists of a single bit, as the expressions simplify considerably.
+In this case, the outcome of $A$ essentially reduces to the number of 1s obtained in the synthetic collection $R(\xv)$.
 
 
 \section{Old stuff}
