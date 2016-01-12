@@ -24,8 +24,10 @@
 \newcommand{\yv}{\mathbf{y}}
 \newcommand{\sv}{\mathbf{s}}
 \newcommand{\xvt}{\tilde{\xv}}
+\newcommand{\yvt}{\tilde{\yv}}
 \newcommand{\sm}{\sv^-}
 \newcommand{\iv}{\mathbf{i}}
+\newcommand{\one}{\boldsymbol{1}}
 
 %% Title matter
 \title{K-Randomization}
@@ -197,7 +199,7 @@ q^{\delta(x_i,y_i)}
 = \sum_{\yv:\Phi(\yv) = s} p^{nL - \delta(\xv,\yv)}\cdot
 q^{\delta(\xv,\yv)}  \nonumber
 \end{align}
-Note that the support of $A$ is the support of a multinomial rv with $n$ trials: \[\Ssp_n := \bigg\{s \in \Ssp : \sum_j s_j = n \bigg\}.\]
+Note that the support of $A$ is the support of a multinomial random variable with $n$ trials: \[\Ssp_n := \bigg\{s \in \Ssp : \sum_j s_j = n \bigg\}.\]
 
 \section{Maximal collections}
 
@@ -252,11 +254,112 @@ for $s \in \{0,\dots,n\}$. Furthermore, the requirement that $x_1 \neq x'_1$ in 
 %\[ \max_{\xv,\xv';\,\sv} \pi = \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \max_{\xvt;\,s} \pi(s;x_1 = 0)\right)
 %=  \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \min_{\xvt;\,s} \pi(s;x_1 = 1)\right)
 %\]
-We fix $s$ and investigate which choice of collection $\xv = (x_1,\xvt)$ maximizes $\pi(s,\xv,x_1')$.
+We fix $s \in \{1,\dots,n\}$ and investigate which choice of collection $\xv = (x_1,\xvt)$ maximizes $\pi(s,\xv,x_1')$.
 Assume first $x_1 = 1$. (TODO: what about when $x_1 = 0$?) Then
 \[ \pi(s,\xvt,0) = \frac{q \P[A(\xvt) = s-1] + p \P[A(\xvt) = s]}
 {p \P[A(\xvt) = s-1] + q \P[A(\xvt) = s]}.
 \]
+By Lemma \ref{lem:rscomp2}, this ratio is maximized at $\xvt^*$ satisfying 
+\[ \frac{\P[A(\xvt^*) = s]}{\P[A(\xvt^*) = s-1]} \geq
+\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]} \]
+for any $\yvt \in \Dsp^{n-1}$.
+We claim that this is the case when $\xvt^*$ consists of all 1s:
+%%% Claim to be proven by induction.
+\begin{claim}
+Write $\one = (1,...,1)$ as an element of $\Dsp^n$.
+Then, given $s \in \{1,\dots,n\}$,
+\begin{equation} \label{eq:maxpA}
+\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]} \geq
+\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]}
+\end{equation}
+for any $\yv \in \Dsp^n$.
+\end{claim}
+\begin{pf}
+We proceed by induction on $n$. If $n = 1$, then $A(x) = R(x)$, we need only confirm \eqref{eq:maxpA} for $s = 1$.
+Taking $\yv = 0$ (the only possibility aside from $\one$), we have
+\begin{equation} \label{eq:singleratio}
+\frac{\P[R(0) = 1]}{\P[R(0) = 0]} = \frac{q}{p} \leq
+\frac{p}{q} = \frac{\P[R(1) = 1]}{\P[R(1) = 0]}
+\end{equation}
+verifying \eqref{eq:maxpA} in this case.
+Next, suppose that \eqref{eq:maxpA} holds for $s\in\{1,\dots,n-1\}$ and $\one,\yvt \in \Dsp^{n-1}$, and consider $\yv = (\yvt, y_n) \in \Dsp^n$.
+For convenience, write $p(y_n) = \P[R(y_n) = 1]$. 
+Observe that
+\[ \P[A(\yv) = s] = \P[A(\yvt) = s]\cdot(1-p(y_n)) +
+\P[A(\yvt) = s-1]\cdot p(y_n), \]
+conditioning on the value of $y_n$.
+Thus,
+%for $s \in \{2,\dots,n-1\}$,
+\begin{equation} \label{eq:inductionratio}
+\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]}
+= \frac{\P[A(\yvt) = s]\cdot(1-p(y_n)) +
+\P[A(\yvt) = s-1]\cdot p(y_n)}
+{\P[A(\yvt) = s-1]\cdot(1-p(y_n)) +
+\P[A(\yvt) = s-2]\cdot p(y_n)}.
+\end{equation}
+For $s \in \{2,\dots,n-1\}$, our induction hypothesis implies that
+\[
+\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]} \leq
+\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}\quad\text{and}\quad
+\frac{\P[A(\yvt) = s-1]}{\P[A(\yvt) = s-2]} \leq
+\frac{\P[A(\one) = s-1]}{\P[A(\one) = s-2]},
+\]
+and furthermore,
+\[ \frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-2]} =
+\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]}\cdot
+\frac{\P[A(\yvt) = s-1]}{\P[A(\yvt) = s-2]} \leq
+\frac{\P[A(\one) = s]}{\P[A(\one) = s-2]}.
+\]
+Therefore, we can apply Lemma \ref{lem:rscomp} to \eqref{eq:inductionratio} to obtain
+\begin{equation} \label{eq:lemmaappl}
+\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]} \leq
+\frac{\P[A(\one) = s]\cdot(1-p(y_n)) +
+\P[A(\one) = s-1]\cdot p(y_n)}
+{\P[A(\one) = s-1]\cdot(1-p(y_n)) +
+\P[A(\one) = s-2]\cdot p(y_n)}
+%= \frac{\P[A((\one,y_n)) = s]}{\P[A((\one,y_n)) = s-1]}
+\end{equation}
+for $s \in \{2,\dots,n-1\}$.
+If $s = n$, we consider $\P[A(\yvt) = s] = 0$ since
+$\P[A(\yvt) \in \{0,\dots,n-1\}] = 1$, and similarly for $\P[A(\one) = s]$.
+In this case, Lemma \ref{lem:rscomp} still applies with $b=b'=0$.
+A similar argument establishes \eqref{eq:lemmaappl} when $s = 1$.
+Therefore,
+\[
+\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]} \leq
+\frac{\P[A((\one,y_n)) = s]}{\P[A((\one,y_n)) = s-1]}
+\]
+for $s \in \{1,\dots,n\}$.
+Since $y_n\in\{0,1\}$, the proof will be complete if we show that
+\begin{align}
+\frac{\P[A((\one,1)) = s]}{\P[A((\one,1)) = s-1]} &=
+\frac{\P[A(\one) = s]\cdot q +
+\P[A(\one) = s-1]\cdot p}
+{\P[A(\one) = s-1]\cdot q +
+\P[A(\one) = s-2]\cdot p} \nonumber\\
+&\geq
+\frac{\P[A(\one) = s]\cdot p +
+\P[A(\one) = s-1]\cdot q}
+{\P[A(\one) = s-1]\cdot p +
+\P[A(\one) = s-2]\cdot q}
+= \frac{\P[A((\one,0)) = s]}{\P[A((\one,0)) = s-1]}.
+\label{eq:indfinal}
+\end{align}
+Using the fact that $A(\one) \sim Bin(n-1, p)$, observe that
+\[
+\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}
+= \frac{\binom{n-1}{s}p^{s}q^{n-1-s}}{\binom{n-1}{s-1}p^{s-1}q^{n-s}}
+= \frac{n-s}{s}\frac{p}{q},
+\]
+from which
+\[
+\frac{\lambda_2}{\mu_2} = \frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}
+= \frac{n-s}{s}\frac{p}{q} \leq \frac{n-s+1}{s-1}\frac{p}{q}
+= \frac{\P[A(\one) = s-1]}{\P[A(\one) = s-2]} = \frac{\lambda_1}{\mu_1},
+\]
+and hence \eqref{eq:indfinal} follows from Lemma \ref{lem:rscomp2} (unless $s=1$, in which case it follows from a simple direct argument).
+\end{pf}
+
 
 \section{Ratios of sums: properties}
 
@@ -381,6 +484,28 @@ where the second equality follows from relabeling the summation indices, and the
 It follows that \eqref{eq:rscomp2} will hold if
 $(a_i a'_j - a_j a'_i)(\lambda_i\mu_j - \lambda_j\mu_i) \geq 0$ for all  $1 \leq i < j \leq m$, which is implied by \eqref{eq:lambdamucond2} and \eqref{eq:aapcond2}.
 \end{pf}
+
+\begin{lem} \label{lem:rscomp}
+Suppose $a,a',\lambda,\mu > 0$, and $b,b',c,c'\geq 0$. Then
+\begin{equation} \label{eq:lemrscomp}
+ \frac{a\lambda + b\mu}{c\lambda + a\mu} \geq
+\frac{a'\lambda + b'\mu}{c'\lambda + a'\mu}
+\end{equation}
+if
+\begin{equation} \label{eq:abccond}
+ac' \geq a'c,\quad ab' \leq a'b,\quad\text{and}\quad bc' \geq b'c.
+\end{equation}
+\end{lem}
+\begin{pf}
+\eqref{eq:lemrscomp} holds iff
+\begin{align*}
+ ac'\lambda^2 &+ aa'\lambda\mu + bc'\lambda\mu + a'b\mu^2 \geq
+a'c\lambda^2 + b'c\lambda\mu + aa'\lambda\mu + ab'\mu^2 \\
+&\iff (ac'-a'c)\lambda^2 + (bc'-b'c)\lambda\mu + (a'b-ab')\mu^2 \geq 0,
+\end{align*}
+which is implied by \eqref{eq:abccond}.
+\end{pf}
+
 
 \section{Old stuff}
 
