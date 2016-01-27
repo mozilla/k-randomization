@@ -168,7 +168,7 @@ We adopt this aggregation step as a model for anonymization. After anonymization
 In the following, we rely on the fact that $\Dsp$ is finite, and we assume a specific enumeration $\Dsp = (d_1,\dots,d_{2^L})$. The ordering is unimportant at this point, although it will be convenient to assume that $d_1 =  (1,\dots,1)$ and $d_{2^L} = (0,\dots,0)$.
 
 \begin{defn}
-The randomized query $\map{A}{\Dsp^n}{\Ssp = \{0,\dots,n\}^{2^L}}$ maps collections of bit vectors to occurrence counts as follows.
+The randomized query $\map{A}{\Dsp^n}{\Ssp_n = \{0,\dots,n\}^{2^L}}$ maps collections of bit vectors to occurrence counts as follows.
 \begin{enumerate}
 \renewcommand{\labelenumi}{(\alph{enumi})}
 \item Extend the bit randomization $R$ to collections $\xv$ by applying it independently to each vector:
@@ -201,14 +201,19 @@ q^{\delta(\xv,\yv)}  \nonumber
 \end{align}
 Note that the support of $A$ is the support of a multinomial random variable with $n$ trials: \[\Ssp_n := \bigg\{s \in \Ssp : \sum_j s_j = n \bigg\}.\]
 
-\section{Maximal collections}
+
+\section{The privacy ratio}
 
 We will study the differential privacy of the query $A$ in terms of the \textbf{privacy ratio}
-\[ \pi(\sv,\xv,\xv') := \frac{\P[A(\xv') = \sv]}{\P[A(\xv) = \sv]} \]
+\[ \pi(\sv;\xv,\xv') := \frac{\P[A(\xv') = \sv]}{\P[A(\xv) = \sv]} \]
 for two collections $\xv,\xv'\in\Dsp^n$ differing in one row and $\sv \in\Ssp_n$.
 Note that $\pi$ is well-defined, since any outcome in $\Ssp_n$ occurs with non-zero probability starting from any collection $\xv$.
-By Proposition \ref{prop:dpcnt}, $A$ is $\epsilon$-differentially private if $\pi$ is bounded everywhere on $\Ssp$,
-with $\epsilon = \max_{\xv,\xv' \in \Dsp^n;\,\sv\in\Ssp} \log\pi$.
+
+Differential privacy is typically concerned with bounding the privacy ratio over all original and synthetic collections.
+In particular, by Proposition \ref{prop:dpcnt}, $A$ is $\epsilon$-differentially private if $\pi$ is bounded everywhere on $\Ssp$,
+with
+\[ \epsilon = \max_{\substack{\sv\in\Ssp\\ \xv,\xv' \in \Dsp^n}} \log\pi(\sv;\xv,\xv'). \]
+We take this further by studying the behaviour of the privacy ratio and how it varies across the support of $A$ and across collections. This will allow us to understand in which situations it is at or near its bound.
 
 Without loss of generality (in light of \eqref{eq:Adist}), assume that the element differing between $\xv$ and $\xv'$ is the first one, and denote $\xvt = (x_2,\dots,x_n)$.
 In other words, $\xv = (x_1,\xvt)$ and $\xv' = (x'_1, \xvt)$.
@@ -216,22 +221,46 @@ We also write $\iv_j = (0,\dots,0,1,0,\dots,0)$, the vector with a 1 in the $j$-
 %For convenience, introduce the notation
 %$\sm_j = (s_1,\dots,s_{j-1},s_j - 1,s_{j+1},\dots,s_{2^L})$.
 
-Conditioning on its value, we can write
+Conditioning on the value of the modified record, we can write
 \begin{equation} \label{eq:prcond}
-\pi(\sv,\xv,\xv') = \frac{\displaystyle\sum_{j=1}^{2^L}
+\pi(\sv;\xvt,x_1,x_1') = \frac{\displaystyle\sum_{j=1}^{2^L}
 \P[A(x'_1) = \iv_j] \P[A(\xvt) = \sv - \iv_j]}
 {\displaystyle\sum_{j=1}^{2^L}
 \P[A(x_1) = \iv_j] \P[A(\xvt) = \sv - \iv_j]}
 = \frac{\displaystyle\sum_{j=1}^{2^L}
 \P[R(x'_1) = d_j] \P[A(\xvt) = \sv - \iv_j]}
 {\displaystyle\sum_{j=1}^{2^L}
-\P[R(x_1) = d_j] \P[A(\xvt) = \sv - \iv_j]},
+\P[R(x_1) = d_j] \P[A(\xvt) = \sv - \iv_j]}.
 \end{equation}
-implying that $\pi$ only depends on the modified collection through the modified record: $\pi = \pi(\sv,\xv,x_1')$.
 
 TODO: consequences of this: \\
 - difference between numerator and denominator is basically a reweighting of the same terms in the sum \\
 - max value of ratio
+
+
+\subsection{The case $L = 1$}
+
+It is instructive to first consider the case where each record in the collection consists of a single bit, as the expressions simplify considerably.
+
+When $L=1$, each original and synthetic record is either 1 or 0, and the transformation $R$ flips each record with probability $q$.
+Further,
+\[ A(\xv) = \Phi\circ R(\xv) = \big(\Phi_1\circ R(\xv),\, n-\Phi_1\circ R(\xv)\big), \]
+with
+\[ \Phi_1\circ R(\xv) = \sum_{i=1}^n I(R(x_i) = 1) \sim Bin(m, p) + Bin(n-m, q) \]
+where $m$ is the number of 1s in the original collection: $m := \sum_i I(x_i = 1)$.
+For simplicity, we interpret $A(\xv) = \Phi_1\circ R(\xv) = A(m)$, a sum of two independent Binomial random variables with support $\{0,\dots,n\}$.
+Note also that the requirement $x_1 \neq x'_1$ implies $x'_1 = 1-x_1$.
+Hence, using the expression \eqref{eq:prcond}, the privacy ratio becomes
+\[ \pi(s; m) = \frac{(1-\P[R(x_1) = 1]) \P[A(m) = s-1] +
+(1-\P[R(x_1) = 0]) \P[A(m) = s]}
+{\P[R(x_1) = 1] \P[A(m) = s-1] + \P[R(x_1) = 0] \P[A(m) = s]}
+\]
+for $s \in \{0,\dots,n\}$.
+
+-----------------------------------------
+
+\section{Maximal collections}
+
 
 The first question we address is for which pair of original and modified collections $\xv$ and $\xv'$ does $\pi$ obtain its maximum.
 
