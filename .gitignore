@@ -1,3 +1,11 @@
+## General
+TODO
+*~
+.Rhistory
+
+# Mac crap
+.DS_Store
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
