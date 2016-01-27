@@ -49,7 +49,7 @@ privratio <- function(n, q) {
 ## Find the alpha-th quantile of the distribution of Y as in dbinomsum(m,n,q).
 ## This is the largest number x such that P[Y < x] <= alpha, ie.
 ## P[Y >= x] >= 1 - alpha.
-qbinomsum <- function(alpha, m, n, q) {
+qbinomsum <- function(m, n, q, alpha) {
     ## First compute the cdf.
     cdf <- cumsum(dbinomsum(m, n, q))
     ## Find the largest x such that alpha >= P[Y <= x-1] = P[Y < x].
