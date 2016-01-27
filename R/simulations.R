@@ -5,6 +5,14 @@
 #############################################################################
 
 
+library(data.table)
+library(ggplot2)
+
+## multiplot() function used below can be found at
+## https://github.com/dzeber/work-tools/blob/master/R/utils/ggplot.R.
+
+source("k-rand-lib.R")
+
 ## For a given collection size n, plot the privacy ratio as a function of the
 ## number of 1s in the synthetic collection s = 0:n, for each number of 1s in
 ## the original collection m = 1:n.
