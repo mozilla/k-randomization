@@ -1,6 +1,6 @@
 #############################################################################
 ###
-###  Useful functions for running simulations for k-randomization.
+###  Useful functions for running simulations for k-randomization project.
 ###
 #############################################################################
 
@@ -13,20 +13,20 @@ dbinomsum <- function(m, n, q) {
     if(m == n) return(dbinom(0:n, n, 1-q))
     ## Otherwise, find the pmfs for the component densities and compute
     ## the convolution.
-    ## In all probabilities below, P[Bin(K,r) = j] = 0 if j < 0 or j > K.
     ## [P[Bin(m,p) = j] for j = 0,...,n].
     bin.mp <- dbinom(0:n, m, 1-q)
     ## [P[Bin(n-m,q) = j] for j = 0,...,n].
     bin.nmq <- dbinom(0:n, n-m, q)
-    ## Create a (n+1) x (n+1) matrix where row i is
-    ## [P[Bin(n-m,q) = i], P[Bin(n-m,q) = i-1], ..., P[Bin(n-m,q) = i-n]].
-    convol <- shift(rev(bin.nmq), n = n:0, fill = 0, type = "lead")
-    convol <- do.call(rbind, convol)
-    ## The result of the convolution is a vector where entry i is
-    ## sum_{j=0}^n P[Bin(n-m,q) = i-j]*P[Bin(m,p) = j].
-    as.vector(convol %*% bin.mp)
+    ## P[Y = s] = sum_{k=max(s-(n-m),0)}^{min(s,m)} P[B(m,p)=k]P[B(n-m,q)=s-k].
+    ## First compute the bounds on the sum for each s = 0:n.
+    upper <- pmin(0:n, m)
+    lower <- pmax(0:n-n+m, 0)
+    ## Compute the convolution sum for each s.
+    mapply(function(s, lb, ub) {
+        k <- lb:ub
+        sum(bin.mp[k+1] * bin.nmq[s-k+1])
+    }, 0:n, lower, upper)
 }
-
 
 ## Compute the privacy ratio for the case L = 1:
 ## - for a collection of size n and lie probability q
