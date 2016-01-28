@@ -28,6 +28,15 @@ dbinomsum <- function(m, n, q) {
     }, 0:n, lower, upper)
 }
 
+
+## Compute the pmfs of Y ~ Bin(m, p) + Bin(n-m, q) for all m in 0,...,n.
+## Returns a list of length n+1, of which entry i is a vector of length
+## n+1 giving the pmf for m = i-1.
+allpmfs <- function(n, q) {
+    lapply(0:n, dbinomsum, n, q)
+}
+
+
 ## Compute the privacy ratio for the case L = 1:
 ## - for a collection of size n and lie probability q
 ## - where the original collection has m 1s
@@ -36,13 +45,16 @@ dbinomsum <- function(m, n, q) {
 ## outcome values s = 0,...,n and over all original collections m = 1,...,n.
 ## As in the notation of section 3.1, A is a rv with distribution 
 ## Bin(m, 1-q) + Bin(N-m, q).
-## Returns a list of length n indexed by m, whose elements are vectors of
-## length n+1 giving the privacy ratio values for that m indexed by s+1.
-privratio <- function(n, q) {
-    ## Compute the full pmf of A(m) for all values of m.
-    pmfA <- lapply(0:n, dbinomsum, n, q)
+## Takes the output of allpmfs (a list of length n+1) for the required n
+## and q, and returns a data table of (m, s, pr).
+## Some of the privacy ratio values may evaluate as NaN when they are the
+## ratio of two very small numbers.
+privratio <- function(pmfs) {
     ## The privacy ratio is pmfA[[m]]/pmfA[[m+1]] for m = 1,...,n.
-    lapply(1:n, function(m) { pmfA[[m]] / pmfA[[m+1]] })
+    n <- length(pmfs) - 1
+    rbindlist(lapply(1:n, function(m) {
+        data.table(m = m, s = 0:n, pr = pmfs[[m]] / pmfs[[m+1]])
+    }))
 }
 
 
