@@ -48,25 +48,48 @@ allpmfs <- function(n, q) {
 ## Takes the output of allpmfs (a list of length n+1) for the required n
 ## and q, and returns a data table of (m, s, pr).
 ## Some of the privacy ratio values may evaluate as NaN when they are the
-## ratio of two very small numbers.
+## ratio of two very small numbers. These are replaced with NA.
 privratio <- function(pmfs) {
     ## The privacy ratio is pmfA[[m]]/pmfA[[m+1]] for m = 1,...,n.
     n <- length(pmfs) - 1
-    rbindlist(lapply(1:n, function(m) {
+    d <- rbindlist(lapply(1:n, function(m) {
         data.table(m = m, s = 0:n, pr = pmfs[[m]] / pmfs[[m+1]])
     }))
+    ## Remove NaNs.
+    d[is.nan(pr), pr := NA]
+    d
 }
 
 
-## Find the alpha-th quantile of the distribution of Y as in dbinomsum(m,n,q).
-## This is the largest number x such that P[Y < x] <= alpha, ie.
-## P[Y >= x] >= 1 - alpha.
-qbinomsum <- function(m, n, q, alpha) {
-    ## First compute the cdf.
-    cdf <- cumsum(dbinomsum(m, n, q))
-    ## Find the largest x such that alpha >= P[Y <= x-1] = P[Y < x].
-    lta <- cdf <= alpha
-    if(!any(lta)) return(0)
-    max(which(cdf <= alpha))
+## Find the alpha-th quantiles of given pmfs.
+## Each pmf should be a vector whose i-th element is P[Y = i-1].
+## Accepts either a single pmf or a list as returned by allpmfs().
+## For each pmf, compute the alpha-th quantile for each value of alpha.
+## Returns a data table of (m, alpha, qs), where m indexes the pmf and
+## qs is the smallest integer such that P[Y_m <= qs] >= alpha.
+## If interpolate = TRUE, the table contains an additional column 'interp'
+## such that alpha = interp * P[Y_m <= qs] + (1-interp) * P[Y_m <= qs - 1].
+pmfquantile <- function(pmfs, alpha, interpolate = FALSE) {
+    if(!is.list(pmfs)) pmfs <- list(pmfs)
+    rbindlist(mapply(function(m, v) {
+        ## Compute cdf from pmf.
+        cdf <- cumsum(v)
+        quants <- lapply(alpha, function(a) {
+            ## Find the smallest cdf element that is no smaller than a.
+            qs <- min(which(cdf >= a))
+            ## The quantile value is 1 less (between 0 and n).
+            res <- list(qs = qs - 1)
+            if(interpolate) {
+                res[["interp"]] <- if(qs == 1) 1 else {
+                    (a - cdf[qs]) / (cdf[qs] - cdf[qs - 1]) }
+            }
+            res
+        })
+        DT <- data.table(m = m, alpha = alpha,
+            qs = as.numeric(lapply(quants, "[[", "qs")))
+        if(interpolate) 
+            DT[, interp := as.numeric(lapply(quants, "[[", "interp"))]
+        DT
+    }, seq_along(pmfs), pmfs, USE.NAMES = FALSE, SIMPLIFY = FALSE))
 }
 
