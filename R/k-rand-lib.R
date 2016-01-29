@@ -85,7 +85,7 @@ pmfquantile <- function(pmfs, alpha, interpolate = FALSE) {
             }
             res
         })
-        DT <- data.table(m = m, alpha = alpha,
+        DT <- data.table(m = m - 1, alpha = alpha,
             qs = as.numeric(lapply(quants, "[[", "qs")))
         if(interpolate) 
             DT[, interp := as.numeric(lapply(quants, "[[", "interp"))]
