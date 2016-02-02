@@ -247,15 +247,24 @@ Further,
 \[ A(\xv) = \Phi\circ R(\xv) = \big(\Phi_1\circ R(\xv),\, n-\Phi_1\circ R(\xv)\big), \]
 with
 \[ \Phi_1\circ R(\xv) = \sum_{i=1}^n I(R(x_i) = 1) \sim Bin(m, p) + Bin(n-m, q) \]
-where $m$ is the number of 1s in the original collection: $m := \sum_i I(x_i = 1)$.
-For simplicity, we interpret $A(\xv) = \Phi_1\circ R(\xv) = A(m)$, a sum of two independent Binomial random variables with support $\{0,\dots,n\}$.
+where $m$ is the number of 1s in the original collection: $m := \sum_{i=1}^n I(x_i = 1)$.
+For simplicity, we interpret $A(\xv) = \Phi_1\circ R(\xv) = A_n(m)$, a sum of two independent Binomial random variables with support $\{0,\dots,n\}$.
 Note also that the requirement $x_1 \neq x'_1$ implies $x'_1 = 1-x_1$.
 Hence, using the expression \eqref{eq:prcond}, the privacy ratio becomes
-\[ \pi(s; m) = \frac{(1-\P[R(x_1) = 1]) \P[A(m) = s-1] +
-(1-\P[R(x_1) = 0]) \P[A(m) = s]}
-{\P[R(x_1) = 1] \P[A(m) = s-1] + \P[R(x_1) = 0] \P[A(m) = s]}
+\[ \pi(s; m, x_1) = \frac{(1-\P[R(x_1) = 1]) \P[A_{n-1}(m) = s-1] +
+(1-\P[R(x_1) = 0]) \P[A_{n-1}(m) = s]}
+{\P[R(x_1) = 1] \P[A_{n-1}(m) = s-1] + \P[R(x_1) = 0] \P[A_{n-1}(m) = s]}
 \]
 for $s \in \{0,\dots,n\}$.
+TODO: this is not exactly right - whether it's $A(m)$ or $A(m-1)$ depends on whether $x_1$ is 0 or 1.
+
+TODO: relationship between $x_1 = 1$ and $x_1 = 0$ - only need to work with one.
+
+\[ \pi(s; m, 1) = \frac{\P[A_n(m-1) = s]}{\P[A_n(m) = s]}
+= \frac{q\cdot \P[A_{n-1}(m-1) = s-1] + p\cdot \P[A_{n-1}(m-1) = s]}
+{p\cdot \P[A_{n-1}(m-1) = s-1] + q\cdot \P[A_{n-1}(m-1) = s]}
+\]
+for $m \in \{1,\cdots,n\}$.
 
 -----------------------------------------
 
@@ -388,7 +397,7 @@ from which
 \]
 and hence \eqref{eq:indfinal} follows from Lemma \ref{lem:rscomp2} (unless $s=1$, in which case it follows from a simple direct argument).
 \end{pf}
-TODO: finish argument in the case when $x_1 = 0$.
+TODO: finish argument in the case when $x_1 = 0$.    
 
 \section{Ratios of sums: properties}
 
