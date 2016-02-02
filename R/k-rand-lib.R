@@ -41,8 +41,8 @@ allpmfs <- function(n, q) {
 ## - for a collection of size n and lie probability q
 ## - where the original collection has m 1s
 ## - and the modification changes a 1 to a 0.
-## The privacy ratio P[A(m-1) = s]/P[A(m) = s] is computed across all
-## outcome values s = 0,...,n and over all original collections m = 1,...,n.
+## The privacy ratio P[A(m) = s]/P[A(m+1) = s] is computed across all
+## outcome values s = 0,...,n and over all original collections m = 0,...,n-1.
 ## As in the notation of section 3.1, A is a rv with distribution 
 ## Bin(m, 1-q) + Bin(N-m, q).
 ## Takes the output of allpmfs (a list of length n+1) for the required n
