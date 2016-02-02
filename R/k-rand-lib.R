@@ -65,10 +65,17 @@ privratio <- function(pmfs) {
 ## Each pmf should be a vector whose i-th element is P[Y = i-1].
 ## Accepts either a single pmf or a list as returned by allpmfs().
 ## For each pmf, compute the alpha-th quantile for each value of alpha.
-## Returns a data table of (m, alpha, qs), where m indexes the pmf and
-## qs is the smallest integer such that P[Y_m <= qs] >= alpha.
-## If interpolate = TRUE, the table contains an additional column 'interp'
-## such that alpha = interp * P[Y_m <= qs] + (1-interp) * P[Y_m <= qs - 1].
+##
+## Returns a data table of (m, alpha, qs, pmf, cdf), where m indexes the pmf
+## and qs is the smallest integer such that P[Y_m <= qs] >= alpha.
+## The columns 'pmf' and 'cdf' give probabilities at the quantile:
+## P[Y_m = qs] and P[Y_m <= qs] respectively.
+##
+## If 'interpolate' is TRUE, the quantile is interpolated linearly between
+## the nearest integer values. Additional returned columns are 'interp' (the
+## fraction (P[Y_m <= qs] - alpha)/P[Y_m = qs]), 'qs.interp' (qs - interp),
+## and the pmf value at qs.interp approximated by interpolating linearly down.
+## Note that this is not a real probability since the pmf is discrete.
 pmfquantile <- function(pmfs, alpha, interpolate = FALSE) {
     if(!is.list(pmfs)) pmfs <- list(pmfs)
     rbindlist(mapply(function(m, v) {
@@ -78,18 +85,19 @@ pmfquantile <- function(pmfs, alpha, interpolate = FALSE) {
             ## Find the smallest cdf element that is no smaller than a.
             qs <- min(which(cdf >= a))
             ## The quantile value is 1 less (between 0 and n).
-            res <- list(qs = qs - 1)
+            res <- list(m = m - 1, alpha = a, qs = qs - 1, pmf = v[qs],
+                cdf = cdf[qs])
             if(interpolate) {
-                res[["interp"]] <- if(qs == 1) 1 else {
-                    (a - cdf[qs]) / (cdf[qs] - cdf[qs - 1]) }
+                lb <- if(qs == 1) 0 else cdf[qs - 1]
+                interp <- (cdf[qs] - a) / (cdf[qs] - lb)
+                res[["qs.interp"]] <- res[["qs"]] - interp
+                res[["pmf.interp"]] <-
+                    v[qs] - interp * (v[qs] - if(qs == 1) 0 else v[qs-1])
+                res[["interp"]] <- interp
             }
             res
         })
-        DT <- data.table(m = m - 1, alpha = alpha,
-            qs = as.numeric(lapply(quants, "[[", "qs")))
-        if(interpolate) 
-            DT[, interp := as.numeric(lapply(quants, "[[", "interp"))]
-        DT
+        rbindlist(quants)
     }, seq_along(pmfs), pmfs, USE.NAMES = FALSE, SIMPLIFY = FALSE))
 }
 
