@@ -230,16 +230,16 @@ plotscumprob <- function(ddist, ratio = FALSE) {
 }
 
 ## Plot sequence of quantiles over m for each alpha value.
-plotquants <- function(quants) {
+plotquants <- function(quants, together = TRUE) {
     dd <- rbind(quants[, list(m, alpha, s = qs, type = "exact")],
         quants[, list(m, alpha, s = qs.interp, type = "interpolated")])
-    ggplot(dd, aes(x = m, y = s
-        #, colour = factor(alpha)
-        )) +
+    aesvals <- list(x = quote(m), y = quote(s))
+    if(together) aesvals$colour <- quote(factor(alpha))
+    gp <- ggplot(dd, aes_(aesvals)) +
         geom_line(aes(linetype = type)) +
-        geom_point(size = 0.5) +
-        facet_wrap(~ alpha) +
-        theme(text = element_text(size = 8)) +
+        geom_point(size = 0.5)
+    if(together) gp <- gp + facet_wrap(~ alpha)
+    gp + theme(text = element_text(size = 8)) +
         labs(title = "Quantile q(m; alpha) for each alpha",
             x = "m", y = "Quantile value (s)", colour = "alpha",
             linetype = "Type")
