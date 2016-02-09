@@ -1,0 +1,82 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 
+%% Informal notes on k-randomization.
+%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[11pt,draft]{article}
+%\documentclass[11pt,draft]{amsart}
+
+% Custom styling.
+\usepackage{mozdp}
+%% Controls enumeration labels
+%\usepackage{enumerate}
+%% Shrinks margins 
+\usepackage{fullpage}
+%% Shows equation label keys
+%\usepackage[notref]{showkeys}
+%% Title matter
+\title{}
+\author{Maxim Zhilyaev \and David Zeber}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\maketitle
+
+\section{MSTACK QUESTION}
+Bounding ratio of probabilities of Poisson-Binomial Distribution.
+
+There are $N$ Bernoulli trials, where $m$  trails have probability of success $p$ and $N-m$ trails have probability of success $q=1-p$.  Assume $p>q$.
+The number of successes is a random variable $S$ expressed as a sum of two binomial random variables:
+
+\begin{align}
+S = Bin(p,m) + Bin(q,N-m)
+\end{align}
+
+The distribution of $S$ is known to be a Poisson-Binomial Distribution.
+I am studying the behavior of the ratio between P(S=k) and P(S=k-1) with respect to $m$ and $k$.
+For a given $m$ and number of successes $k$, denote such ratio as $R(k,m)$:
+
+\begin{align}
+R(k,m)  = \frac{P(S=k \; | \;m)}{P(S=k-1 \; |\;m)}
+\end{align}
+
+I am particularly interested in the behavior of this ratio for small quantiles, and ran numerical simulation for $R(k,m)$ when $k << mean$. 
+It appears that for values of $k$ that are equally distant from the mean, the following holds:
+
+Let $\mu_m=m \cdot (p-q) + N \cdot q$ be the mean of the corresponding distribution and $\alpha$ be the distance away from the mean.
+Then for $k=\mu_m - \alpha$:
+
+\begin{align}
+R(\mu_0 - \alpha,0)  > R(\mu_1 - \alpha,1) > \dots > R(\mu_{m-1} - \alpha,m-1) > R(\mu_{m} - \alpha,m) > \dots > R(\mu_{N} - \alpha,N) 
+\end{align}
+
+The ratio seems to bounded by two binomial distribution for $m=0$ and $m=N$ respectively.
+
+It is easy to see why  $R(\mu_0 - \alpha,0) >  R(\mu_{N} - \alpha,N)$.
+
+\begin{align}
+R(k,0) = \frac{\binom{N}{k} q^kp^{N-k}}{\binom{N}{k-1} q^{k-1}p^{N-k+1}} = \frac{N-k+1}{k} \cdot \frac{q}{p} \\
+R(k,N) = \frac{\binom{N}{k} q^kp^{N-k}}{\binom{N}{k-1} q^{k-1}p^{N-k+1}} = \frac{N-k+1}{k} \cdot \frac{p}{q} 
+\end{align}
+
+Setting  $k=\mu - \alpha$ for each case, we have
+\begin{align}
+R(k,0) =  \frac{N-qN + \alpha+1}{qN-\alpha} \cdot \frac{q}{p} \approx \frac{qp + \frac{\alpha q}{N}}{qp - \frac{\alpha p}{N}}\\
+R(k,N) = \frac{N-pN + \alpha+1}{pN-\alpha} \cdot \frac{p}{q} \approx \frac{qp + \frac{\alpha p}{N}}{qp - \frac{\alpha q}{N}}\\
+\frac{qp + \frac{\alpha q}{N}}{qp - \frac{\alpha p}{N}} >  \frac{qp + \frac{\alpha p}{N}}{qp - \frac{\alpha q}{N}} \\
+(qp + \frac{\alpha q}{N})(qp - \frac{\alpha q}{N}) > (qp + \frac{\alpha p}{N})(qp - \frac{\alpha p}{N}) \\
+(qp)^2 - \left ( \frac{\alpha q}{N} \right )^2 > (qp)^2 - \left ( \frac{\alpha p}{N} \right )^2 
+\end{align}
+
+Since $p>q$, the above inequality holds.
+
+But I am unable to express $R(k,m)$ analytically, no prove that it is bounded between ratios corresponding to the limiting binomial distributions (although I see it in simulations).
+Any help with proving this and/or pointers to related papers will be much appreciated.
+
+
+\end{document}
+

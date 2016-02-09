@@ -590,18 +590,98 @@ Hence, an observer does not gain any more privacy insight by looking at individu
 
 \subsubsection{Local differential privacy}
 
-Let's revisit the ratio:
+As mentioned above, we can equivalently represent collection $S$ by set-bits-histogram counts. For vectors of length $L$, there are $L+1$ histogram buckets raging from $l=0$ to $l=L$. 
+Let's consider the privacy ratio when the synthetic collection is in the expected state $S_e$ and assume bucket $l$ is sufficiently filled, that is $s_0 \ge 1$.  We should represent state S as:
+
+\[ S = [s_0, s_1, \dots, s_L] \]
+
+For the expected synthetic state $S_e$ we choose the state generated from modified collection since this increases privacy ratio. Recall that modified collection $D' + 0$ consists of $(N-1)$ unit vectors and one zero valued vector.  Hence the distribution $S$ is a some of $N$ independent random vectors of size $L$ consisting of probabilities of finding $1$ in a bucket $l$:
 
 \begin{align}
-\frac{P(S|D'+0)}{P(S|D'+1)} = \frac{1}{N}   \cdot  \sum_{l=0}^{L} s_l \cdot  \left ( \frac{p}{q} \right )^ {L - 2l}
+S = (N-1) \
+ \begin{bmatrix}  \
+  p(l=0|1) \\
+  p(l=1|1) \\
+  \dots \\
+  p(l=L|1)
+\end{bmatrix} + \
+ \begin{bmatrix}  \
+  p(l=0|0) \\
+  p(l=1|0) \\
+  \dots \\
+  p(l=|0)
+\end{bmatrix} = \
+ N \begin{bmatrix}  \
+  p(l=0|1) \\
+  p(l=1|1) \\
+  \dots \\
+  p(l=L|1)
+\end{bmatrix} + \
+ \begin{bmatrix}  \
+  p(l=0|0) \\
+  p(l=1|0) \\
+  \dots \\
+  p(l=L|0)
+\end{bmatrix} - \
+ \begin{bmatrix}  \
+  p(l=0|1) \\
+  p(l=1|1) \\
+  \dots \\
+  p(l=L|1)
+\end{bmatrix}
 \end{align}
 
+Note that probability of generating a synthetic vector containing $l$ set bits from either unit or zero original is given by:
+
+\begin{align}
+ p(l|1) = \binom{L}{l} p^lq^{L-l} \\
+ p(l|0) = \binom{L}{l} q^lp^{L-l}
+\end{align}
+
+For a single unit vector, the expected value of the privacy ratio is given by:
+
+\begin{align}
+\sum_{l=0}^{L}   p(l|1)  \cdot  \left ( \frac{p}{q} \right )^ {L - 2l} = \sum_{l=0}^{L}  \cdot   \binom{L}{l} p^lq^{L-l} \left ( \frac{p}{q} \right )^ {L - 2l} =\sum_{l=0}^{L}  \binom{L}{l} \cdot p^{L-l}q^{l} = (p+q)^L = 1
+\end{align}
+
+For a single zero-valued vector, the expected value of the privacy ratio is given by:
+
+\begin{align}
+\sum_{l=0}^{L} p(l|0)  \cdot  \left ( \frac{p}{q} \right )^ {L - 2l} = \sum_{l=0}^{L}  \cdot   \binom{L}{l} p^{L-l}q^l \left ( \frac{p}{q} \right )^ {L - 2l} = \
+\sum_{l=0}^{L}  \binom{L}{l}   \frac{p^{2L-3l}}{q^{L-3l}} = \\
+\sum_{l=0}^{L}  \binom{L}{l}   \frac{p^{3L-3l} q^{3l}}{(pq)^{L}} = \frac{1}{(pq)^{L}} \sum_{l=0}^{L}  \binom{L}{l}   (p^3)^{L-l} (q^3)^{l} = \left ( \frac{p^3 + q^3}{pq} \right )^L
+\end{align}
+
+Using these expressions we have for the expected state $S_e$
+
+\begin{align}
+\frac{P(S_e|D'+0)}{P(S_e|D'+1)} = \frac{N-1}{N} + \frac{1}{N}  \left ( \frac{p^3 + q^3}{pq} \right )^L
+\end{align}
+
+The local differential privacy requires that state $S$ should not be too far away from $S_e$.  Which we express as a requirement that the count in every bucket can't be more than $3\sigma$ away from expected value.  Since, the number of synthetic vectors in each bucket has to sum to N, then the total number of deviations in each bucket must sum to 0. Which immediately gives us the upper bound for the privacy ratio:
+
+\begin{align}
+\frac{P(S_e|D'+0)}{P(S_e|D'+1)} <   \frac{1}{N}   \cdot  \sum_{l=0}^{L} (E(s_l) + 3\sqrt{VAR(s_l)}) \cdot  \left ( \frac{p}{q} \right )^ {L - 2l}
+\end{align}
+
+Note that variance in each $l$-bucket is identical for either unit or zero original vector and is:
+
+\begin{align}
+VAR(s_l) =  \frac{1}{N}   \cdot  \sum_{l=0}^{L} (E(s_l) + 3\sqrt{VAR(s_l)}) \cdot  \left ( \frac{p}{q} \right )^ {L - 2l}
+\end{align}
+
+\newpage 
 
 
 \section{===== IGNORE BELOW THIS POINT  ============}
 
 Suppose there are two vectors of length $L$ in D.  One is modified to all-zeros vector.  
 Assume synthetic vectors are n$l_1$ and $l_2$, and original collection is vector $z$ and $x$
+
+\begin{align}
+\frac{P(S|D'+0)}{P(S|D'+1)} = \frac{1}{N}   \cdot  \sum_{l=0}^{L} N \binom{L}{l} p^lq^{L-l} \cdot  \left ( \frac{p}{q} \right )^ {L - 2l} =  \sum_{l=0}^{L} \binom{L}{l} p^{L-l}q^{l} = 1
+\end{align}
+
 
 \begin{align}
 \frac{p(l_1|0)p(l_2|x) + p(l_1|x)p(l_2|0)}{p(l_1|z)p(l_2|x) + p(l_1|x)p(l_2|z)} = \
@@ -657,6 +737,56 @@ p(S|D_m) = p^Lp(s|1)^{N-1} + (N-1) q^Lp(s|0)p(s|1)^{N-2}\\
 \frac{p(S|D_m)}{p(S|D)} = \frac {\left ( \frac{p}{q} \right )^L + (N-1)\left ( \frac{p}{q} \right )^{L-2s} } { N} \\
 \frac{p(S|D_m)}{p(S|D)} = \frac{1}{N}\left ( \frac{p}{q} \right )^L + \frac{N-1}{N}\left ( \frac{p}{q} \right )^{L-2s}\\
 \end{align}
+
+\section{MSTACK QUESTION}
+Bounding ratio of probabilities of Poisson-Binomial Distribution.
+
+There are $N$ Bernoulli trials, where $m$  trails have probability of success $p$ and $N-m$ trails have probability of success $q=1-p$.  Assume $p>q$.
+The number of successes in these $N$ Bernoulli random variables is a random variable $S$ expressed as a sum of two binomial random variables:
+
+\begin{align}
+S = Bin(p,m) + Bin(q,N-m)
+\end{align}
+
+The distribution of $S$ is known to be a Poisson-Binomial Distribution.
+I am studying the behavior of the ratio between P(S=k) and P(S=k-1) with respect to $m$ and $k$.
+For a given $m$ and number of successes $k$, denote such ratio as $R(k,m)$:
+
+\begin{align}
+R(k,m)  = \frac{P(S=k \; | \;m)}{P(S=k-1 \; |\;m)}
+\end{align}
+
+I am particularly interested in the behavior of this ratio when for small quantiles, and ran numerical simulation for $R(k,m)$ when $k << mean$. 
+It appears that for values of $k$ that are equally distant from the mean, the following holds:
+
+Let $\mu_m=m \cdot (p-q) + N \cdot q$ be the mean of the corresponding distribution and $\alpha$ be the distance away from the mean.
+Then for $k=\mu_m - \alpha$:
+
+\begin{align}
+R(\mu_0 - \alpha,0)  > R(\mu_1 - \alpha,1) > \dots > R(\mu_{m-1} - \alpha,m-1) > R(\mu_{m} - \alpha,m) > \dots > R(\mu_{N} - \alpha,N) 
+\end{align}
+
+The ratio seems to bounded by two binomial distribution for $m=0$ and $m=N$ respectively.
+It is easy to see why  $R(\mu_0 - \alpha,0) >  R(\mu_{N} - \alpha,N)$.
+
+\begin{align}
+R(k,0) = \frac{\binom{N}{k} q^kp^{N-k}}{\binom{N}{k-1} q^{k-1}p^{N-k+1}} = \frac{N-k+1}{k} \cdot \frac{q}{p} \\
+R(k,N) = \frac{\binom{N}{k} q^kp^{N-k}}{\binom{N}{k-1} q^{k-1}p^{N-k+1}} = \frac{N-k+1}{k} \cdot \frac{p}{q} 
+\end{align}
+
+Setting  $k=\mu - \alpha$ for each case, we have
+\begin{align}
+R(k,0) =  \frac{N-qN + \alpha+1}{qN-\alpha} \cdot \frac{q}{p} \approx \frac{qp + \frac{\alpha q}{N}}{qp - \frac{\alpha p}{N}}\\
+R(k,N) = \frac{N-pN + \alpha+1}{pN-\alpha} \cdot \frac{p}{q} \approx \frac{qp + \frac{\alpha p}{N}}{qp - \frac{\alpha q}{N}}\\
+\frac{qp + \frac{\alpha q}{N}}{qp - \frac{\alpha p}{N}} >  \frac{qp + \frac{\alpha p}{N}}{qp - \frac{\alpha q}{N}} \\
+(qp + \frac{\alpha q}{N})(qp - \frac{\alpha q}{N}) > (qp + \frac{\alpha p}{N})(qp - \frac{\alpha p}{N}) \\
+(qp)^2 - \left ( \frac{\alpha q}{N} \right )^2 > (qp)^2 - \left ( \frac{\alpha p}{N} \right )^2 
+\end{align}
+
+Since $p>q$, the above inequality holds.
+
+But I am unable to express $R(k,m)$ analytically, no prove that it is bounded between by ratios corresponding to the limiting binomial distribution.
+Any help with proving this and/or pointers to related papers will be much appreciated 
 
 
 \end{document}
