@@ -1,0 +1,106 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 
+%% Informal notes on k-randomization.
+%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[11pt,draft]{article}
+%\documentclass[11pt,draft]{amsart}
+
+% Custom styling.
+\usepackage{mozdp}
+%% Controls enumeration labels
+%\usepackage{enumerate}
+%% Shrinks margins 
+\usepackage{fullpage}
+%% Shows equation label keys
+%\usepackage[notref]{showkeys}
+%% Title matter
+\title{}
+\author{Maxim Zhilyaev \and David Zeber}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\maketitle
+
+\section{recursion formular - simple version}
+
+Consider generating function for Poisson-Binomial of you case.  $m$ Bernoulli trials with success $p$ and $n$ Bernoulli trials with success $q$. 
+
+\begin{align}
+m+n = N \\
+q+p = 1 \\
+G(x) = (q+px)^m \cdot (p+qx)^n
+\end{align}
+
+The derivative of $ln(f(x)$ is given by:
+
+\begin{align}
+[ln(g(x))]' = \frac{g^`(x)}{f(x)} = \frac{\left ( \sum_{i=0}^{N} a_i x^i \right )^`}{ \sum_{i=0}^{N} a_i x^i} = \frac{\sum_{i=1}^{N} i \cdot a_i x^{i-1}}{  \sum_{i=0}^{N} a_i x^i}
+\end{align}
+
+On the other hand
+\begin{align}
+[ln(g(x_)]^` = (m(q+px) + n(p+qx))^` = \frac{mp}{q+px} + \frac{nq}{p+qx} = \frac{xpq(m+n) + mp^2 + nq^2}{x^2pq + x(p^2 + q^2) + pq}
+\end{align}
+
+Equating both expressions we get
+\begin{align}
+\frac{xpqN + mp^2 + nq^2}{x^2pq + x(p^2 + q^2) + pq} = \frac{\sum_{i=1}^{N} i \cdot a_i x^{i-1}}{  \sum_{i=0}^{N} a_i x^i} \\
+(xpqN + mp^2 + nq^2)(\sum_{i=0}^{N} a_i x^i) = (x^2pq + x(p^2 + q^2) + pq)(\sum_{i=1}^{N} i \cdot a_i x^{i-1})
+\end{align}
+
+Multiplying and equating terms with same power of $x$ we get:
+\begin{align}
+a_i(mp^2 + nq^2) + a_{i-1}pqN = a_{i+1}pq(i+1) + a_i(p^2 + q^2)i + a_{i-1}pq(i-1) \\
+a_i(mp^2 + nq^2) + a_{i-1}pqN = a_{i+1}pqi + a_i(p^2 + q^2)i + a_{i-1}pqi  + (a_{i+1} - a_{i-1})
+\end{align}
+
+Ignore the difference of $a_{i+1} - a_{i-1}$, and denote the expectation of successes as $\mu$. Then the expression simplifies to:
+\begin{align}
+\frac{   N - i}{ \frac{ a_{i+1}}{a_i}i    - (\frac{\mu - Npq}{pq} - \frac{p^2 + q^2}{pq}i)   } =  \frac{a_{i}}{a_{i-1}} \\
+\frac{   N - i}{ N - i  + (\frac{ a_{i+1}}{a_i} - 1)i   - \frac{\mu - i}{pq}   } =  \frac{a_{i}}{a_{i-1}} \\
+\end{align}
+
+Denote the distance between $i$ and $\mu$ as $l$.  Then:
+\begin{align}
+\mu - i = l\\
+i = \mu -l \\
+\frac{a_{i+1}}{a_{i}} = f_l \\
+\frac{a_{i}}{a_{i-1}} = f_{l+1} \\
+\frac{   N - \mu + l}{ N - \mu + l  + (f_l - 1)(\mu-l)  - \frac{l}{pq}   } =  f_{l+1}  \\
+ f_{l+1} =  \frac{  1 }{ 1  - \frac{1}{N-\mu + l}(\frac{l}{pq} - (f_l - 1)(\mu - l)) } 
+\end{align}
+
+Differentiating by $\mu$, we have:
+\begin{align}
+F'(\mu) = -\dfrac{pq\left(\left(f_l-1\right)Npq-l\right)}{\left(\left(f_l-2\right)pqx+\left(n+\left(2-f_l\right)l\right)pq-l\right)^2}
+\end{align}
+
+Since the denominator is always positive, the derivative is always negative as long as for all $l$ the inequality below holds:
+\begin{align}
+(f_l-1)Npq > l
+\end{align}
+
+This is a magic formula.  No matter what I do, and how I twist the proof, it always comes down to that inequality.
+I tested it empirically and it indeed works, and in fact $(f_l-1)Npq$ grows much much faster than $l$.
+But i had difficulties proving that analytically.
+A very interesting observation that $Npq$ is the variance, which would suggest using Chebusheff inequality, but this, again, didn't get me anywhere.
+I know the inequality holds, but not sure how to prove it.
+
+Note that when $l=0$  and $f_0=1$, $f_1 = 1$ for all $\mu$.  When $l=1$, $f_1$ is given by
+\begin{align}
+f_{1} =  \frac{  1 }{ 1  - \frac{1}{N-\mu + 1}\frac{1}{pq} } 
+\end{align}
+
+Clearly,  $f_1$ is largest for the smallest $\mu$ which is reached when $m=0$ and the smallest when $m=N$.
+And we also know that $f_l$ when $m=0$ is always greater than $f_l$ for $m=N$, perhaps there's some way to utilize monotonicity of the $f_{l+1}$ when $f_l$ is fixed.
+
+
+\end{document}
+
+
+
