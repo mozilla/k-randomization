@@ -345,6 +345,16 @@ and
 
 Therefore, $F_{n,m}(x) \leq F_{n,m-1}(x) \leq F_{n,m}(x+1)$ and $F_{n,m-1}(x-1) \leq F_{n,m}(x) \leq F_{n,m-1}(x)$.
 
+For probabilities, the relationship becomes
+\begin{align*}
+\P[A_n(m) = s] &- \P[A_n(m-1) = s] \\
+ &= (p-q) \big\{ \P[A_{n-1}(m-1) = s-1] - \P[A_{n-1}(m-1) = s] \big\}
+\end{align*}
+and
+\begin{align*}
+\P[A_n(m) = s+1] &- \P[A_n(m-1) = s] \\
+ &= q \big\{ \P[A_{n-1}(m-1) = s+1] - \P[A_{n-1}(m-1) = s-1] \big\}
+\end{align*}
 
 \subsubsection{Quantiles}
 
@@ -388,136 +398,136 @@ $\pi(s;m) \leq \pi(s+1; m+1)$.
 
 
 
-%\section{Maximal collections}
-%
-%
-%The first question we address is for which pair of original and modified collections $\xv$ and $\xv'$ does $\pi$ obtain its maximum.
-%
-%\subsection{The case $L = 1$}
-%
-%It is instructive to first consider the case where each record in the collection consists of a single bit, as the expressions simplify considerably.
-%In this case, the outcome of $A$ essentially reduces to the number of 1s obtained in the synthetic collection $R(\xv)$, since $\sv\in\Ssp_n$ can be written as $(s_1,s_2)$ with $s_1\in\{0,\dots,n\}$ and $s_2 = n-s_1$. 
-%Using this fact, we interpret $A(\xv)$ as $\sum_{i=1}^n I(R(x_i) = 1)$,
-%and express the privacy ratio as
-%\[ \pi(s,\xv,x_1') = \frac{\P[R(x'_1) = 1] \P[A(\xvt) = s-1] +
-%\P[R(x'_1) = 0] \P[A(\xvt) = s]}
-%{\P[R(x_1) = 1] \P[A(\xvt) = s-1] + \P[R(x_1) = 0] \P[A(\xvt) = s]}
+\section{Maximal collections}
+
+
+The first question we address is for which pair of original and modified collections $\xv$ and $\xv'$ does $\pi$ obtain its maximum.
+
+\subsection{The case $L = 1$}
+
+It is instructive to first consider the case where each record in the collection consists of a single bit, as the expressions simplify considerably.
+In this case, the outcome of $A$ essentially reduces to the number of 1s obtained in the synthetic collection $R(\xv)$, since $\sv\in\Ssp_n$ can be written as $(s_1,s_2)$ with $s_1\in\{0,\dots,n\}$ and $s_2 = n-s_1$. 
+Using this fact, we interpret $A(\xv)$ as $\sum_{i=1}^n I(R(x_i) = 1)$,
+and express the privacy ratio as
+\[ \pi(s,\xv,x_1') = \frac{\P[R(x'_1) = 1] \P[A(\xvt) = s-1] +
+\P[R(x'_1) = 0] \P[A(\xvt) = s]}
+{\P[R(x_1) = 1] \P[A(\xvt) = s-1] + \P[R(x_1) = 0] \P[A(\xvt) = s]}
+\]
+for $s \in \{0,\dots,n\}$. Furthermore, the requirement that $x_1 \neq x'_1$ in the single-bit case implies that $x'_1 = 1-x_1$, so
+\[ \pi(s,\xv,x_1') = \frac{(1-\P[R(x_1) = 1]) \P[A(\xvt) = s-1] +
+(1-\P[R(x_1) = 0]) \P[A(\xvt) = s]}
+{\P[R(x_1) = 1] \P[A(\xvt) = s-1] + \P[R(x_1) = 0] \P[A(\xvt) = s]}.
+\]
+%Hence, $\pi(s; x_1 = 0) = 1/\pi(s; x_1 = 1)$, and so 
+%\[ \max_{\xv,\xv';\,\sv} \pi = \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \max_{\xvt;\,s} \pi(s;x_1 = 0)\right)
+%=  \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \min_{\xvt;\,s} \pi(s;x_1 = 1)\right)
 %\]
-%for $s \in \{0,\dots,n\}$. Furthermore, the requirement that $x_1 \neq x'_1$ in the single-bit case implies that $x'_1 = 1-x_1$, so
-%\[ \pi(s,\xv,x_1') = \frac{(1-\P[R(x_1) = 1]) \P[A(\xvt) = s-1] +
-%(1-\P[R(x_1) = 0]) \P[A(\xvt) = s]}
-%{\P[R(x_1) = 1] \P[A(\xvt) = s-1] + \P[R(x_1) = 0] \P[A(\xvt) = s]}.
-%\]
-%%Hence, $\pi(s; x_1 = 0) = 1/\pi(s; x_1 = 1)$, and so 
-%%\[ \max_{\xv,\xv';\,\sv} \pi = \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \max_{\xvt;\,s} \pi(s;x_1 = 0)\right)
-%%=  \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \min_{\xvt;\,s} \pi(s;x_1 = 1)\right)
-%%\]
-%We fix $s \in \{1,\dots,n\}$ and investigate which choice of collection $\xv = (x_1,\xvt)$ maximizes $\pi(s,\xv,x_1')$.
-%Assume first $x_1 = 1$. (TODO: what about when $x_1 = 0$?) Then
-%\[ \pi(s,\xvt,0) = \frac{q \P[A(\xvt) = s-1] + p \P[A(\xvt) = s]}
-%{p \P[A(\xvt) = s-1] + q \P[A(\xvt) = s]}.
-%\]
-%By Lemma \ref{lem:rscomp2}, this ratio is maximized at $\xvt^*$ satisfying 
-%\[ \frac{\P[A(\xvt^*) = s]}{\P[A(\xvt^*) = s-1]} \geq
-%\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]} \]
-%for any $\yvt \in \Dsp^{n-1}$.
-%We claim that this is the case when $\xvt^*$ consists of all 1s:
-%%%% Claim to be proven by induction.
-%\begin{claim}
-%Write $\one = (1,...,1)$ as an element of $\Dsp^n$.
-%Then, given $s \in \{1,\dots,n\}$,
-%\begin{equation} \label{eq:maxpA}
-%\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]} \geq
-%\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]}
-%\end{equation}
-%for any $\yv \in \Dsp^n$.
-%\end{claim}
-%\begin{pf}
-%We proceed by induction on $n$. If $n = 1$, then $A(x) = R(x)$, we need only confirm \eqref{eq:maxpA} for $s = 1$.
-%Taking $\yv = 0$ (the only possibility aside from $\one$), we have
-%\begin{equation} \label{eq:singleratio}
-%\frac{\P[R(0) = 1]}{\P[R(0) = 0]} = \frac{q}{p} \leq
-%\frac{p}{q} = \frac{\P[R(1) = 1]}{\P[R(1) = 0]}
-%\end{equation}
-%verifying \eqref{eq:maxpA} in this case.
-%Next, suppose that \eqref{eq:maxpA} holds for $s\in\{1,\dots,n-1\}$ and $\one,\yvt \in \Dsp^{n-1}$, and consider $\yv = (\yvt, y_n) \in \Dsp^n$.
-%For convenience, write $p(y_n) = \P[R(y_n) = 1]$. 
-%Observe that
-%\[ \P[A(\yv) = s] = \P[A(\yvt) = s]\cdot(1-p(y_n)) +
-%\P[A(\yvt) = s-1]\cdot p(y_n), \]
-%conditioning on the value of $y_n$.
-%Thus,
-%%for $s \in \{2,\dots,n-1\}$,
-%\begin{equation} \label{eq:inductionratio}
-%\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]}
-%= \frac{\P[A(\yvt) = s]\cdot(1-p(y_n)) +
-%\P[A(\yvt) = s-1]\cdot p(y_n)}
-%{\P[A(\yvt) = s-1]\cdot(1-p(y_n)) +
-%\P[A(\yvt) = s-2]\cdot p(y_n)}.
-%\end{equation}
-%For $s \in \{2,\dots,n-1\}$, our induction hypothesis implies that
-%\[
-%\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]} \leq
-%\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}\quad\text{and}\quad
-%\frac{\P[A(\yvt) = s-1]}{\P[A(\yvt) = s-2]} \leq
-%\frac{\P[A(\one) = s-1]}{\P[A(\one) = s-2]},
-%\]
-%and furthermore,
-%\[ \frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-2]} =
-%\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]}\cdot
-%\frac{\P[A(\yvt) = s-1]}{\P[A(\yvt) = s-2]} \leq
-%\frac{\P[A(\one) = s]}{\P[A(\one) = s-2]}.
-%\]
-%Therefore, we can apply Lemma \ref{lem:rscomp} to \eqref{eq:inductionratio} to obtain
-%\begin{equation} \label{eq:lemmaappl}
-%\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]} \leq
-%\frac{\P[A(\one) = s]\cdot(1-p(y_n)) +
-%\P[A(\one) = s-1]\cdot p(y_n)}
-%{\P[A(\one) = s-1]\cdot(1-p(y_n)) +
-%\P[A(\one) = s-2]\cdot p(y_n)}
-%%= \frac{\P[A((\one,y_n)) = s]}{\P[A((\one,y_n)) = s-1]}
-%\end{equation}
-%for $s \in \{2,\dots,n-1\}$.
-%If $s = n$, we consider $\P[A(\yvt) = s] = 0$ since
-%$\P[A(\yvt) \in \{0,\dots,n-1\}] = 1$, and similarly for $\P[A(\one) = s]$.
-%In this case, Lemma \ref{lem:rscomp} still applies with $b=b'=0$.
-%A similar argument establishes \eqref{eq:lemmaappl} when $s = 1$.
-%Therefore,
-%\[
-%\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]} \leq
-%\frac{\P[A((\one,y_n)) = s]}{\P[A((\one,y_n)) = s-1]}
-%\]
-%for $s \in \{1,\dots,n\}$.
-%Since $y_n\in\{0,1\}$, the proof will be complete if we show that
-%\begin{align}
-%\frac{\P[A((\one,1)) = s]}{\P[A((\one,1)) = s-1]} &=
-%\frac{\P[A(\one) = s]\cdot q +
-%\P[A(\one) = s-1]\cdot p}
-%{\P[A(\one) = s-1]\cdot q +
-%\P[A(\one) = s-2]\cdot p} \nonumber\\
-%&\geq
-%\frac{\P[A(\one) = s]\cdot p +
-%\P[A(\one) = s-1]\cdot q}
-%{\P[A(\one) = s-1]\cdot p +
-%\P[A(\one) = s-2]\cdot q}
-%= \frac{\P[A((\one,0)) = s]}{\P[A((\one,0)) = s-1]}.
-%\label{eq:indfinal}
-%\end{align}
-%Using the fact that $A(\one) \sim Bin(n-1, p)$, observe that
-%\[
-%\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}
-%= \frac{\binom{n-1}{s}p^{s}q^{n-1-s}}{\binom{n-1}{s-1}p^{s-1}q^{n-s}}
-%= \frac{n-s}{s}\frac{p}{q},
-%\]
-%from which
-%\[
-%\frac{\lambda_2}{\mu_2} = \frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}
-%= \frac{n-s}{s}\frac{p}{q} \leq \frac{n-s+1}{s-1}\frac{p}{q}
-%= \frac{\P[A(\one) = s-1]}{\P[A(\one) = s-2]} = \frac{\lambda_1}{\mu_1},
-%\]
-%and hence \eqref{eq:indfinal} follows from Lemma \ref{lem:rscomp2} (unless $s=1$, in which case it follows from a simple direct argument).
-%\end{pf}
-%TODO: finish argument in the case when $x_1 = 0$.    
+We fix $s \in \{1,\dots,n\}$ and investigate which choice of collection $\xv = (x_1,\xvt)$ maximizes $\pi(s,\xv,x_1')$.
+Assume first $x_1 = 1$. (TODO: what about when $x_1 = 0$?) Then
+\[ \pi(s,\xvt,0) = \frac{q \P[A(\xvt) = s-1] + p \P[A(\xvt) = s]}
+{p \P[A(\xvt) = s-1] + q \P[A(\xvt) = s]}.
+\]
+By Lemma \ref{lem:rscomp2}, this ratio is maximized at $\xvt^*$ satisfying 
+\[ \frac{\P[A(\xvt^*) = s]}{\P[A(\xvt^*) = s-1]} \geq
+\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]} \]
+for any $\yvt \in \Dsp^{n-1}$.
+We claim that this is the case when $\xvt^*$ consists of all 1s:
+%%% Claim to be proven by induction.
+\begin{claim}
+Write $\one = (1,...,1)$ as an element of $\Dsp^n$.
+Then, given $s \in \{1,\dots,n\}$,
+\begin{equation} \label{eq:maxpA}
+\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]} \geq
+\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]}
+\end{equation}
+for any $\yv \in \Dsp^n$.
+\end{claim}
+\begin{pf}
+We proceed by induction on $n$. If $n = 1$, then $A(x) = R(x)$, we need only confirm \eqref{eq:maxpA} for $s = 1$.
+Taking $\yv = 0$ (the only possibility aside from $\one$), we have
+\begin{equation} \label{eq:singleratio}
+\frac{\P[R(0) = 1]}{\P[R(0) = 0]} = \frac{q}{p} \leq
+\frac{p}{q} = \frac{\P[R(1) = 1]}{\P[R(1) = 0]}
+\end{equation}
+verifying \eqref{eq:maxpA} in this case.
+Next, suppose that \eqref{eq:maxpA} holds for $s\in\{1,\dots,n-1\}$ and $\one,\yvt \in \Dsp^{n-1}$, and consider $\yv = (\yvt, y_n) \in \Dsp^n$.
+For convenience, write $p(y_n) = \P[R(y_n) = 1]$. 
+Observe that
+\[ \P[A(\yv) = s] = \P[A(\yvt) = s]\cdot(1-p(y_n)) +
+\P[A(\yvt) = s-1]\cdot p(y_n), \]
+conditioning on the value of $y_n$.
+Thus,
+%for $s \in \{2,\dots,n-1\}$,
+\begin{equation} \label{eq:inductionratio}
+\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]}
+= \frac{\P[A(\yvt) = s]\cdot(1-p(y_n)) +
+\P[A(\yvt) = s-1]\cdot p(y_n)}
+{\P[A(\yvt) = s-1]\cdot(1-p(y_n)) +
+\P[A(\yvt) = s-2]\cdot p(y_n)}.
+\end{equation}
+For $s \in \{2,\dots,n-1\}$, our induction hypothesis implies that
+\[
+\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]} \leq
+\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}\quad\text{and}\quad
+\frac{\P[A(\yvt) = s-1]}{\P[A(\yvt) = s-2]} \leq
+\frac{\P[A(\one) = s-1]}{\P[A(\one) = s-2]},
+\]
+and furthermore,
+\[ \frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-2]} =
+\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]}\cdot
+\frac{\P[A(\yvt) = s-1]}{\P[A(\yvt) = s-2]} \leq
+\frac{\P[A(\one) = s]}{\P[A(\one) = s-2]}.
+\]
+Therefore, we can apply Lemma \ref{lem:rscomp} to \eqref{eq:inductionratio} to obtain
+\begin{equation} \label{eq:lemmaappl}
+\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]} \leq
+\frac{\P[A(\one) = s]\cdot(1-p(y_n)) +
+\P[A(\one) = s-1]\cdot p(y_n)}
+{\P[A(\one) = s-1]\cdot(1-p(y_n)) +
+\P[A(\one) = s-2]\cdot p(y_n)}
+%= \frac{\P[A((\one,y_n)) = s]}{\P[A((\one,y_n)) = s-1]}
+\end{equation}
+for $s \in \{2,\dots,n-1\}$.
+If $s = n$, we consider $\P[A(\yvt) = s] = 0$ since
+$\P[A(\yvt) \in \{0,\dots,n-1\}] = 1$, and similarly for $\P[A(\one) = s]$.
+In this case, Lemma \ref{lem:rscomp} still applies with $b=b'=0$.
+A similar argument establishes \eqref{eq:lemmaappl} when $s = 1$.
+Therefore,
+\[
+\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]} \leq
+\frac{\P[A((\one,y_n)) = s]}{\P[A((\one,y_n)) = s-1]}
+\]
+for $s \in \{1,\dots,n\}$.
+Since $y_n\in\{0,1\}$, the proof will be complete if we show that
+\begin{align}
+\frac{\P[A((\one,1)) = s]}{\P[A((\one,1)) = s-1]} &=
+\frac{\P[A(\one) = s]\cdot q +
+\P[A(\one) = s-1]\cdot p}
+{\P[A(\one) = s-1]\cdot q +
+\P[A(\one) = s-2]\cdot p} \nonumber\\
+&\geq
+\frac{\P[A(\one) = s]\cdot p +
+\P[A(\one) = s-1]\cdot q}
+{\P[A(\one) = s-1]\cdot p +
+\P[A(\one) = s-2]\cdot q}
+= \frac{\P[A((\one,0)) = s]}{\P[A((\one,0)) = s-1]}.
+\label{eq:indfinal}
+\end{align}
+Using the fact that $A(\one) \sim Bin(n-1, p)$, observe that
+\[
+\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}
+= \frac{\binom{n-1}{s}p^{s}q^{n-1-s}}{\binom{n-1}{s-1}p^{s-1}q^{n-s}}
+= \frac{n-s}{s}\frac{p}{q},
+\]
+from which
+\[
+\frac{\lambda_2}{\mu_2} = \frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}
+= \frac{n-s}{s}\frac{p}{q} \leq \frac{n-s+1}{s-1}\frac{p}{q}
+= \frac{\P[A(\one) = s-1]}{\P[A(\one) = s-2]} = \frac{\lambda_1}{\mu_1},
+\]
+and hence \eqref{eq:indfinal} follows from Lemma \ref{lem:rscomp2} (unless $s=1$, in which case it follows from a simple direct argument).
+\end{pf}
+TODO: finish argument in the case when $x_1 = 0$.    
 
 \section{Ratios of sums: properties}
 
