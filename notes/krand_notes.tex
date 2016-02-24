@@ -259,7 +259,7 @@ A_n(m) &:= \sum_{i=1}^n I(R(x_i) = 1)
 a sum of two independent Binomial random variables with support $\{0,\dots,n\}$.
 Furthermore, if $\xv\in\Dsp_m^n$ and $\xv,\xv'$ differ in one row, then $\xv'\in\Dsp_{m-1}^n \cup \Dsp_{m+1}^n$.
 Defining
-\[ \pi(s; m) := \frac{\P[A_n(m) = s]}{\P[A_n(m+1) = s]}\
+\[ \pi(s; m) := \frac{\P[A_n(m) = s]}{\P[A_n(m+1) = s]}
 \quad\quad\text{for}\ \ 
 s\in\{0,\dots,n\}\ \text{and}\ m\in\{0,\dots,n-1\},
 \]
@@ -361,137 +361,33 @@ Since $\alpha \leq F_{n,m}(\tau_n(m)) \leq F_{n,m-1}(\tau_n(m))$, we have $\tau_
 On the other hand, $F_{n,m}(\tau_n(m-1)+1) \geq F_{n,m-1}(\tau_n(m-1)) \geq \alpha$, from which $\tau_n(m) \leq \tau_n(m-1) + 1$.
 \end{pf}
 
+Furthermore, $\tau_n(m) = \tau_n(m-1)$ if and only if
+$F_{n,m}(\tau_n(m-1)) \geq \alpha$, \ie
+\[ F_{n,m-1}(\tau_n(m-1)) - \alpha \geq (p-q)\P[A_{n-1}(m-1) = \tau_n(m-1)]. \]
+
+
+\subsubsection{Privacy Ratio}
+
+
+Using the recursive relationships \eqref{eq:rec1} and \eqref{eq:rec0}, we have
+\[ \pi(s; m) = \frac{\P[A_n(m) = s]}{\P[A_n(m+1) = s]}
+ = \frac{q\P[A_{n-1}(m) = s-1] + p\P[A_{n-1}(m) = s]}
+ {p\P[A_{n-1}(m) = s-1] + q\P[A_{n-1}(m) = s]}.
+\]
+
+Facts:
+\begin{itemize}
+\item $\pi$ is decreasing in $s$: $\pi(s;m) \geq \pi(s+1; m)$
+\item $\pi$ is increasing in $m$: $\pi(s;m) \leq \pi(s; m+1)$
+\item $\pi$ is net decreasing when both $s$ and $m$ increase:
+$\pi(s;m) \leq \pi(s+1; m+1)$.
+\end{itemize}
+
+
 ----------------------------
 
-%Denote $\phi(k) = [k(p-q)] = [k(1-2q)]$ where $[x]$ is the floor of $x$ (largest integer no greater than $x$).
-%
-%
-%\begin{prop}
-%\[\big\lvert F_{n,m}(x + \phi(m)) - F_{n,0}(x) \big\rvert \leq \gamma_n\]
-%for all $x\in\R$ and $m = 1,\dots,n$.
-%\end{prop}
-%\begin{pf}
-%We proceed by induction on n.
-%If $n = 1$, then $m = 1$ and $\phi(m) = 0$:
-%\[ \big\lvert F_{1,1}(x) - F_{1,0}(x) \big\rvert \leq 
-%\begin{cases}
-%p-q & 0\leq x < 1 \\
-%0 & \text{otherwise}
-%\end{cases}
-%\]
-%[base case...]
-%
-%Next, assume that
-%\begin{equation}\label{eq:Fubindhyp}
-%\big\lvert F_{n-1,m}(x + \phi(m)) - F_{n-1,0}(x) \big\rvert \leq \gamma_{n-1}
-%\end{equation}
-%holds for $m = 1,\dots,n-1$.
-%For such $m$, we have
-%\begin{align*}
-%F_{n,m}&(x + \phi(m)) - F_{n,0}(x) \\
-% &= q\cdot F_{n-1,m}(x + \phi(m) - 1) + p\cdot F_{n-1,m}(x + \phi(m)) -
-%q\cdot F_{n-1,0}(x-1) - p\cdot F_{n-1,0}(x) \\
-% &= q\big[ F_{n-1,m}(x + \phi(m) - 1) - F_{n-1,0}(x-1) \big] +
-%p\big[ F_{n-1,m}(x + \phi(m)) - F_{n-1,0}(x) \big],
-%\end{align*}
-%by \eqref{eq:Frec0}, and so
-%\begin{align*}
-%\big\lvert F_{n,m}&(x + \phi(m)) - F_{n,0}(x) \big\rvert \\
-% &\leq q\big\lvert F_{n-1,m}(x - 1 + \phi(m)) - F_{n-1,0}(x-1) \big\rvert +
-%p\big\lvert F_{n-1,m}(x + \phi(m)) - F_{n-1,0}(x) \big\rvert \\
-% &\leq q \gamma_{n-1} + p \gamma_{n-1} = \gamma_{n-1}.
-%\end{align*}
-%[and link $\gamma_{n-1}$ to $\gamma_n$]
-%Otherwise, consider $m = n$.
-%Note that $\phi(n) = [(n-1)(p-q) + (p-q)] \in \{\phi(n-1), \phi(n-1)+1\}$.
-%If $\phi(n) = \phi(n-1)$, apply \eqref{eq:Frec1} to $F_{n,m}$ to get
-%\begin{align*}
-%&F_{n,n}(x + \phi(n)) - F_{n,0}(x) \\
-% &= p\cdot F_{n-1,n-1}(x + \phi(n-1) - 1) + q\cdot F_{n-1,n-1}(x + \phi(n-1)) -
-%q\cdot F_{n-1,0}(x-1) - p\cdot F_{n-1,0}(x) \\
-% &= p\big[ F_{n-1,n-1}(x + \phi(n-1) - 1) - F_{n-1,0}(x-1) \big] +
-%q\big[ F_{n-1,n-1}(x + \phi(n-1)) - F_{n-1,0}(x) \big] \\
-% &\qquad\qquad - (p-q)\P[A_{n-1}(0) = x] \\
-% &=: D_n(x) - (p-q)\P[A_{n-1}(0) = x].
-%\end{align*}
-%If $\phi(n) = \phi(n-1)+1$, note that
-%\begin{align*}
-%F_{n,n}&(x + \phi(n)) - F_{n,0}(x) 
-%= F_{n,n}(x + 1 + \phi(n-1)) - F_{n,0}(x + 1) + \P[A_n(0) = x+1] \\
-% &= D_n(x+1) - (p-q)\P[A_{n-1}(0) = x] + \P[A_n(0) = x+1] \\
-% &= D_n(x+1) + (2q-p)\P[A_{n-1}(0) = x] + p\P[A_{n-1}(0) = x+1] \\
-%\end{align*}
-%Since $\abs{D_n(x)} \leq \gamma_{n-1}$ for all $x$, we have
-%\begin{align*}
-%\big\lvert F_{n,n}&(x + \phi(n)) - F_{n,0}(x) \big\rvert \\
-% &\leq \gamma_{n-1} +
-%  \max\Big\{(p-q)\P[A_{n-1}(0) = x], 
-% \big\lvert (2q-p)\P[A_{n-1}(0) = x] + p\P[A_{n-1}(0) = x+1]
-% \big\rvert \Big\}
-%\end{align*}
-%\end{pf}
-%
-%TODO:
-%
-%- figure out $\gamma$
-%
-%- write continuous $s$ in terms of integer $s$77
-%
-%----------------------------
-%
-%\begin{prop}
-%\begin{equation}\label{eq:Fupperbd}
-%F_{n,m}(x + \phi(m)) \leq F_{n,0}(x)
-%\end{equation}
-%for $m = 1,\dots,n$ and $0 \leq x < n-\phi(n)$.
-%\end{prop}
-%Note that if $n > x >= n-\phi(n)$ we may have $F_{n,m}(x + \phi(m)) = 1$ if $x +\phi(m)$ exceeds the support of $A_n(m)$ even though $F_{n,0}(x) < 1$.
-%\begin{pf}
-%We establish \eqref{eq:Fupperbd} for integers $s = 0,\dots, n-\phi(n)-1$ by induction on $n$.
-%If $n = 1$, then $m = 1$, $\phi(m) = 0$, and $n - \phi(n) - 1 = 0$, and 
-%\[ F_{1,1}(0) = q \leq p = F_{1,0}(0). \]
-%Next, assume that
-%\begin{equation}\label{eq:Fubindhyp}
-%F_{n-1,m}(s + \phi(m)) \leq F_{n-1,0}(s)
-%\end{equation}
-%holds for $m = 1,\dots,n-1$ and $s = 0,\dots,n-\phi(n-1)-2$ (and trivially for $m = 0$).
-%Note that $\phi(n-1) = [n(p-q) - (p-q)] \in \{\phi(n), \phi(n) - 1\}$ since $p-q < 1$.
-%
-%Suppose first that $\phi(n-1) = \phi(n) - 1$.
-%Then \eqref{eq:Fubindhyp} holds for $s = 0,\dots,n - \phi(n) - 1$.
-%For such $s$ and $m \in \{1,\dots,n-1\}$, we have
-%\begin{align*}
-%F_{n,m}(s + \phi(m)) &= q\cdot F_{n-1,m}(s + \phi(m) - 1) + p\cdot F_{n-1,m}(s + \phi(m)) \\
-% &\leq q\cdot F_{n-1,0}(s - 1) + p\cdot F_{n-1,0}(s) \\
-% & = F_{n,0}(s),
-%\end{align*}
-%applying \eqref{eq:Frec0} and noting that $F_{n-1,m}(x) = 0$ for $x<0$.
-%If $m=n$, 
-%\begin{align*}
-%F_{n,n}(s + \phi(n))
-%&= p\cdot F_{n-1,n-1}(s + \phi(n) - 1) + q\cdot F_{n-1, n-1}(s + \phi(n)) \\
-%&= p\cdot F_{n-1,n-1}(s + \phi(n-1)) + q\cdot F_{n-1, n-1}(s + \phi(n-1) + 1) \\
-%&\leq p\cdot F_{n-1,0}(s) + q\cdot F_{n-1,0}(s+1) \\
-%\end{align*}
-%
-%\end{pf}
-%
-%
-%-------------------------
-%
-%
-%TODO: 
-%
-%
-%
-%- location shift of pdf
-%
-%- linearity of quantiles
-%
-%- bound for probability ratio
-%
-%---------------------------------------
-%
+
+
 %\section{Maximal collections}
 %
 %
