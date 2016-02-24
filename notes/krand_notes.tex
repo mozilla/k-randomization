@@ -272,145 +272,317 @@ the privacy ratio becomes
 \]
 Hence, in the $L=1$ case, it suffices to study the behaviour of $\pi(s;m)$.
 
-Applying the decomposition \eqref{eq:prcond}, we have
-\[ \pi(s;m)
-= \frac{q\cdot \P[A_{n-1}(m) = s-1] + p\cdot \P[A_{n-1}(m) = s]}
-{p\cdot \P[A_{n-1}(m) = s-1] + q\cdot \P[A_{n-1}(m) = s]}.
-\]
 
+\subsubsection{Recursive relationship over $n$ and $m$}
 
------------------------------------------
+The conditioning argument \eqref{eq:prcond} yields a recursive relationship that lets us express the distribution of $A_n$ in terms of that of $A_{n-1}$.
 
-\section{Maximal collections}
-
-
-The first question we address is for which pair of original and modified collections $\xv$ and $\xv'$ does $\pi$ obtain its maximum.
-
-\subsection{The case $L = 1$}
-
-It is instructive to first consider the case where each record in the collection consists of a single bit, as the expressions simplify considerably.
-In this case, the outcome of $A$ essentially reduces to the number of 1s obtained in the synthetic collection $R(\xv)$, since $\sv\in\Ssp_n$ can be written as $(s_1,s_2)$ with $s_1\in\{0,\dots,n\}$ and $s_2 = n-s_1$. 
-Using this fact, we interpret $A(\xv)$ as $\sum_{i=1}^n I(R(x_i) = 1)$,
-and express the privacy ratio as
-\[ \pi(s,\xv,x_1') = \frac{\P[R(x'_1) = 1] \P[A(\xvt) = s-1] +
-\P[R(x'_1) = 0] \P[A(\xvt) = s]}
-{\P[R(x_1) = 1] \P[A(\xvt) = s-1] + \P[R(x_1) = 0] \P[A(\xvt) = s]}
-\]
-for $s \in \{0,\dots,n\}$. Furthermore, the requirement that $x_1 \neq x'_1$ in the single-bit case implies that $x'_1 = 1-x_1$, so
-\[ \pi(s,\xv,x_1') = \frac{(1-\P[R(x_1) = 1]) \P[A(\xvt) = s-1] +
-(1-\P[R(x_1) = 0]) \P[A(\xvt) = s]}
-{\P[R(x_1) = 1] \P[A(\xvt) = s-1] + \P[R(x_1) = 0] \P[A(\xvt) = s]}.
-\]
-%Hence, $\pi(s; x_1 = 0) = 1/\pi(s; x_1 = 1)$, and so 
-%\[ \max_{\xv,\xv';\,\sv} \pi = \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \max_{\xvt;\,s} \pi(s;x_1 = 0)\right)
-%=  \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \min_{\xvt;\,s} \pi(s;x_1 = 1)\right)
-%\]
-We fix $s \in \{1,\dots,n\}$ and investigate which choice of collection $\xv = (x_1,\xvt)$ maximizes $\pi(s,\xv,x_1')$.
-Assume first $x_1 = 1$. (TODO: what about when $x_1 = 0$?) Then
-\[ \pi(s,\xvt,0) = \frac{q \P[A(\xvt) = s-1] + p \P[A(\xvt) = s]}
-{p \P[A(\xvt) = s-1] + q \P[A(\xvt) = s]}.
-\]
-By Lemma \ref{lem:rscomp2}, this ratio is maximized at $\xvt^*$ satisfying 
-\[ \frac{\P[A(\xvt^*) = s]}{\P[A(\xvt^*) = s-1]} \geq
-\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]} \]
-for any $\yvt \in \Dsp^{n-1}$.
-We claim that this is the case when $\xvt^*$ consists of all 1s:
-%%% Claim to be proven by induction.
-\begin{claim}
-Write $\one = (1,...,1)$ as an element of $\Dsp^n$.
-Then, given $s \in \{1,\dots,n\}$,
-\begin{equation} \label{eq:maxpA}
-\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]} \geq
-\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]}
+Recall that $A_n(m)$ is the outcome of applying the bit transformation $R$ to $n$ original bits, $m$ of which are 1 and $n-m$ are 0.
+For $m >= 1$, we can condition on the outcome of one of the original 1s:
+\[ A_n(m) \sim Ber(p) + Bin(m-1, p) + Bin(n-m, q) \sim Ber(p) + A_{n-1}(m-1), \]
+and so
+\begin{equation}\label{eq:rec1}
+\P[A_n(m) = s] = p\P[A_{n-1}(m-1) = s-1] + q\P[A_{n-1}(m-1) = s].
 \end{equation}
-for any $\yv \in \Dsp^n$.
-\end{claim}
-\begin{pf}
-We proceed by induction on $n$. If $n = 1$, then $A(x) = R(x)$, we need only confirm \eqref{eq:maxpA} for $s = 1$.
-Taking $\yv = 0$ (the only possibility aside from $\one$), we have
-\begin{equation} \label{eq:singleratio}
-\frac{\P[R(0) = 1]}{\P[R(0) = 0]} = \frac{q}{p} \leq
-\frac{p}{q} = \frac{\P[R(1) = 1]}{\P[R(1) = 0]}
-\end{equation}
-verifying \eqref{eq:maxpA} in this case.
-Next, suppose that \eqref{eq:maxpA} holds for $s\in\{1,\dots,n-1\}$ and $\one,\yvt \in \Dsp^{n-1}$, and consider $\yv = (\yvt, y_n) \in \Dsp^n$.
-For convenience, write $p(y_n) = \P[R(y_n) = 1]$. 
-Observe that
-\[ \P[A(\yv) = s] = \P[A(\yvt) = s]\cdot(1-p(y_n)) +
-\P[A(\yvt) = s-1]\cdot p(y_n), \]
-conditioning on the value of $y_n$.
-Thus,
-%for $s \in \{2,\dots,n-1\}$,
-\begin{equation} \label{eq:inductionratio}
-\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]}
-= \frac{\P[A(\yvt) = s]\cdot(1-p(y_n)) +
-\P[A(\yvt) = s-1]\cdot p(y_n)}
-{\P[A(\yvt) = s-1]\cdot(1-p(y_n)) +
-\P[A(\yvt) = s-2]\cdot p(y_n)}.
-\end{equation}
-For $s \in \{2,\dots,n-1\}$, our induction hypothesis implies that
-\[
-\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]} \leq
-\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}\quad\text{and}\quad
-\frac{\P[A(\yvt) = s-1]}{\P[A(\yvt) = s-2]} \leq
-\frac{\P[A(\one) = s-1]}{\P[A(\one) = s-2]},
-\]
-and furthermore,
-\[ \frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-2]} =
-\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]}\cdot
-\frac{\P[A(\yvt) = s-1]}{\P[A(\yvt) = s-2]} \leq
-\frac{\P[A(\one) = s]}{\P[A(\one) = s-2]}.
-\]
-Therefore, we can apply Lemma \ref{lem:rscomp} to \eqref{eq:inductionratio} to obtain
-\begin{equation} \label{eq:lemmaappl}
-\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]} \leq
-\frac{\P[A(\one) = s]\cdot(1-p(y_n)) +
-\P[A(\one) = s-1]\cdot p(y_n)}
-{\P[A(\one) = s-1]\cdot(1-p(y_n)) +
-\P[A(\one) = s-2]\cdot p(y_n)}
-%= \frac{\P[A((\one,y_n)) = s]}{\P[A((\one,y_n)) = s-1]}
-\end{equation}
-for $s \in \{2,\dots,n-1\}$.
-If $s = n$, we consider $\P[A(\yvt) = s] = 0$ since
-$\P[A(\yvt) \in \{0,\dots,n-1\}] = 1$, and similarly for $\P[A(\one) = s]$.
-In this case, Lemma \ref{lem:rscomp} still applies with $b=b'=0$.
-A similar argument establishes \eqref{eq:lemmaappl} when $s = 1$.
-Therefore,
-\[
-\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]} \leq
-\frac{\P[A((\one,y_n)) = s]}{\P[A((\one,y_n)) = s-1]}
-\]
-for $s \in \{1,\dots,n\}$.
-Since $y_n\in\{0,1\}$, the proof will be complete if we show that
-\begin{align}
-\frac{\P[A((\one,1)) = s]}{\P[A((\one,1)) = s-1]} &=
-\frac{\P[A(\one) = s]\cdot q +
-\P[A(\one) = s-1]\cdot p}
-{\P[A(\one) = s-1]\cdot q +
-\P[A(\one) = s-2]\cdot p} \nonumber\\
-&\geq
-\frac{\P[A(\one) = s]\cdot p +
-\P[A(\one) = s-1]\cdot q}
-{\P[A(\one) = s-1]\cdot p +
-\P[A(\one) = s-2]\cdot q}
-= \frac{\P[A((\one,0)) = s]}{\P[A((\one,0)) = s-1]}.
-\label{eq:indfinal}
-\end{align}
-Using the fact that $A(\one) \sim Bin(n-1, p)$, observe that
-\[
-\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}
-= \frac{\binom{n-1}{s}p^{s}q^{n-1-s}}{\binom{n-1}{s-1}p^{s-1}q^{n-s}}
-= \frac{n-s}{s}\frac{p}{q},
-\]
+If $s = 0$, the first term on the RHS is interpreted as 0, and if $s = n$, the last term is.
+Similarly, for $m <= n-1$, conditioning on an original 0,
+\[ A_n(m) \sim Ber(q) + Bin(m, p) + Bin(n-m-1, q) \sim Ber(q) + A_{n-1}(m), \]
 from which
-\[
-\frac{\lambda_2}{\mu_2} = \frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}
-= \frac{n-s}{s}\frac{p}{q} \leq \frac{n-s+1}{s-1}\frac{p}{q}
-= \frac{\P[A(\one) = s-1]}{\P[A(\one) = s-2]} = \frac{\lambda_1}{\mu_1},
-\]
-and hence \eqref{eq:indfinal} follows from Lemma \ref{lem:rscomp2} (unless $s=1$, in which case it follows from a simple direct argument).
-\end{pf}
-TODO: finish argument in the case when $x_1 = 0$.    
+\begin{equation}\label{eq:rec0}
+\P[A_n(m) = s] = q\P[A_{n-1}(m) = s-1] + p\P[A_{n-1}(m) = s].
+\end{equation}
+
+The recursive formulas \eqref{eq:rec1} and \eqref{eq:rec0} give some insight into how the distribution of $A_n(m)$ changes as $n$ and $m$ vary:
+\begin{itemize}
+\item  as $n$ increases by 1, the probabilities shift slightly, with $\P[A_n(m) = 0] \leq \P[A_{n-1}(m) = 0]$ and
+$\P[A_n(m) = s]$ falling between $\P[A_{n-1}(m) = s-1]$ and $\P[A_{n-1}(m) = s]$ for each $s\geq 1$ (\ie the hump of the pmf shifts to the right);
+\item the distribution of $A_n(m+1)$ is not so different to that of $A_n(m)$, since $\P[A_n(m) = s]$ and $\P[A_n(m+1) = s]$ both lie between consecutive pmf values of $A_{n-1}(m)$. In particular, this allows us to express the privacy ratio $\pi(s;m)$ in terms of $A_{n-1}(m)$.
+\end{itemize}
+
+Summing both sides of \eqref{eq:rec1} and \eqref{eq:rec0} shows that the recursive relationship extends to cdfs as well.
+Writing $F_{n,m}(x) := \P[A_n(m) <= x]$, we have
+\begin{equation*}%\label{eq:Frec1}
+F_{n,m}(x) = p\cdot F_{n-1,m-1}(x-1) + q\cdot F_{n-1,m-1}(x)
+\qquad\qquad m = 1,\dots,n
+\end{equation*}
+and 
+\begin{equation*}%\label{eq:Frec0}
+F_{n,m}(x) = q\cdot F_{n-1,m}(x-1) + p\cdot F_{n-1,m}(x)
+\qquad\qquad m = 0,\dots,n-1.
+\end{equation*}
+
+
+
+----------------------------
+
+%\subsubsection{Approximate location relationship}
+%
+%The recursive relationships \eqref{eq:rec1} and \eqref{eq:rec0} imply that belong approximately to a location family.
+%Indeed, note that
+%\[ \EP A_n(m) = mp + (n-m)q = nq + m(p-q) \]
+%and
+%\[ \Var A_n(m) = mpq + (n-m)qp = npq. \]
+%In other words, as $m$ varies between $0$ and $n$, the mean varies linearly in $m$ and the variance remains constant.
+%We show that $F_{n,m}(x + m(p-q)) \approx F_{n,0}(x)$.
+%Denote $\phi(k) = [k(p-q)] = [k(1-2q)]$ where $[x]$ is the floor of $x$ (largest integer no greater than $x$).
+%
+%
+%\begin{prop}
+%\[\big\lvert F_{n,m}(x + \phi(m)) - F_{n,0}(x) \big\rvert \leq \gamma_n\]
+%for all $x\in\R$ and $m = 1,\dots,n$.
+%\end{prop}
+%\begin{pf}
+%We proceed by induction on n.
+%If $n = 1$, then $m = 1$ and $\phi(m) = 0$:
+%\[ \big\lvert F_{1,1}(x) - F_{1,0}(x) \big\rvert \leq 
+%\begin{cases}
+%p-q & 0\leq x < 1 \\
+%0 & \text{otherwise}
+%\end{cases}
+%\]
+%[base case...]
+%
+%Next, assume that
+%\begin{equation}\label{eq:Fubindhyp}
+%\big\lvert F_{n-1,m}(x + \phi(m)) - F_{n-1,0}(x) \big\rvert \leq \gamma_{n-1}
+%\end{equation}
+%holds for $m = 1,\dots,n-1$.
+%For such $m$, we have
+%\begin{align*}
+%F_{n,m}&(x + \phi(m)) - F_{n,0}(x) \\
+% &= q\cdot F_{n-1,m}(x + \phi(m) - 1) + p\cdot F_{n-1,m}(x + \phi(m)) -
+%q\cdot F_{n-1,0}(x-1) - p\cdot F_{n-1,0}(x) \\
+% &= q\big[ F_{n-1,m}(x + \phi(m) - 1) - F_{n-1,0}(x-1) \big] +
+%p\big[ F_{n-1,m}(x + \phi(m)) - F_{n-1,0}(x) \big],
+%\end{align*}
+%by \eqref{eq:Frec0}, and so
+%\begin{align*}
+%\big\lvert F_{n,m}&(x + \phi(m)) - F_{n,0}(x) \big\rvert \\
+% &\leq q\big\lvert F_{n-1,m}(x - 1 + \phi(m)) - F_{n-1,0}(x-1) \big\rvert +
+%p\big\lvert F_{n-1,m}(x + \phi(m)) - F_{n-1,0}(x) \big\rvert \\
+% &\leq q \gamma_{n-1} + p \gamma_{n-1} = \gamma_{n-1}.
+%\end{align*}
+%[and link $\gamma_{n-1}$ to $\gamma_n$]
+%Otherwise, consider $m = n$.
+%Note that $\phi(n) = [(n-1)(p-q) + (p-q)] \in \{\phi(n-1), \phi(n-1)+1\}$.
+%If $\phi(n) = \phi(n-1)$, apply \eqref{eq:Frec1} to $F_{n,m}$ to get
+%\begin{align*}
+%&F_{n,n}(x + \phi(n)) - F_{n,0}(x) \\
+% &= p\cdot F_{n-1,n-1}(x + \phi(n-1) - 1) + q\cdot F_{n-1,n-1}(x + \phi(n-1)) -
+%q\cdot F_{n-1,0}(x-1) - p\cdot F_{n-1,0}(x) \\
+% &= p\big[ F_{n-1,n-1}(x + \phi(n-1) - 1) - F_{n-1,0}(x-1) \big] +
+%q\big[ F_{n-1,n-1}(x + \phi(n-1)) - F_{n-1,0}(x) \big] \\
+% &\qquad\qquad - (p-q)\P[A_{n-1}(0) = x] \\
+% &=: D_n(x) - (p-q)\P[A_{n-1}(0) = x].
+%\end{align*}
+%If $\phi(n) = \phi(n-1)+1$, note that
+%\begin{align*}
+%F_{n,n}&(x + \phi(n)) - F_{n,0}(x) 
+%= F_{n,n}(x + 1 + \phi(n-1)) - F_{n,0}(x + 1) + \P[A_n(0) = x+1] \\
+% &= D_n(x+1) - (p-q)\P[A_{n-1}(0) = x] + \P[A_n(0) = x+1] \\
+% &= D_n(x+1) + (2q-p)\P[A_{n-1}(0) = x] + p\P[A_{n-1}(0) = x+1] \\
+%\end{align*}
+%Since $\abs{D_n(x)} \leq \gamma_{n-1}$ for all $x$, we have
+%\begin{align*}
+%\big\lvert F_{n,n}&(x + \phi(n)) - F_{n,0}(x) \big\rvert \\
+% &\leq \gamma_{n-1} +
+%  \max\Big\{(p-q)\P[A_{n-1}(0) = x], 
+% \big\lvert (2q-p)\P[A_{n-1}(0) = x] + p\P[A_{n-1}(0) = x+1]
+% \big\rvert \Big\}
+%\end{align*}
+%\end{pf}
+%
+%TODO:
+%
+%- figure out $\gamma$
+%
+%- write continuous $s$ in terms of integer $s$77
+%
+%----------------------------
+%
+%\begin{prop}
+%\begin{equation}\label{eq:Fupperbd}
+%F_{n,m}(x + \phi(m)) \leq F_{n,0}(x)
+%\end{equation}
+%for $m = 1,\dots,n$ and $0 \leq x < n-\phi(n)$.
+%\end{prop}
+%Note that if $n > x >= n-\phi(n)$ we may have $F_{n,m}(x + \phi(m)) = 1$ if $x +\phi(m)$ exceeds the support of $A_n(m)$ even though $F_{n,0}(x) < 1$.
+%\begin{pf}
+%We establish \eqref{eq:Fupperbd} for integers $s = 0,\dots, n-\phi(n)-1$ by induction on $n$.
+%If $n = 1$, then $m = 1$, $\phi(m) = 0$, and $n - \phi(n) - 1 = 0$, and 
+%\[ F_{1,1}(0) = q \leq p = F_{1,0}(0). \]
+%Next, assume that
+%\begin{equation}\label{eq:Fubindhyp}
+%F_{n-1,m}(s + \phi(m)) \leq F_{n-1,0}(s)
+%\end{equation}
+%holds for $m = 1,\dots,n-1$ and $s = 0,\dots,n-\phi(n-1)-2$ (and trivially for $m = 0$).
+%Note that $\phi(n-1) = [n(p-q) - (p-q)] \in \{\phi(n), \phi(n) - 1\}$ since $p-q < 1$.
+%
+%Suppose first that $\phi(n-1) = \phi(n) - 1$.
+%Then \eqref{eq:Fubindhyp} holds for $s = 0,\dots,n - \phi(n) - 1$.
+%For such $s$ and $m \in \{1,\dots,n-1\}$, we have
+%\begin{align*}
+%F_{n,m}(s + \phi(m)) &= q\cdot F_{n-1,m}(s + \phi(m) - 1) + p\cdot F_{n-1,m}(s + \phi(m)) \\
+% &\leq q\cdot F_{n-1,0}(s - 1) + p\cdot F_{n-1,0}(s) \\
+% & = F_{n,0}(s),
+%\end{align*}
+%applying \eqref{eq:Frec0} and noting that $F_{n-1,m}(x) = 0$ for $x<0$.
+%If $m=n$, 
+%\begin{align*}
+%F_{n,n}(s + \phi(n))
+%&= p\cdot F_{n-1,n-1}(s + \phi(n) - 1) + q\cdot F_{n-1, n-1}(s + \phi(n)) \\
+%&= p\cdot F_{n-1,n-1}(s + \phi(n-1)) + q\cdot F_{n-1, n-1}(s + \phi(n-1) + 1) \\
+%&\leq p\cdot F_{n-1,0}(s) + q\cdot F_{n-1,0}(s+1) \\
+%\end{align*}
+%
+%\end{pf}
+%
+%
+%-------------------------
+%
+%
+%TODO: 
+%
+%
+%
+%- location shift of pdf
+%
+%- linearity of quantiles
+%
+%- bound for probability ratio
+%
+%---------------------------------------
+%
+%\section{Maximal collections}
+%
+%
+%The first question we address is for which pair of original and modified collections $\xv$ and $\xv'$ does $\pi$ obtain its maximum.
+%
+%\subsection{The case $L = 1$}
+%
+%It is instructive to first consider the case where each record in the collection consists of a single bit, as the expressions simplify considerably.
+%In this case, the outcome of $A$ essentially reduces to the number of 1s obtained in the synthetic collection $R(\xv)$, since $\sv\in\Ssp_n$ can be written as $(s_1,s_2)$ with $s_1\in\{0,\dots,n\}$ and $s_2 = n-s_1$. 
+%Using this fact, we interpret $A(\xv)$ as $\sum_{i=1}^n I(R(x_i) = 1)$,
+%and express the privacy ratio as
+%\[ \pi(s,\xv,x_1') = \frac{\P[R(x'_1) = 1] \P[A(\xvt) = s-1] +
+%\P[R(x'_1) = 0] \P[A(\xvt) = s]}
+%{\P[R(x_1) = 1] \P[A(\xvt) = s-1] + \P[R(x_1) = 0] \P[A(\xvt) = s]}
+%\]
+%for $s \in \{0,\dots,n\}$. Furthermore, the requirement that $x_1 \neq x'_1$ in the single-bit case implies that $x'_1 = 1-x_1$, so
+%\[ \pi(s,\xv,x_1') = \frac{(1-\P[R(x_1) = 1]) \P[A(\xvt) = s-1] +
+%(1-\P[R(x_1) = 0]) \P[A(\xvt) = s]}
+%{\P[R(x_1) = 1] \P[A(\xvt) = s-1] + \P[R(x_1) = 0] \P[A(\xvt) = s]}.
+%\]
+%%Hence, $\pi(s; x_1 = 0) = 1/\pi(s; x_1 = 1)$, and so 
+%%\[ \max_{\xv,\xv';\,\sv} \pi = \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \max_{\xvt;\,s} \pi(s;x_1 = 0)\right)
+%%=  \max\left(\max_{\xvt;\,s} \pi(s;x_1 = 1),\, \min_{\xvt;\,s} \pi(s;x_1 = 1)\right)
+%%\]
+%We fix $s \in \{1,\dots,n\}$ and investigate which choice of collection $\xv = (x_1,\xvt)$ maximizes $\pi(s,\xv,x_1')$.
+%Assume first $x_1 = 1$. (TODO: what about when $x_1 = 0$?) Then
+%\[ \pi(s,\xvt,0) = \frac{q \P[A(\xvt) = s-1] + p \P[A(\xvt) = s]}
+%{p \P[A(\xvt) = s-1] + q \P[A(\xvt) = s]}.
+%\]
+%By Lemma \ref{lem:rscomp2}, this ratio is maximized at $\xvt^*$ satisfying 
+%\[ \frac{\P[A(\xvt^*) = s]}{\P[A(\xvt^*) = s-1]} \geq
+%\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]} \]
+%for any $\yvt \in \Dsp^{n-1}$.
+%We claim that this is the case when $\xvt^*$ consists of all 1s:
+%%%% Claim to be proven by induction.
+%\begin{claim}
+%Write $\one = (1,...,1)$ as an element of $\Dsp^n$.
+%Then, given $s \in \{1,\dots,n\}$,
+%\begin{equation} \label{eq:maxpA}
+%\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]} \geq
+%\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]}
+%\end{equation}
+%for any $\yv \in \Dsp^n$.
+%\end{claim}
+%\begin{pf}
+%We proceed by induction on $n$. If $n = 1$, then $A(x) = R(x)$, we need only confirm \eqref{eq:maxpA} for $s = 1$.
+%Taking $\yv = 0$ (the only possibility aside from $\one$), we have
+%\begin{equation} \label{eq:singleratio}
+%\frac{\P[R(0) = 1]}{\P[R(0) = 0]} = \frac{q}{p} \leq
+%\frac{p}{q} = \frac{\P[R(1) = 1]}{\P[R(1) = 0]}
+%\end{equation}
+%verifying \eqref{eq:maxpA} in this case.
+%Next, suppose that \eqref{eq:maxpA} holds for $s\in\{1,\dots,n-1\}$ and $\one,\yvt \in \Dsp^{n-1}$, and consider $\yv = (\yvt, y_n) \in \Dsp^n$.
+%For convenience, write $p(y_n) = \P[R(y_n) = 1]$. 
+%Observe that
+%\[ \P[A(\yv) = s] = \P[A(\yvt) = s]\cdot(1-p(y_n)) +
+%\P[A(\yvt) = s-1]\cdot p(y_n), \]
+%conditioning on the value of $y_n$.
+%Thus,
+%%for $s \in \{2,\dots,n-1\}$,
+%\begin{equation} \label{eq:inductionratio}
+%\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]}
+%= \frac{\P[A(\yvt) = s]\cdot(1-p(y_n)) +
+%\P[A(\yvt) = s-1]\cdot p(y_n)}
+%{\P[A(\yvt) = s-1]\cdot(1-p(y_n)) +
+%\P[A(\yvt) = s-2]\cdot p(y_n)}.
+%\end{equation}
+%For $s \in \{2,\dots,n-1\}$, our induction hypothesis implies that
+%\[
+%\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]} \leq
+%\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}\quad\text{and}\quad
+%\frac{\P[A(\yvt) = s-1]}{\P[A(\yvt) = s-2]} \leq
+%\frac{\P[A(\one) = s-1]}{\P[A(\one) = s-2]},
+%\]
+%and furthermore,
+%\[ \frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-2]} =
+%\frac{\P[A(\yvt) = s]}{\P[A(\yvt) = s-1]}\cdot
+%\frac{\P[A(\yvt) = s-1]}{\P[A(\yvt) = s-2]} \leq
+%\frac{\P[A(\one) = s]}{\P[A(\one) = s-2]}.
+%\]
+%Therefore, we can apply Lemma \ref{lem:rscomp} to \eqref{eq:inductionratio} to obtain
+%\begin{equation} \label{eq:lemmaappl}
+%\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]} \leq
+%\frac{\P[A(\one) = s]\cdot(1-p(y_n)) +
+%\P[A(\one) = s-1]\cdot p(y_n)}
+%{\P[A(\one) = s-1]\cdot(1-p(y_n)) +
+%\P[A(\one) = s-2]\cdot p(y_n)}
+%%= \frac{\P[A((\one,y_n)) = s]}{\P[A((\one,y_n)) = s-1]}
+%\end{equation}
+%for $s \in \{2,\dots,n-1\}$.
+%If $s = n$, we consider $\P[A(\yvt) = s] = 0$ since
+%$\P[A(\yvt) \in \{0,\dots,n-1\}] = 1$, and similarly for $\P[A(\one) = s]$.
+%In this case, Lemma \ref{lem:rscomp} still applies with $b=b'=0$.
+%A similar argument establishes \eqref{eq:lemmaappl} when $s = 1$.
+%Therefore,
+%\[
+%\frac{\P[A(\yv) = s]}{\P[A(\yv) = s-1]} \leq
+%\frac{\P[A((\one,y_n)) = s]}{\P[A((\one,y_n)) = s-1]}
+%\]
+%for $s \in \{1,\dots,n\}$.
+%Since $y_n\in\{0,1\}$, the proof will be complete if we show that
+%\begin{align}
+%\frac{\P[A((\one,1)) = s]}{\P[A((\one,1)) = s-1]} &=
+%\frac{\P[A(\one) = s]\cdot q +
+%\P[A(\one) = s-1]\cdot p}
+%{\P[A(\one) = s-1]\cdot q +
+%\P[A(\one) = s-2]\cdot p} \nonumber\\
+%&\geq
+%\frac{\P[A(\one) = s]\cdot p +
+%\P[A(\one) = s-1]\cdot q}
+%{\P[A(\one) = s-1]\cdot p +
+%\P[A(\one) = s-2]\cdot q}
+%= \frac{\P[A((\one,0)) = s]}{\P[A((\one,0)) = s-1]}.
+%\label{eq:indfinal}
+%\end{align}
+%Using the fact that $A(\one) \sim Bin(n-1, p)$, observe that
+%\[
+%\frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}
+%= \frac{\binom{n-1}{s}p^{s}q^{n-1-s}}{\binom{n-1}{s-1}p^{s-1}q^{n-s}}
+%= \frac{n-s}{s}\frac{p}{q},
+%\]
+%from which
+%\[
+%\frac{\lambda_2}{\mu_2} = \frac{\P[A(\one) = s]}{\P[A(\one) = s-1]}
+%= \frac{n-s}{s}\frac{p}{q} \leq \frac{n-s+1}{s-1}\frac{p}{q}
+%= \frac{\P[A(\one) = s-1]}{\P[A(\one) = s-2]} = \frac{\lambda_1}{\mu_1},
+%\]
+%and hence \eqref{eq:indfinal} follows from Lemma \ref{lem:rscomp2} (unless $s=1$, in which case it follows from a simple direct argument).
+%\end{pf}
+%TODO: finish argument in the case when $x_1 = 0$.    
 
 \section{Ratios of sums: properties}
 
@@ -511,6 +683,15 @@ It is easy to see that \eqref{eq:lambdamucond2} is satisfied when
 $\lambda_1 \geq \lambda_2 \geq \cdots \geq \lambda_m$ and
 $\mu_1 \leq \mu_2 \leq \cdots \leq \mu_m$.
 It is also clear from the proof that \eqref{eq:rscomp2} still holds if all the inequalities in \eqref{eq:lambdamucond2} and \eqref{eq:aapcond2} are reversed.
+An important special case for us is the following:
+\begin{cor}
+Suppose $0 < q < p < 1$ and $a_i, a'_i > 0$ for $i = 1,2$.
+Then
+\[ \frac{q \cdot a_1 + p\cdot a_2}{p\cdot a_1 + q\cdot a_2} \geq
+\frac{q\cdot a'_1 + p\cdot a'_2}{p\cdot a'_1 + q\cdot a'_2} \]
+whenever
+\[ \frac{a_2}{a_1} \geq \frac{a'_2}{a'_1}. \]
+\end{cor}
 \begin{pf}
 Cross-multiplying, we see that \eqref{eq:rscomp2} is equivalent to
 \[ \sum_i \sum_j a_i a'_j \lambda_i \mu_j \geq
