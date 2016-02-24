@@ -343,10 +343,7 @@ and
 \P\big[A_{n-1}(m-1) = \lfloor x+1 \rfloor\big] \big\}
 \end{align*}
 
-Therefore, $F_{n,m}(x) \leq F_{n,m-1}(x) \leq F_{n,m}(x+1)$ and $F_{n,m-1}(x-1) \leq F_{n,m}(x) \leq F_{n,m-1}(x)$. The same logic applies to the pmf, showing that 
-\[ \P[A_n(m-1) = s-1] \leq \P[A_n(m)  = s] \leq \P[A_n(m-1) = s] \]
-and
-\[ \P[A_n(m)  = s] = \P[A_n(m-1) = s] - (p-q)\P[A_{n-1}(m-1) = s]. \]%
+Therefore, $F_{n,m}(x) \leq F_{n,m-1}(x) \leq F_{n,m}(x+1)$ and $F_{n,m-1}(x-1) \leq F_{n,m}(x) \leq F_{n,m-1}(x)$.
 
 
 \subsubsection{Quantiles}
@@ -367,8 +364,8 @@ On the other hand, $F_{n,m}(\tau_n(m-1)+1) \geq F_{n,m-1}(\tau_n(m-1)) \geq \alp
 ----------------------------
 
 %Denote $\phi(k) = [k(p-q)] = [k(1-2q)]$ where $[x]$ is the floor of $x$ (largest integer no greater than $x$).
-
-
+%
+%
 %\begin{prop}
 %\[\big\lvert F_{n,m}(x + \phi(m)) - F_{n,0}(x) \big\rvert \leq \gamma_n\]
 %for all $x\in\R$ and $m = 1,\dots,n$.
