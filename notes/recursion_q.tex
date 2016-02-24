@@ -36,15 +36,15 @@ q+p = 1 \\
 G(x) = (q+px)^m \cdot (p+qx)^n
 \end{align}
 
-The derivative of $ln(f(x)$ is given by:
+The derivative of $ln(a(x)$ is given by:
 
 \begin{align}
-[ln(g(x))]' = \frac{g^`(x)}{f(x)} = \frac{\left ( \sum_{i=0}^{N} a_i x^i \right )^`}{ \sum_{i=0}^{N} a_i x^i} = \frac{\sum_{i=1}^{N} i \cdot a_i x^{i-1}}{  \sum_{i=0}^{N} a_i x^i}
+[ln(g(x)]' = \frac{g'(x)}{g(x)} = \frac{\left ( \sum_{i=0}^{N} a_i x^i \right )^`}{ \sum_{i=0}^{N} a_i x^i} = \frac{\sum_{i=1}^{N} i \cdot a_i x^{i-1}}{  \sum_{i=0}^{N} a_i x^i}
 \end{align}
 
 On the other hand
 \begin{align}
-[ln(g(x_)]^` = (m(q+px) + n(p+qx))^` = \frac{mp}{q+px} + \frac{nq}{p+qx} = \frac{xpq(m+n) + mp^2 + nq^2}{x^2pq + x(p^2 + q^2) + pq}
+[ln(g(x))]' = (m(q+px) + n(p+qx))^` = \frac{mp}{q+px} + \frac{nq}{p+qx} = \frac{xpq(m+n) + mp^2 + nq^2}{x^2pq + x(p^2 + q^2) + pq}
 \end{align}
 
 Equating both expressions we get
@@ -75,31 +75,73 @@ i = \mu -l \\
  f_{l+1} =  \frac{  1 }{ 1  - \frac{1}{N-\mu + l}(\frac{l}{pq} - (f_l - 1)(\mu - l)) } 
 \end{align}
 
-Differentiating by $\mu$, we have:
+Note that when $l=0$  and $f_0=1$, $f_1 = 1$ for all $\mu$.  When $l=1$, $f_2$ is given by
 \begin{align}
-F'(\mu) = -\dfrac{pq\left(\left(f_l-1\right)Npq-l\right)}{\left(\left(f_l-2\right)pqx+\left(n+\left(2-f_l\right)l\right)pq-l\right)^2}
+f_{2} =  \frac{  1 }{ 1  - \frac{1}{N-\mu + 1}\frac{1}{pq} } 
 \end{align}
 
-Since the denominator is always positive, the derivative is always negative as long as for all $l$ the inequality below holds:
+Clearly,  $f_2$ is largest for the smallest $\mu$ which is reached when $m=0$ and the smallest when $m=N$.
+Denote $\mu_0$ and $\mu_x$ as expectations at $m=0$ and $m=x$ respectively.  Obviously  $\mu_0 < \mu_x$.
+Suppose that for some $l+1$,  the corresponding ratio $f_l$ of distribution with $\mu_x$ becomes larger then that of distribution with $\mu_0$.
 \begin{align}
-(f_l-1)Npq > l
+f^x_{l+1} > f^0_{l+1} \\
 \end{align}
 
-This is a magic formula.  No matter what I do, and how I twist the proof, it always comes down to that inequality.
-I tested it empirically and it indeed works, and in fact $(f_l-1)Npq$ grows much much faster than $l$.
-But i had difficulties proving that analytically.
-A very interesting observation that $Npq$ is the variance, which would suggest using Chebusheff inequality, but this, again, didn't get me anywhere.
-I know the inequality holds, but not sure how to prove it.
-
-Note that when $l=0$  and $f_0=1$, $f_1 = 1$ for all $\mu$.  When $l=1$, $f_1$ is given by
+Using the recursion formula, we can express  $f^x_{l+1}$ and  $f^0_{l+1}$ as:
 \begin{align}
-f_{1} =  \frac{  1 }{ 1  - \frac{1}{N-\mu + 1}\frac{1}{pq} } 
+f^x_{l+1} = \frac{  1 }{ 1  - \frac{1}{N-\mu_x + l}(\frac{l}{pq} - (f^x_l - 1)(\mu_x - l)) } \\
+f^0_{l+1} = \frac{  1 }{ 1  - \frac{1}{N-\mu_0 + l}(\frac{l}{pq} - (f^0_l - 1)(\mu_0 - l)) }
 \end{align}
 
-Clearly,  $f_1$ is largest for the smallest $\mu$ which is reached when $m=0$ and the smallest when $m=N$.
-And we also know that $f_l$ when $m=0$ is always greater than $f_l$ for $m=N$, perhaps there's some way to utilize monotonicity of the $f_{l+1}$ when $f_l$ is fixed.
+For $f^x_{l+1}  > f^0_{l+1}$ to hold, the following must hold:
 
+\begin{align}
+\frac{1}{N-\mu_x + l}(\frac{l}{pq} - (f^x_l - 1)(\mu_x - l)) >  \frac{1}{N-\mu_0 + l}(\frac{l}{pq} - (f^0_l - 1)(\mu_0 - l))  \\
+\frac{(f^0_l - 1)(\mu_0 - l)}{N-\mu_0 + l} - \frac{(f^x_l - 1)(\mu_x - l)}{N-\mu_x + l} > \frac{1}{N-\mu_0 + l} \frac{l}{pq}  - \frac{1}{N-\mu_x + l}\frac{l}{pq}   \\
+\frac{(f^0_l - 1)(\mu_0 - l)}{N-\mu_0 + l} - \frac{(f^x_l - 1)(\mu_x - l)}{N-\mu_x + l} > - \frac{l}{pq} \frac{\mu_x - \mu_0}{((N-\mu_x + l)(N-\mu_0 + l)} \\
+\frac{(f^x_l - 1)(\mu_x - l)}{N-\mu_x + l}  - \frac{(f^0_l - 1)(\mu_0 - l)}{N-\mu_0 + l} < \frac{l}{pq} \frac{\mu_x - \mu_0}{((N-\mu_x + l)(N-\mu_0 + l)}
+\end{align}
 
+Suppose $f^x_l \ge f^0_l$, then we can replace $f^x_l - 1$ with $f^0_l - 1$ and the inequality should still hold since we reduce the left part.
+
+\begin{align}
+\frac{(f^x_0 - 1)(\mu_x - l)}{N-\mu_x + l}  - \frac{(f^0_l - 1)(\mu_0 - l)}{N-\mu_0 + l} < \frac{l}{pq} \frac{\mu_x - \mu_0}{(N-\mu_x + l)(N-\mu_0 + l)} \\
+(f^0_l - 1) \left [ \frac{\mu_x - l}{N-\mu_x + l}  - \frac{\mu_0 - l}{N-\mu_0 + l} \right ] < \frac{l}{pq} \frac{\mu_x - \mu_0}{(N-\mu_x + l)(N-\mu_0 + l)}
+\end{align}
+
+The expression inside the brackets simplifies to:
+\begin{align}
+\frac{\mu_x - l}{N-\mu_x + l}  - \frac{\mu_0 - l}{N-\mu_0 + l} = \frac{N(\mu_x-\mu_0)}{(N-\mu_x + l)(N-\mu_0 + l)}
+\end{align}
+
+From here:
+\begin{align}
+(f^0_l - 1) \frac{N(\mu_x-\mu_0)}{(N-\mu_x + l)(N-\mu_0 + l)} < \frac{l}{pq} \frac{\mu_x - \mu_0}{(N-\mu_x + l)(N-\mu_0 + l)} \\
+(f^0_l - 1)Npq < l \\
+(f^0_l - 1) < \frac{l}{Npq}
+\end{align}
+
+Now consider the values of probabilistic ratio for $\mu_0$.  Since $m=0$, all Bernoulli trials generate successes with probability $q$, hence the ratio at any given number of successes $i$ is:
+\begin{align}
+\frac{a_i}{a_{i-1}} = \frac{\binom{N}{i} q^ip^{N-i}}{\binom{N}{i-1} q^{i-1}p^{N-i+1}} = \frac{N-i+1}{i}\frac{q}{p} \\
+f^0_l = \frac{N-\mu_0 + l+1}{\mu_0 - l}\frac{q}{p} = \frac{N- qN+ l+1}{qN - l}\frac{q}{p}  \\
+f^0_l  - 1 =  \frac{N- qN+ l+1}{qN - l}\frac{q}{p} - 1 = \frac{(N- qN+ l+1)q - (qN-l)p}{(qN-l)p} = \\
+\frac{Nq -q^2N +lq+q - pqN +pl}{(qN-l)p} = \frac{Nq(1-p) -q^2N +l(q+p)+q}{(qN-l)p} = \\
+ \frac{Nq^2 -q^2N +l+q}{(qN-l)p} = \frac{l+q}{(qN-l)p}  \\
+ f^0_l  - 1 =  \frac{l+q}{(qN-l)p}
+\end{align}
+
+Now, consider the inequality:
+\begin{align}
+ f^0_l  - 1 =  \frac{l+q}{(qN-l)p} >  \frac{l}{Npq} \\
+ \frac{l+q}{qN-l} >  \frac{l}{qN} 
+\end{align}
+
+Since this inequality holds for all $l$, we arrived at contradiction.   Then $f_x$ must be strictly less than $f_0$.   
+That's interesting, for it means that if  $f^x_l > f^0_l$ and iteration $l$, then at iteration $l+1$,     $f^0_l > f^x_l$.
+Basically, $f^0_l$ may only loose it maximum status for a single iteration.
+This could be sufficient for our purpose, but i am still looking for a better prove. 
+ 
 \end{document}
 
 
