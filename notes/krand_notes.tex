@@ -312,21 +312,63 @@ F_{n,m}(x) = q\cdot F_{n-1,m}(x-1) + p\cdot F_{n-1,m}(x)
 \end{equation*}
 
 
+\subsubsection{Approximate location relationship over $m$}
+
+The family $\{A_n(m),\, m = 0,\dots,n\}$ are in fact approximately location-shifted versions of each other.
+Indeed, note that
+\[ \EP A_n(m) = mp + (n-m)q = nq + m(p-q) \]
+and
+\[ \Var A_n(m) = mpq + (n-m)qp = npq. \]
+In other words, as $m$ varies between $0$ and $n$, the mean varies linearly in $m$ and the variance remains constant.
+The central portion of the distribution remains approximately the same shape, although transitioning from right-skewed when $m=0$ to left-skewed when $m=n$.
+Thus, 
+\[ F_{n,m}(x) \approx F_{n,0}(x - m(p-q)). \]
+
+We quantify this approximation as follows.
+
+\begin{align*}
+ F_{n,m}(x) &- F_{n,m-1}(x) \\
+&= p F_{n-1,m-1}(x-1) + q F_{n-1,m-1}(x) - q F_{n-1,m-1}(x-1)
+ - p F_{n-1,m-1}(x) \\
+&= (p-q) \big[ F_{n-1,m-1}(x-1) - F_{n-1,m-1}(x) \big] \\
+&= -(p-q) \P\big[A_{n-1}(m-1) = \lfloor x \rfloor\big]
+\end{align*}
+and
+\begin{align*}
+ F_{n,m}(x+1) &- F_{n,m-1}(x) \\
+&= p F_{n-1,m-1}(x) + q F_{n-1,m-1}(x+1) - q F_{n-1,m-1}(x-1)
+ - p F_{n-1,m-1}(x) \\
+&= q\big[ F_{n-1,m-1}(x+1) - F_{n-1,m-1}(x-1) \big] \\
+&= q \big\{ \P\big[A_{n-1}(m-1) = \lfloor x \rfloor\big] +
+\P\big[A_{n-1}(m-1) = \lfloor x+1 \rfloor\big] \big\}
+\end{align*}
+
+Therefore, $F_{n,m}(x) \leq F_{n,m-1}(x) \leq F_{n,m}(x+1)$ and $F_{n,m-1}(x-1) \leq F_{n,m}(x) \leq F_{n,m-1}(x)$. The same logic applies to the pmf, showing that 
+\[ \P[A_n(m-1) = s-1] \leq \P[A_n(m)  = s] \leq \P[A_n(m-1) = s] \]
+and
+\[ \P[A_n(m)  = s] = \P[A_n(m-1) = s] - (p-q)\P[A_{n-1}(m-1) = s]. \]%
+
+
+\subsubsection{Quantiles}
+
+Denote by $\tau_n(m)$ the $\alpha$-th quantile of $F_{n,m}$:
+\[ \tau_n(m) = \inf\{y : F_{n,m}(y) \geq \alpha \}. \]
+Note that $\tau_n(m)$ is an integer satisfying $F_{n,m}(\tau_n(m)) \geq \alpha$ and $F_{n,m}(\tau_n(m) - 1) < \alpha$.
+
+\begin{claim}
+For $m = 1,\dots,n$,
+\[ \tau_n(m) \in \{ \tau_n(m-1), \tau_n(m-1) + 1 \}. \]
+\end{claim}
+\begin{pf}
+Since $\alpha \leq F_{n,m}(\tau_n(m)) \leq F_{n,m-1}(\tau_n(m))$, we have $\tau_n(m) \geq \tau_n(m-1)$.
+On the other hand, $F_{n,m}(\tau_n(m-1)+1) \geq F_{n,m-1}(\tau_n(m-1)) \geq \alpha$, from which $\tau_n(m) \leq \tau_n(m-1) + 1$.
+\end{pf}
 
 ----------------------------
 
-%\subsubsection{Approximate location relationship}
-%
-%The recursive relationships \eqref{eq:rec1} and \eqref{eq:rec0} imply that belong approximately to a location family.
-%Indeed, note that
-%\[ \EP A_n(m) = mp + (n-m)q = nq + m(p-q) \]
-%and
-%\[ \Var A_n(m) = mpq + (n-m)qp = npq. \]
-%In other words, as $m$ varies between $0$ and $n$, the mean varies linearly in $m$ and the variance remains constant.
-%We show that $F_{n,m}(x + m(p-q)) \approx F_{n,0}(x)$.
 %Denote $\phi(k) = [k(p-q)] = [k(1-2q)]$ where $[x]$ is the floor of $x$ (largest integer no greater than $x$).
-%
-%
+
+
 %\begin{prop}
 %\[\big\lvert F_{n,m}(x + \phi(m)) - F_{n,0}(x) \big\rvert \leq \gamma_n\]
 %for all $x\in\R$ and $m = 1,\dots,n$.
@@ -640,10 +682,10 @@ The result follows since each $a_i/b_i$ is bounded by $\max_i a_i/b_i$.
 %\sum_i \sum_{j \neq i} (a_ib'_j - a'_ib_j)
 %&= \sum_i \sum_{j > i} (a_ib'_j - a'_ib_j) +
 %\sum_i \sum_{j < i} (a_ib'_j - a'_ib_j) \\
-%%% relabel the indices
+%% relabel the indices
 %&= \sum_i \sum_{j > i} a_i a'_j (\lambda_i\mu_j - \lambda_j\mu_i) +
 %\sum_j \sum_{i < j} a_j a'_i (\lambda_j\mu_i - \lambda_i\mu_j) \\
-%%% reverse the sums
+%% reverse the sums
 %&= \sum_i \sum_{j > i} a_i a'_j (\lambda_i\mu_j - \lambda_j\mu_i) +
 %\sum_i \sum_{j > i} a_j a'_i (\lambda_j\mu_i - \lambda_i\mu_j) \\
 %%% factor out -1 from the second term and combine
