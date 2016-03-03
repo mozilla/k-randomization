@@ -1,0 +1,322 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 
+%% Informal notes on k-randomization.
+%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[11pt,draft]{article}
+%\documentclass[11pt,draft]{amsart}
+
+% Custom styling.
+\usepackage{mozdp}
+%% Controls enumeration labels
+%\usepackage{enumerate}
+%% Shrinks margins 
+\usepackage{fullpage}
+%% Shows equation label keys
+%\usepackage[notref]{showkeys}
+%% Title matter
+\title{}
+\author{Maxim Zhilyaev \and David Zeber}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\maketitle
+
+\section{recursion formular - simple version}
+
+Consider generating function for Poisson-Binomial of you case.  $m$ Bernoulli trials with success $p$ and $n$ Bernoulli trials with success $q$. 
+
+\begin{align}
+m+n = N \\
+q+p = 1 \\
+G(x) = (q+px)^m \cdot (p+qx)^n
+\end{align}
+
+The derivative of $ln(a(x)$ is given by:
+
+\begin{align}
+[ln(g(x)]' = \frac{g'(x)}{g(x)} = \frac{\left ( \sum_{i=0}^{N} a_i x^i \right )^`}{ \sum_{i=0}^{N} a_i x^i} = \frac{\sum_{i=1}^{N} i \cdot a_i x^{i-1}}{  \sum_{i=0}^{N} a_i x^i}
+\end{align}
+
+On the other hand
+\begin{align}
+[ln(g(x))]' = (m(q+px) + n(p+qx))^` = \frac{mp}{q+px} + \frac{nq}{p+qx} = \frac{xpq(m+n) + mp^2 + nq^2}{x^2pq + x(p^2 + q^2) + pq}
+\end{align}
+
+Equating both expressions we get
+\begin{align}
+\frac{xpqN + mp^2 + nq^2}{x^2pq + x(p^2 + q^2) + pq} = \frac{\sum_{i=1}^{N} i \cdot a_i x^{i-1}}{  \sum_{i=0}^{N} a_i x^i} \\
+(xpqN + mp^2 + nq^2)(\sum_{i=0}^{N} a_i x^i) = (x^2pq + x(p^2 + q^2) + pq)(\sum_{i=1}^{N} i \cdot a_i x^{i-1})
+\end{align}
+
+Multiplying and equating terms with same power of $x$ we get:
+\begin{align}
+a_i(mp^2 + nq^2) + a_{i-1}pqN = a_{i+1}pq(i+1) + a_i(p^2 + q^2)i + a_{i-1}pq(i-1) \\
+a_{i-1}pq(N - i +1) = a_{i+1}pq(i+1) + a_i[(p^2 + q^2)i - (mp^2 + nq^2)] \\
+a_{i-1}(N - i +1) = a_{i+1}(i+1) + a_i\frac{(p^2 + q^2)i - (mp^2 + nq^2)}{pq}
+\end{align}
+
+Denote the expectation of successes as $\mu$, and note the obvious relationships:
+\begin{align}
+mp^2 + nq^2 = mp^2 + (N-m)q^2 = m(p^2 - q^2) + Nq^2 =\\
+m(p- q) +Nq -Nq +Nq^2 = \mu + Nq(q-1) = \mu - Npq\\
+p^2 - q^2 = (p+q)^2 - 2pq = 1 - 2pq
+\end{align}
+
+Replacing the expression above in 1.10, we have:
+\begin{align}
+a_{i-1}(N - i +1) = a_{i+1}(i+1) + a_i\frac{(1 -2pq)i - (\mu - Npq)}{pq} \\
+a_{i-1}(N - i +1) = a_{i+1}(i+1) + a_i \left (N - 2i - \frac{\mu - i}{pq} \right ) \\
+\frac{a_{i-1}}{a_{i}} (N - i +1) = \frac{ a_{i+1}}{a_i} (i+1) + N - 2i  - \frac{\mu - i}{pq} \\
+\frac{a_{i-1}}{a_{i}} (N - i +1) = \frac{ a_{i+1}}{a_i} (i+1) + N - i +1 - i - 1 - \frac{\mu - i}{pq} \\
+\frac{a_{i-1}}{a_{i}} (N - i +1) = N - i +1 - (\frac{ a_{i+1}}{a_i} - 1)(i+1) - \frac{\mu - i}{pq}
+\end{align}
+
+Rearranging the terms, we arrive to the recursive relationship between probabilistic ratios at $i$ and $i-1$:
+\begin{align}
+\frac{   N - i + 1}{ N - i +1  + (\frac{ a_{i+1}}{a_i} - 1)(i+1)   - \frac{\mu - i}{pq}   } =  \frac{a_{i}}{a_{i-1}} 
+\end{align}
+
+\textbf{NOTATION:}
+
+Denote the distance between $\mu$ and $i$ as $l$.  Also denote the probabilistic ratio at $i$ as $f_i$.  Then:
+\begin{align}
+\mu - i = l\\
+i = \mu -l \\
+f_{i+1} = f_{l-1} = \frac{a_{i+1}}{a_{i}} \\
+f_{i} =  f_{l} = \frac{a_{i}}{a_{i-1}} \\
+f_{i-1} =  f_{l+1} = \frac{a_{i-1}}{a_{i-2}} \\
+\frac{   N - i + 1}{ N - i + 1  + (f_{l-1} - 1)(i+1)  - \frac{l}{pq}   } =  \frac{  1 }{ 1  - \frac{1}{N- i + 1}\left (\frac{l}{pq} - (f_{l-1} - 1)(i+1) \right ) }  = f_{l}  \\
+\frac{   N - i + 2}{ N - i + 2  + (f_l - 1)i  - \frac{l+1}{pq}   } =   \frac{  1 }{ 1  - \frac{1}{N- i + 2}\left (\frac{l+1}{pq} - (f_{l} - 1)i \right ) }  = f_{l+1} 
+\end{align}
+
+
+For some value of $m$ denote corresponding expectation as $\mu_m$.  Denote the number of successes equal as $i_m$, and a corresponding probability ratio at $i_m$ as $f_{m,l}$:
+\begin{align}
+\mu_m = mp + (N-m)q\\ 
+i_m = \mu_m - l \\
+f_{m,l} = \frac{a_{{i_m+1}}}{a_{i_m}}
+\end{align}
+
+Expressing $i_m=\mu_m-l$ , allows to re-write formula $1.26$  as follows:
+
+\begin{align}
+\frac{  1 }{ 1  - \frac{1}{N- \mu_m + l + 2}\left (\frac{l+1}{pq} - (f_{m,l} - 1)(\mu_m-l) \right ) }  = f_{m,l+1} 
+\end{align}
+
+
+\textbf{Properties of $f_{0,l}$}
+
+Consider probability ratio for the case $m=0$.  Since all Bernoulli trials generate successes with probability $q$, the following relationships hold:
+\begin{align}
+\mu_0 = Nq \\
+f_{0,l} = \frac{a_{i}}{a_{i-1}} = \frac{\binom{N}{i} q^{i}p^{N-i }}{\binom{N}{i-1} q^{i-1}p^{N-i+1}} = \frac{N-i+1}{i}\frac{q}{p} 
+\end{align}
+
+Subtracting 1 from both sides of the equality above gives:
+\begin{align}
+f_{0,l} -1 =   \frac{N-i+1}{i}\frac{q}{p}  - 1 =  = \frac{qN - qi + q - pi}{pi} = \frac{\mu_0 - i + q}{pi} = \frac{l + q}{p(\mu_0 - l)} \\
+f_{0,l} -1 =   \frac{l + q}{p(\mu_0 - l)} =  \frac{l + q}{pi}
+\end{align}
+
+Similarly:
+\begin{align}
+f_{0,l-1} -1 =   \frac{l + p}{p(i+1)}
+\end{align}
+
+We need few more expression relating differences between ratios of adjacent $l$:
+
+\begin{align}
+f_{0,l} - f_{0,l+1}=  \frac{q}{p}\left ( \frac{N-i+1}{i} - \frac{N-i}{i+1} \right ) =  \frac{q}{p} \cdot \frac{N+1}{(i+1)i}  \\
+\frac{1}{f_{0,l+1}} - \frac{1}{f_{0,l}} = \frac{q}{p}\left ( \frac{i+1}{N-i} - \frac{i}{N-i+1} -\right ) = \frac{p}{q}  \cdot \frac{N+1}{(N-i+1)(N-i)}  
+\end{align}
+
+We use this expressions in the theorem below.
+
+\textbf{THEOREM 1}
+ 
+For $l > \sigma$ probability ratio $f_{m,l}$ maximizes at $m=0$.
+
+\textbf{PROOF:}
+
+Suppose that there's a particular value of $m$ such that $f_{m,{l+1}}  > f_{0,{l+1}}$  for some $l$ and consider $f_{m,{l+1}}$ and $f_{0,{l+1}}$ for $m=m$ and $m=0$:
+\begin{align}
+\frac{  1 }{ 1  - \frac{1}{N- \mu_m + l + 2}\left (\frac{l+1}{pq} - (f_{m,l} - 1)(\mu_m-l) \right ) }  = f_{m,l+1} \\
+\frac{  1 }{ 1  - \frac{1}{N- \mu_0 + l + 2}\left (\frac{l+1}{pq} - (f_{0,l} - 1)(\mu_0-l) \right ) }  = f_{0,l+1} 
+\end{align}
+
+For  $f_{m,{l+1}}  > f_{0,{l+1}}$  to hold the difference of denominators in the expressions for  $f_{0,l+1}$  and  $f_{0,m+1}$ must be positive, hence:
+
+\begin{align}
+\frac{1}{N-\mu_m + l+2} \left (\frac{l+1}{pq} - (f_{m,l} - 1)(\mu_m - l) \right ) -  \frac{1}{N-\mu_0 + l+2} \left (\frac{l+1}{pq} - (f_{0,l} - 1)(\mu_0 - l) \right) > 0\\
+\frac{l+1}{pq} (\frac{1}{N-\mu_m + l + 2}  - \frac{1}{N-\mu_0 + l + 2} ) + \frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l+2} - \frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l+2} > 0 \\
+ \frac{l+1}{pq} \frac{\mu_m - \mu_0}{(N-\mu_m + l+2)(N-\mu_0 + l+2)} + \frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l+2} - \frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l+2} > 0
+\end{align}
+
+Suppose $f_{m,l} \ge f_{0,l}$, then we can replace $f_{m,l} - 1$ with $f_{0,l} - 1$, and the inequality should still hold since we subtract a lesser value.
+
+\begin{align}
+\frac{l+1}{pq} \frac{\mu_m - \mu_0}{(N-\mu_m + l)(N-\mu_0 + l)}  + \frac{(f_{0,l} - 1)(\mu_m - l)}{N-\mu_m + l}  - \frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l} > 0\\
+\frac{l+1}{pq} \frac{\mu_m - \mu_0}{(N-\mu_m + l+2)(N-\mu_0 + l+2)}  + (f_{0,l} - 1) \left [ \frac{\mu_0 - l}{N-\mu_0 + l+2}  - \frac{\mu_m - l}{N-\mu_m + l+2} \right ]  > 0
+\end{align}
+
+The expression inside the brackets simplifies to:
+\begin{align}
+\frac{\mu_0 - l}{N-\mu_0 + l+2}  - \frac{\mu_m - l}{N-\mu_m + l+2}  = - \frac{(N+2)(\mu_m-\mu_0)}{(N-\mu_m + l)(N-\mu_0 + l)}
+\end{align}
+
+From here:
+\begin{align}
+\frac{l+1}{pq} - (f_{0,l} - 1)(N+2) > 0 \\
+\frac{l+1}{pq} > (f_{0,l} - 1)(N+2)
+\end{align}
+
+From properties of $f_{0,l}$ we have:
+\begin{align}
+\frac{l+1}{pq} > (f_{0,l} - 1)(N+2) \\
+\frac{l+1}{pq} > \frac{l + q}{p(\mu_0 - l)}(N+2) >   \frac{l + q}{p(\mu_0 - l)}N \\
+(l+1)(\mu_0 - l) > Nq(l+q) \\
+(l+1)(\mu_0 - l) > \mu_0(l+q)
+\end{align}
+
+After simplification we have:
+\begin{align}
+-l^2 - l +Npq > 0
+\end{align}
+
+Since the standard deviation is $\sigma = \sqrt{Npq}$, this condition clearly does not hold for $l>\sigma$.  Which proves an interesting point.
+
+When $l$ becomes sufficiently large,  $f_{m,l+1}$ could only become greater than $f_{0,l+1}$ if at the previous iteration $f_{m,l}$ is less than $f_{0,l}$.  Hence, there are only two outcomes:
+either  $f_{m,l+1}$ is always less than  $f_{0,l+1}$, or it oscillates.  On one iteration  $f_{m,l}$ is less than  $f_{0,l}$ and on the next iteration it becomes greater than  $f_{0,l+1}$. 
+We prove by contradiction that the second outcome is impossible.
+
+Assume that it's the case, then we must observe the following:
+\begin{align}
+f_{m,l-1} > f_{0,l-1} \\
+f_{m,l} < f_{0,l} \\
+f_{m,l+1} >  f_{0,l+1}
+\end{align}
+
+Note that last two conditions imply that:
+\begin{align}
+\frac{1}{f_{m,l}} - \frac{1}{f_{m,l+1}} > \frac{1}{f_{0,l}} - \frac{1}{f_{0,l+1}} >  \frac{p}{q}  \cdot \frac{N+1}{(N-i_0+1)(N-i_0)} 
+\end{align}
+
+Expressing the difference of quotients using  formulas  1.26 and 1.25, we have:
+\begin{align}
+ \frac{1}{N- i_m + 2}\left (\frac{l+1}{pq} - (f_{m,l} - 1)i_m \right ) -  \frac{1}{N- i_m + 1}\left (\frac{l}{pq} - (f_{m,l-1} - 1)(i_m+1) \right )  = \frac{1}{f_{m,l}} - \frac{1}{f_{m,l+1}}   \\
+ \frac{1}{N- i_m + 1}\left ( \frac{l+1}{pq} - (f_{m,l} - 1)i_m  -  \frac{l}{pq} + (f_{m,l-1} - 1)(i_m+1) \right )>  \frac{p}{q}  \cdot \frac{N+1}{(N-i_0+1)(N-i_0)} \\
+ \frac{1}{N- i_m + 1}\left ( \frac{1}{pq} + (f_{m,l-1} - 1) - (f_{m,l} -  f_{m,l-1})i_m  \right )> \frac{p}{q}  \cdot \frac{N+1}{(N-i_0+1)(N-i_0)} 
+\end{align}
+
+Note the the oscillating conditions mean the following holds:
+\begin{align}
+f_{m,l-1} - 1 > f_{0,l-1} - 1 \\
+ f_{m,l} -  f_{m,l-1} <  f_{0,l} -  f_{0,l-1}
+\end{align}
+
+Hence, we can replace $f_{m,l-1}$ with $f_{0,l-1}$ and that will decrease the left part of the inequality, because we add a lesser value.  And by the same argument we can replace  $f_{m,l} -  f_{m,l-1}$  with $f_{0,l} -  f_{0,l-1}$, and that will further decrease the inequality since we subtract a greater value.  From here:
+
+\begin{align}
+\frac{1}{pq} + (f_{m,l-1} - 1) - (f_{m,l} -  f_{m,l-1})i_m  > \frac{1}{pq} + (f_{0,l-1} - 1) - (f_{0,l} -  f_{0,l-1})i_m
+\end{align}
+
+Using formulas 1.35 and 1.36, we arrive:
+\begin{align}
+\frac{1}{pq} + (f_{0,l-1} - 1) - (f_{0,l} -  f_{0,l-1})i_m  = \frac{1}{pq} + \frac{l + p}{p(i_0+1)} -  \frac{q}{p} \cdot \frac{N+1}{(i_0+1)i_0} \cdot i_m = \\
+\frac{1}{pq} +  \frac{l-p-qN - q}{p(i+1)} = \frac{1}{pq} - \frac{\mu_0 - l  - p + q}{p(i+1)}
+\end{align}
+
+\clearpage
+
+
+The last inequality contradicts LEMMA 2, which means that $f_{m,l} < f_{0,l}$.
+
+On the other hand,  $f_{m,l} >  f_{N,l}$.  Since
+\[ f_{m,{l+1}} > f_{0,{l+1}} > f_{N,{l+1}} \]
+
+We have:
+\begin{align}
+\frac{1}{N-\mu_m + l}(\frac{l}{pq} - (f_{m,l} - 1)(\mu_m - l)) -  \frac{1}{N-\mu_N + l}(\frac{l}{pq} - (f_{N,l} - 1)(\mu_N - l))  > 0\\
+ \frac{l}{pq} \frac{\mu_m - \mu_N}{(N-\mu_m + l)(N-\mu_N + l)} + \frac{(f_{N,l} - 1)(\mu_N - l)}{N-\mu_N + l} - \frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l} > 0 \\
+\frac{(f_{N,l} - 1)(\mu_N - l)}{N-\mu_N + l} - \frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l} -   \frac{l}{pq} \frac{\mu_N- \mu_m}{(N-\mu_m + l)(N-\mu_N + l)} > 0 
+\end{align}
+
+Suppose $f_{m,l} \le f_{N,l}$, then we can replace $f_{m,l} - 1$ with $f_{N,l} - 1$, and the inequality should still hold since we subtract a lesser value. Then
+
+\begin{align}
+\frac{l}{pq} \frac{\mu_m - \mu_N}{(N-\mu_m + l)(N-\mu_N + l)}  - (f_{N,l} - 1) \frac{N(\mu_N-\mu_m)}{(N-\mu_m + l)(N-\mu_N + l)} > 0 \\
+\frac{l}{pq} - (f_{N,l} - 1)N > 0 \\
+(f_{N,l} - 1) < \frac{l}{pqN}
+\end{align}
+
+Which again contradicts LEMMA 2, and we must conclude that:
+\[ f_{0,l} > f_{m,l} > f_{N,l} \]
+
+\clearpage
+
+
+
+
+
+
+
+
+Suppose $f^x_l \ge f^0_l$, then we can replace $f^x_l - 1$ with $f^0_l - 1$ and the inequality should still hold since we reduce the left part.
+
+\begin{align}
+\frac{(f^x_0 - 1)(\mu_x - l)}{N-\mu_x + l}  - \frac{(f^0_l - 1)(\mu_0 - l)}{N-\mu_0 + l} < \frac{l}{pq} \frac{\mu_x - \mu_0}{(N-\mu_x + l)(N-\mu_0 + l)} \\
+(f^0_l - 1) \left [ \frac{\mu_x - l}{N-\mu_x + l}  - \frac{\mu_0 - l}{N-\mu_0 + l} \right ] < \frac{l}{pq} \frac{\mu_x - \mu_0}{(N-\mu_x + l)(N-\mu_0 + l)}
+\end{align}
+
+The expression inside the brackets simplifies to:
+\begin{align}
+\frac{\mu_x - l}{N-\mu_x + l}  - \frac{\mu_0 - l}{N-\mu_0 + l} = \frac{N(\mu_x-\mu_0)}{(N-\mu_x + l)(N-\mu_0 + l)}
+\end{align}
+
+From here:
+\begin{align}
+(f^0_l - 1) \frac{N(\mu_x-\mu_0)}{(N-\mu_x + l)(N-\mu_0 + l)} < \frac{l}{pq} \frac{\mu_x - \mu_0}{(N-\mu_x + l)(N-\mu_0 + l)} \\
+(f^0_l - 1)Npq < l \\
+(f^0_l - 1) < \frac{l}{Npq}
+\end{align}
+
+
+Since this inequality holds for all $l$, we arrived at contradiction.   Then $f_x$ must be strictly less than $f_0$.   
+This may be  sufficient result on its own.
+ 
+\begin{align}
+\frac{1}{N-\mu_m + l}(\frac{l}{pq} - (f_{m,l} - 1)(\mu_m - l)) -  \frac{1}{N-\mu_0 + l}(\frac{l}{pq} - (f_{0,l} - 1)(\mu_0 - l))  > 0\\
+  \frac{1}{N-\mu_m + l}\frac{l}{pq}  - \frac{1}{N-\mu_0 + l} \frac{l}{pq}  + \frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l} - \frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l} > 0 \\
+\frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l} - \frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l} > - \frac{l}{pq} \frac{\mu_m - \mu_0}{((N-\mu_m + l)(N-\mu_0 + l)} \\
+\frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l}  - \frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l} < \frac{l}{pq} \frac{\mu_m - \mu_0}{((N-\mu_m + l)(N-\mu_0 + l)}
+\end{align}
+
+Suppose $f_{m,l} \ge f_{0,l}$, then we can replace $f_{m,l} - 1$ with $f_{0,l} - 1$ and the inequality should still hold since we reduce the left part.
+
+\begin{align}
+\frac{(f^x_0 - 1)(\mu_m - l)}{N-\mu_m + l}  - \frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l} < \frac{l}{pq} \frac{\mu_m - \mu_0}{(N-\mu_m + l)(N-\mu_0 + l)} \\
+(f_{0,l} - 1) \left [ \frac{\mu_m - l}{N-\mu_m + l}  - \frac{\mu_0 - l}{N-\mu_0 + l} \right ] < \frac{l}{pq} \frac{\mu_m - \mu_0}{(N-\mu_m + l)(N-\mu_0 + l)}
+\end{align}
+
+The expression inside the brackets simplifies to:
+\begin{align}
+\frac{\mu_m - l}{N-\mu_m + l}  - \frac{\mu_0 - l}{N-\mu_0 + l} = \frac{N(\mu_m-\mu_0)}{(N-\mu_m + l)(N-\mu_0 + l)}
+\end{align}
+
+From here:
+\begin{align}
+(f_{0,l} - 1) \frac{N(\mu_m-\mu_0)}{(N-\mu_m + l)(N-\mu_0 + l)} < \frac{l}{pq} \frac{\mu_m - \mu_0}{(N-\mu_m + l)(N-\mu_0 + l)} \\
+(f_{0,l} - 1)Npq < l \\
+(f_{0,l} - 1) < \frac{l}{Npq}
+\end{align}
+
+
+\end{document}
+
+
+
