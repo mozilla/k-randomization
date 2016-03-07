@@ -390,8 +390,27 @@ Facts:
 \item $\pi$ is decreasing in $s$: $\pi(s;m) \geq \pi(s+1; m)$
 \item $\pi$ is increasing in $m$: $\pi(s;m) \leq \pi(s; m+1)$
 \item $\pi$ is net decreasing when both $s$ and $m$ increase:
-$\pi(s;m) \leq \pi(s+1; m+1)$.
+$\pi(s;m) \geq \pi(s+1; m+1)$.
 \end{itemize}
+
+Write $P_{n,m}(s) = \P[A_{n}(m) = s]$. We have
+\begin{align*}
+\pi(s; m) &= \frac{P_{n,m}(s)}{P_{n,m+1}(s)}
+ = \frac{P_{n,m-1}(s) + (p-q)\{P_{n-1,m-1}(s-1) - P_{n-1,m-1}(s)\}}
+ {P_{n,m}(s) + (p-q)\{P_{n-1,m}(s-1) - P_{n-1,m}(s)\}} \\
+ &= \frac{\frac{P_{n,m-1}(s)}{P_{n,m}(s)} + (p-q)\frac{P_{n-1,m-1}(s-1) - P_{n-1,m-1}(s)}{P_{n,m}(s)}}
+ {1 + (p-q)\frac{P_{n-1,m}(s-1) - P_{n-1,m}(s)}{P_{n,m}(s)}}.
+\end{align*}
+Therefore,
+\begin{align*}
+\frac{\pi(s; m)}{\pi(s; m-1)} &= \frac{P_{n,m}(s)}{P_{n,m-1}(s)} \pi(s;m) \\
+ &= \frac{1 + (p-q)\frac{P_{n-1,m-1}(s-1) - P_{n-1,m-1}(s)}{P_{n,m-1}(s)}}
+ {1 + (p-q)\frac{P_{n-1,m}(s-1) - P_{n-1,m}(s)}{P_{n,m}(s)}}
+\end{align*}
+
+
+\subsubsection{Asymptotic approach}
+
 
 
 ----------------------------
