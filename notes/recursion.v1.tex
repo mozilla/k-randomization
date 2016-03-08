@@ -123,23 +123,10 @@ f_{0,l} -1 =   \frac{N-i+1}{i}\frac{q}{p}  - 1 =  = \frac{qN - qi + q - pi}{pi} 
 f_{0,l} -1 =   \frac{l + q}{p(\mu_0 - l)} =  \frac{l + q}{pi}
 \end{align}
 
-Similarly:
-\begin{align}
-f_{0,l-1} -1 =   \frac{l + p}{p(i+1)}
-\end{align}
-
-We need few more expression relating differences between ratios of adjacent $l$:
-
-\begin{align}
-f_{0,l} - f_{0,l+1}=  \frac{q}{p}\left ( \frac{N-i+1}{i} - \frac{N-i}{i+1} \right ) =  \frac{q}{p} \cdot \frac{N+1}{(i+1)i}  \\
-\frac{1}{f_{0,l+1}} - \frac{1}{f_{0,l}} = \frac{q}{p}\left ( \frac{i+1}{N-i} - \frac{i}{N-i+1} -\right ) = \frac{p}{q}  \cdot \frac{N+1}{(N-i+1)(N-i)}  
-\end{align}
-
-We use this expressions in the theorem below.
 
 \textbf{THEOREM 1}
  
-For $l > \sigma$ probability ratio $f_{m,l}$ maximizes at $m=0$.
+For $l > \sigma$ probability ratio $f_{0,l+1}$ at $l+1$ is higher then probability ratio $f_{m,l}$ for any $m$.
 
 \textbf{PROOF:}
 
@@ -188,133 +175,13 @@ After simplification we have:
 -l^2 - l +Npq > 0
 \end{align}
 
-Since the standard deviation is $\sigma = \sqrt{Npq}$, this condition clearly does not hold for $l>\sigma$.  Which proves an interesting point.
+Since the standard deviation is $\sigma = \sqrt{Npq}$, this condition clearly does not hold for $l>\sigma$.  Which proves an important point. When $l$ exceeds $\sigma$,  $f_{m,l+1}$ could only become greater than $f_{0,l+1}$ if at the previous iteration $f_{m,l}$ is less than $f_{0,l}$.  And conversely, if $f_{m,l} > f_{0,l}$ at $l$, the next iteration $f_{m,l+1} < f_{0,l+1}$.  We now can prove the main statement of the theorem.
 
-When $l$ becomes sufficiently large,  $f_{m,l+1}$ could only become greater than $f_{0,l+1}$ if at the previous iteration $f_{m,l}$ is less than $f_{0,l}$.  Hence, there are only two outcomes:
-either  $f_{m,l+1}$ is always less than  $f_{0,l+1}$, or it oscillates.  On one iteration  $f_{m,l}$ is less than  $f_{0,l}$ and on the next iteration it becomes greater than  $f_{0,l+1}$. 
-We prove by contradiction that the second outcome is impossible.
+Choose a particular value for $l$ such that $l>\sigma$.  For those values of $m$ such that $f_{0,l} > f_{m,l}$ the theorem holds already, since $f_{0,l+1} > f_{0,l}$.  
+Now consider those $m$ for which $f_{0,l} < f_{m,l}$ at $l$.  In the next iteration the probability ratio $f_{m,l+1}$ for such $m$ has to be become less than $f_{0,l+1}$.  Hence:
+\[ f_{0,l+1} > f_{m+1,l} > f_{m,l} \]
 
-Assume that it's the case, then we must observe the following:
-\begin{align}
-f_{m,l-1} > f_{0,l-1} \\
-f_{m,l} < f_{0,l} \\
-f_{m,l+1} >  f_{0,l+1}
-\end{align}
-
-Note that last two conditions imply that:
-\begin{align}
-\frac{1}{f_{m,l}} - \frac{1}{f_{m,l+1}} > \frac{1}{f_{0,l}} - \frac{1}{f_{0,l+1}} >  \frac{p}{q}  \cdot \frac{N+1}{(N-i_0+1)(N-i_0)} 
-\end{align}
-
-Expressing the difference of quotients using  formulas  1.26 and 1.25, we have:
-\begin{align}
- \frac{1}{N- i_m + 2}\left (\frac{l+1}{pq} - (f_{m,l} - 1)i_m \right ) -  \frac{1}{N- i_m + 1}\left (\frac{l}{pq} - (f_{m,l-1} - 1)(i_m+1) \right )  = \frac{1}{f_{m,l}} - \frac{1}{f_{m,l+1}}   \\
- \frac{1}{N- i_m + 1}\left ( \frac{l+1}{pq} - (f_{m,l} - 1)i_m  -  \frac{l}{pq} + (f_{m,l-1} - 1)(i_m+1) \right )>  \frac{p}{q}  \cdot \frac{N+1}{(N-i_0+1)(N-i_0)} \\
- \frac{1}{N- i_m + 1}\left ( \frac{1}{pq} + (f_{m,l-1} - 1) - (f_{m,l} -  f_{m,l-1})i_m  \right )> \frac{p}{q}  \cdot \frac{N+1}{(N-i_0+1)(N-i_0)} 
-\end{align}
-
-Note the the oscillating conditions mean the following holds:
-\begin{align}
-f_{m,l-1} - 1 > f_{0,l-1} - 1 \\
- f_{m,l} -  f_{m,l-1} <  f_{0,l} -  f_{0,l-1}
-\end{align}
-
-Hence, we can replace $f_{m,l-1}$ with $f_{0,l-1}$ and that will decrease the left part of the inequality, because we add a lesser value.  And by the same argument we can replace  $f_{m,l} -  f_{m,l-1}$  with $f_{0,l} -  f_{0,l-1}$, and that will further decrease the inequality since we subtract a greater value.  From here:
-
-\begin{align}
-\frac{1}{pq} + (f_{m,l-1} - 1) - (f_{m,l} -  f_{m,l-1})i_m  > \frac{1}{pq} + (f_{0,l-1} - 1) - (f_{0,l} -  f_{0,l-1})i_m
-\end{align}
-
-Using formulas 1.35 and 1.36, we arrive:
-\begin{align}
-\frac{1}{pq} + (f_{0,l-1} - 1) - (f_{0,l} -  f_{0,l-1})i_m  = \frac{1}{pq} + \frac{l + p}{p(i_0+1)} -  \frac{q}{p} \cdot \frac{N+1}{(i_0+1)i_0} \cdot i_m = \\
-\frac{1}{pq} +  \frac{l-p-qN - q}{p(i+1)} = \frac{1}{pq} - \frac{\mu_0 - l  - p + q}{p(i+1)}
-\end{align}
-
-\clearpage
-
-
-The last inequality contradicts LEMMA 2, which means that $f_{m,l} < f_{0,l}$.
-
-On the other hand,  $f_{m,l} >  f_{N,l}$.  Since
-\[ f_{m,{l+1}} > f_{0,{l+1}} > f_{N,{l+1}} \]
-
-We have:
-\begin{align}
-\frac{1}{N-\mu_m + l}(\frac{l}{pq} - (f_{m,l} - 1)(\mu_m - l)) -  \frac{1}{N-\mu_N + l}(\frac{l}{pq} - (f_{N,l} - 1)(\mu_N - l))  > 0\\
- \frac{l}{pq} \frac{\mu_m - \mu_N}{(N-\mu_m + l)(N-\mu_N + l)} + \frac{(f_{N,l} - 1)(\mu_N - l)}{N-\mu_N + l} - \frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l} > 0 \\
-\frac{(f_{N,l} - 1)(\mu_N - l)}{N-\mu_N + l} - \frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l} -   \frac{l}{pq} \frac{\mu_N- \mu_m}{(N-\mu_m + l)(N-\mu_N + l)} > 0 
-\end{align}
-
-Suppose $f_{m,l} \le f_{N,l}$, then we can replace $f_{m,l} - 1$ with $f_{N,l} - 1$, and the inequality should still hold since we subtract a lesser value. Then
-
-\begin{align}
-\frac{l}{pq} \frac{\mu_m - \mu_N}{(N-\mu_m + l)(N-\mu_N + l)}  - (f_{N,l} - 1) \frac{N(\mu_N-\mu_m)}{(N-\mu_m + l)(N-\mu_N + l)} > 0 \\
-\frac{l}{pq} - (f_{N,l} - 1)N > 0 \\
-(f_{N,l} - 1) < \frac{l}{pqN}
-\end{align}
-
-Which again contradicts LEMMA 2, and we must conclude that:
-\[ f_{0,l} > f_{m,l} > f_{N,l} \]
-
-\clearpage
-
-
-
-
-
-
-
-
-Suppose $f^x_l \ge f^0_l$, then we can replace $f^x_l - 1$ with $f^0_l - 1$ and the inequality should still hold since we reduce the left part.
-
-\begin{align}
-\frac{(f^x_0 - 1)(\mu_x - l)}{N-\mu_x + l}  - \frac{(f^0_l - 1)(\mu_0 - l)}{N-\mu_0 + l} < \frac{l}{pq} \frac{\mu_x - \mu_0}{(N-\mu_x + l)(N-\mu_0 + l)} \\
-(f^0_l - 1) \left [ \frac{\mu_x - l}{N-\mu_x + l}  - \frac{\mu_0 - l}{N-\mu_0 + l} \right ] < \frac{l}{pq} \frac{\mu_x - \mu_0}{(N-\mu_x + l)(N-\mu_0 + l)}
-\end{align}
-
-The expression inside the brackets simplifies to:
-\begin{align}
-\frac{\mu_x - l}{N-\mu_x + l}  - \frac{\mu_0 - l}{N-\mu_0 + l} = \frac{N(\mu_x-\mu_0)}{(N-\mu_x + l)(N-\mu_0 + l)}
-\end{align}
-
-From here:
-\begin{align}
-(f^0_l - 1) \frac{N(\mu_x-\mu_0)}{(N-\mu_x + l)(N-\mu_0 + l)} < \frac{l}{pq} \frac{\mu_x - \mu_0}{(N-\mu_x + l)(N-\mu_0 + l)} \\
-(f^0_l - 1)Npq < l \\
-(f^0_l - 1) < \frac{l}{Npq}
-\end{align}
-
-
-Since this inequality holds for all $l$, we arrived at contradiction.   Then $f_x$ must be strictly less than $f_0$.   
-This may be  sufficient result on its own.
- 
-\begin{align}
-\frac{1}{N-\mu_m + l}(\frac{l}{pq} - (f_{m,l} - 1)(\mu_m - l)) -  \frac{1}{N-\mu_0 + l}(\frac{l}{pq} - (f_{0,l} - 1)(\mu_0 - l))  > 0\\
-  \frac{1}{N-\mu_m + l}\frac{l}{pq}  - \frac{1}{N-\mu_0 + l} \frac{l}{pq}  + \frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l} - \frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l} > 0 \\
-\frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l} - \frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l} > - \frac{l}{pq} \frac{\mu_m - \mu_0}{((N-\mu_m + l)(N-\mu_0 + l)} \\
-\frac{(f_{m,l} - 1)(\mu_m - l)}{N-\mu_m + l}  - \frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l} < \frac{l}{pq} \frac{\mu_m - \mu_0}{((N-\mu_m + l)(N-\mu_0 + l)}
-\end{align}
-
-Suppose $f_{m,l} \ge f_{0,l}$, then we can replace $f_{m,l} - 1$ with $f_{0,l} - 1$ and the inequality should still hold since we reduce the left part.
-
-\begin{align}
-\frac{(f^x_0 - 1)(\mu_m - l)}{N-\mu_m + l}  - \frac{(f_{0,l} - 1)(\mu_0 - l)}{N-\mu_0 + l} < \frac{l}{pq} \frac{\mu_m - \mu_0}{(N-\mu_m + l)(N-\mu_0 + l)} \\
-(f_{0,l} - 1) \left [ \frac{\mu_m - l}{N-\mu_m + l}  - \frac{\mu_0 - l}{N-\mu_0 + l} \right ] < \frac{l}{pq} \frac{\mu_m - \mu_0}{(N-\mu_m + l)(N-\mu_0 + l)}
-\end{align}
-
-The expression inside the brackets simplifies to:
-\begin{align}
-\frac{\mu_m - l}{N-\mu_m + l}  - \frac{\mu_0 - l}{N-\mu_0 + l} = \frac{N(\mu_m-\mu_0)}{(N-\mu_m + l)(N-\mu_0 + l)}
-\end{align}
-
-From here:
-\begin{align}
-(f_{0,l} - 1) \frac{N(\mu_m-\mu_0)}{(N-\mu_m + l)(N-\mu_0 + l)} < \frac{l}{pq} \frac{\mu_m - \mu_0}{(N-\mu_m + l)(N-\mu_0 + l)} \\
-(f_{0,l} - 1)Npq < l \\
-(f_{0,l} - 1) < \frac{l}{Npq}
-\end{align}
-
+Which proves the theorem.  
 
 \end{document}
 
