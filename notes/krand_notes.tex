@@ -278,14 +278,14 @@ Hence, in the $L=1$ case, it suffices to study the behaviour of $\pi(s;m)$.
 The conditioning argument \eqref{eq:prcond} yields a recursive relationship that lets us express the distribution of $A_n$ in terms of that of $A_{n-1}$.
 
 Recall that $A_n(m)$ is the outcome of applying the bit transformation $R$ to $n$ original bits, $m$ of which are 1 and $n-m$ are 0.
-For $m >= 1$, we can condition on the outcome of one of the original 1s:
+For $m \geq 1$, we can condition on the outcome of one of the original 1s:
 \[ A_n(m) \sim Ber(p) + Bin(m-1, p) + Bin(n-m, q) \sim Ber(p) + A_{n-1}(m-1), \]
 and so
 \begin{equation}\label{eq:rec1}
 \P[A_n(m) = s] = p\P[A_{n-1}(m-1) = s-1] + q\P[A_{n-1}(m-1) = s].
 \end{equation}
 If $s = 0$, the first term on the RHS is interpreted as 0, and if $s = n$, the last term is.
-Similarly, for $m <= n-1$, conditioning on an original 0,
+Similarly, for $m \leq n-1$, conditioning on an original 0,
 \[ A_n(m) \sim Ber(q) + Bin(m, p) + Bin(n-m-1, q) \sim Ber(q) + A_{n-1}(m), \]
 from which
 \begin{equation}\label{eq:rec0}
@@ -300,7 +300,7 @@ $\P[A_n(m) = s]$ falling between $\P[A_{n-1}(m) = s-1]$ and $\P[A_{n-1}(m) = s]$
 \end{itemize}
 
 Summing both sides of \eqref{eq:rec1} and \eqref{eq:rec0} shows that the recursive relationship extends to cdfs as well.
-Writing $F_{n,m}(x) := \P[A_n(m) <= x]$, we have
+Writing $F_{n,m}(x) := \P[A_n(m) \leq x]$, we have
 \begin{equation*}%\label{eq:Frec1}
 F_{n,m}(x) = p\cdot F_{n-1,m-1}(x-1) + q\cdot F_{n-1,m-1}(x)
 \qquad\qquad m = 1,\dots,n
@@ -311,27 +311,13 @@ F_{n,m}(x) = q\cdot F_{n-1,m}(x-1) + p\cdot F_{n-1,m}(x)
 \qquad\qquad m = 0,\dots,n-1.
 \end{equation*}
 
-
-\subsubsection{Approximate location relationship over $m$}
-
-The family $\{A_n(m),\, m = 0,\dots,n\}$ are in fact approximately location-shifted versions of each other.
-Indeed, note that
-\[ \EP A_n(m) = mp + (n-m)q = nq + m(p-q) \]
-and
-\[ \Var A_n(m) = mpq + (n-m)qp = npq. \]
-In other words, as $m$ varies between $0$ and $n$, the mean varies linearly in $m$ and the variance remains constant.
-The central portion of the distribution remains approximately the same shape, although transitioning from right-skewed when $m=0$ to left-skewed when $m=n$.
-Thus, 
-\[ F_{n,m}(x) \approx F_{n,0}(x - m(p-q)). \]
-
-We quantify this approximation as follows.
-
+Furthermore, we can express the difference on incrementing $m$ as follows. Denote $P_{n,m}(s) := \P[A_n(m) = s]$. Then
 \begin{align*}
  F_{n,m}(x) &- F_{n,m-1}(x) \\
 &= p F_{n-1,m-1}(x-1) + q F_{n-1,m-1}(x) - q F_{n-1,m-1}(x-1)
  - p F_{n-1,m-1}(x) \\
 &= (p-q) \big[ F_{n-1,m-1}(x-1) - F_{n-1,m-1}(x) \big] \\
-&= -(p-q) \P\big[A_{n-1}(m-1) = \lfloor x \rfloor\big]
+&= -(p-q) P_{n-1, m-1}(\lfloor x \rfloor)
 \end{align*}
 and
 \begin{align*}
@@ -339,22 +325,57 @@ and
 &= p F_{n-1,m-1}(x) + q F_{n-1,m-1}(x+1) - q F_{n-1,m-1}(x-1)
  - p F_{n-1,m-1}(x) \\
 &= q\big[ F_{n-1,m-1}(x+1) - F_{n-1,m-1}(x-1) \big] \\
-&= q \big\{ \P\big[A_{n-1}(m-1) = \lfloor x \rfloor\big] +
-\P\big[A_{n-1}(m-1) = \lfloor x+1 \rfloor\big] \big\}
+&= q\big\{ P_{n-1, m-1}(\lfloor x \rfloor) +
+P_{n-1, m-1}(\lfloor x+1 \rfloor) \big\}
 \end{align*}
 
 Therefore, $F_{n,m}(x) \leq F_{n,m-1}(x) \leq F_{n,m}(x+1)$ and $F_{n,m-1}(x-1) \leq F_{n,m}(x) \leq F_{n,m-1}(x)$.
 
 For probabilities, the relationship becomes
-\begin{align*}
-\P[A_n(m) = s] &- \P[A_n(m-1) = s] \\
- &= (p-q) \big\{ \P[A_{n-1}(m-1) = s-1] - \P[A_{n-1}(m-1) = s] \big\}
-\end{align*}
+\[
+P_{n, m}(s) - P_{n, m-1}(s) = -(p-q) \big\{ P_{n-1, m-1}(s) - P_{n-1, m-1}(s-1) \big\}
+\]
 and
+\[
+P_{n, m}(s+1) - P_{n, m-1}(s) = q \big\{ P_{n-1, m-1}(s+1) - P_{n-1, m-1}(s-1) \big\}.
+\]
+
+
+\subsubsection{Privacy Ratio}
+
+Using the recursive relationships \eqref{eq:rec1} and \eqref{eq:rec0}, we have
+\[ \pi(s; m) = \frac{\P[A_n(m) = s]}{\P[A_n(m+1) = s]}
+ = \frac{q P_{n-1, m}(s-1) + p P_{n-1, m}(s)}
+ {p P_{n-1, m}(s-1) + q P_{n-1, m}(s)}.
+\]
+Lemma \ref{lem:rscomp2} implies that monotonicity and extrema of  the privacy ratio $\pi$ are determined by those of the \emph{probability ratio} $P_{n-1, m}(s)/P_{n-1,m}(s-1)$:
+\[ \text{if}\quad \frac{P_{n-1,m}(s)}{P_{n-1,m}(s-1)} \geq \frac{P_{n-1,m'}(s')}{P_{n-1,m'}(s'-1)},
+\quad\text{then}\quad \pi_n(s;m) \geq \pi_n(s';m'). \]
+Hence, studying the behaviour of the privacy ratio reduces to studying 
+ratios of consecutive pmf values.
+Using this property, we can derive the following facts:
+\begin{itemize}
+\item $\pi$ is decreasing in $s$: $\pi(s;m) \geq \pi(s+1; m)$
+\item $\pi$ is increasing in $m$: $\pi(s;m) \leq \pi(s; m+1)$
+\item $\pi$ is net decreasing when both $s$ and $m$ increase:
+$\pi(s;m) \geq \pi(s+1; m+1)$.
+\end{itemize}
+
+A different approach, using the difference identities above, gives
 \begin{align*}
-\P[A_n(m) = s+1] &- \P[A_n(m-1) = s] \\
- &= q \big\{ \P[A_{n-1}(m-1) = s+1] - \P[A_{n-1}(m-1) = s-1] \big\}
+\pi(s; m) &= \frac{P_{n,m}(s)}{P_{n,m+1}(s)}
+ = \frac{P_{n,m-1}(s) + (p-q)\{P_{n-1,m-1}(s-1) - P_{n-1,m-1}(s)\}}
+ {P_{n,m}(s) + (p-q)\{P_{n-1,m}(s-1) - P_{n-1,m}(s)\}} \\
+ &= \frac{\frac{P_{n,m-1}(s)}{P_{n,m}(s)} + (p-q)\frac{P_{n-1,m-1}(s-1) - P_{n-1,m-1}(s)}{P_{n,m}(s)}}
+ {1 + (p-q)\frac{P_{n-1,m}(s-1) - P_{n-1,m}(s)}{P_{n,m}(s)}}.
 \end{align*}
+Therefore,
+\begin{align*}
+\frac{\pi(s; m)}{\pi(s; m-1)} &= \frac{P_{n,m}(s)}{P_{n,m-1}(s)} \pi(s;m) \\
+ &= \frac{1 + (p-q)\frac{P_{n-1,m-1}(s-1) - P_{n-1,m-1}(s)}{P_{n,m-1}(s)}}
+ {1 + (p-q)\frac{P_{n-1,m}(s-1) - P_{n-1,m}(s)}{P_{n,m}(s)}}
+\end{align*}
+
 
 \subsubsection{Quantiles}
 
@@ -376,45 +397,27 @@ $F_{n,m}(\tau_n(m-1)) \geq \alpha$, \ie
 \[ F_{n,m-1}(\tau_n(m-1)) - \alpha \geq (p-q)\P[A_{n-1}(m-1) = \tau_n(m-1)]. \]
 
 
-\subsubsection{Privacy Ratio}
-
-
-Using the recursive relationships \eqref{eq:rec1} and \eqref{eq:rec0}, we have
-\[ \pi(s; m) = \frac{\P[A_n(m) = s]}{\P[A_n(m+1) = s]}
- = \frac{q\P[A_{n-1}(m) = s-1] + p\P[A_{n-1}(m) = s]}
- {p\P[A_{n-1}(m) = s-1] + q\P[A_{n-1}(m) = s]}.
-\]
-
-Facts:
-\begin{itemize}
-\item $\pi$ is decreasing in $s$: $\pi(s;m) \geq \pi(s+1; m)$
-\item $\pi$ is increasing in $m$: $\pi(s;m) \leq \pi(s; m+1)$
-\item $\pi$ is net decreasing when both $s$ and $m$ increase:
-$\pi(s;m) \geq \pi(s+1; m+1)$.
-\end{itemize}
-
-Write $P_{n,m}(s) = \P[A_{n}(m) = s]$. We have
-\begin{align*}
-\pi(s; m) &= \frac{P_{n,m}(s)}{P_{n,m+1}(s)}
- = \frac{P_{n,m-1}(s) + (p-q)\{P_{n-1,m-1}(s-1) - P_{n-1,m-1}(s)\}}
- {P_{n,m}(s) + (p-q)\{P_{n-1,m}(s-1) - P_{n-1,m}(s)\}} \\
- &= \frac{\frac{P_{n,m-1}(s)}{P_{n,m}(s)} + (p-q)\frac{P_{n-1,m-1}(s-1) - P_{n-1,m-1}(s)}{P_{n,m}(s)}}
- {1 + (p-q)\frac{P_{n-1,m}(s-1) - P_{n-1,m}(s)}{P_{n,m}(s)}}.
-\end{align*}
-Therefore,
-\begin{align*}
-\frac{\pi(s; m)}{\pi(s; m-1)} &= \frac{P_{n,m}(s)}{P_{n,m-1}(s)} \pi(s;m) \\
- &= \frac{1 + (p-q)\frac{P_{n-1,m-1}(s-1) - P_{n-1,m-1}(s)}{P_{n,m-1}(s)}}
- {1 + (p-q)\frac{P_{n-1,m}(s-1) - P_{n-1,m}(s)}{P_{n,m}(s)}}
-\end{align*}
-
 
 \subsubsection{Asymptotic approach}
 
-
+    
 
 ----------------------------
 
+
+\subsubsection{Approximate location relationship over $m$}
+
+The family $\{A_n(m),\, m = 0,\dots,n\}$ are in fact approximately location-shifted versions of each other.
+Indeed, note that
+\[ \EP A_n(m) = mp + (n-m)q = nq + m(p-q) \]
+and
+\[ \Var A_n(m) = mpq + (n-m)qp = npq. \]
+In other words, as $m$ varies between $0$ and $n$, the mean varies linearly in $m$ and the variance remains constant.
+The central portion of the distribution remains approximately the same shape, although transitioning from right-skewed when $m=0$ to left-skewed when $m=n$.
+Thus, 
+\[ F_{n,m}(x) \approx F_{n,0}(x - m(p-q)). \]
+
+We quantify this approximation as follows.
 
 
 \section{Maximal collections}
