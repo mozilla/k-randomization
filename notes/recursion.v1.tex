@@ -170,6 +170,7 @@ From properties of $f_{0,l}$ we have:
 (l+1)(\mu_0 - l) > \mu_0(l+q)
 \end{align}
 
+
 After simplification we have:
 \begin{align}
 -l^2 - l +Npq > 0
@@ -182,6 +183,18 @@ Now consider those $m$ for which $f_{0,l} < f_{m,l}$ at $l$.  In the next iterat
 \[ f_{0,l+1} > f_{m+1,l} > f_{m,l} \]
 
 Which proves the theorem.  
+
+\section{Derivative magic}
+
+Taking deirvate by $\mu$ in formula 1.30, we have
+
+\[ F'(\mu) = -\frac{ (f_{m,l}-1)(N+2)pq - (l+1) }{[ pq(N+2 + (f_{m,l}-2)(\mu_m -l )) - (l+1)]^2}  \]
+
+The denominator is always positive, hence the derivate is always negative when:
+\[ (f-1)(N+2)pq > (l+1)  \]
+
+Which the exact condition for oscillating ratios (see formula 1.45).  Why?
+
 
 \end{document}
 
