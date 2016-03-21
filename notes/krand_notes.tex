@@ -299,6 +299,75 @@ $\P[A_n(m) = s]$ falling between $\P[A_{n-1}(m) = s-1]$ and $\P[A_{n-1}(m) = s]$
 \item the distribution of $A_n(m+1)$ is not so different to that of $A_n(m)$, since $\P[A_n(m) = s]$ and $\P[A_n(m+1) = s]$ both lie between consecutive pmf values of $A_{n-1}(m)$. In particular, this allows us to express the privacy ratio $\pi(s;m)$ in terms of $A_{n-1}(m)$.
 \end{itemize}
 
+Writing $P_{n,m}(s) := \P[A_n(m) = s]$, the formulas \eqref{eq:rec1} and \eqref{eq:rec0} can be expressed as
+\[ P_{n,m}(s) = pP_{n-1,m-1}(s-1) + qP_{n-1,m-1}(s)
+\quad\text{for}\ \ s = 0,\dots,n,\ \ m = 1,\dots,n \]
+and
+\[ P_{n,m}(s) = qP_{n-1,m}(s-1) + pP_{n-1,m}(s)
+\quad\text{for}\ \ s = 0,\dots,n,\ \ m = 0,\dots,n-1. \]
+We now establish a relationship between consecutive pmf values $P_{n,m}(s)$ for fixed $n$ and $m$.
+
+\begin{prop}
+For $n \geq 1$,
+\begin{equation} \label{eq:recP}
+(s+1) P_{n,m}(s+1) = \bigg\{ (m-s)\frac{p}{q} + (n-m-s)\frac{q}{p} \bigg\} P_{n,m}(s) + (n-s+1) P_{n,m}(s-1)
+\end{equation}
+for $0 \leq m \leq n$ and $0 \leq s \leq n-1$ (with $P_{n,m}(-1) := 0$).\end{prop}
+\begin{pf}
+We proceed by induction on $n$.
+Suppose first $n=1$, $s = 0$.
+If $m=1$, then $A_1(1) \sim Ber(p)$, and \eqref{eq:recP} holds since 
+$(mp/q + (1-m)q/p) \cdot P_{1,1}(0) = p = P_{1,1}(1)$.
+The argument is similar when $m=0$.
+Next assume \eqref{eq:recP} holds for $A_{n-1}(m)$, and suppose $m \leq n-1$ and $1 \leq s \leq n-2$.
+Observe that
+\begin{align*}
+\bigg\{ &(m-s)\frac{p}{q} + (n-m-s)\frac{q}{p} \bigg\} P_{n,m}(s) + (n-s+1) P_{n,m}(s-1) \\
+&= \bigg\{ (m-s)\frac{p}{q} + (n-1-m-s)\frac{q}{p} \bigg\} \big[qP_{n-1,m}(s-1) + pP_{n-1,m}(s)\big] \\
+ &\qquad\qquad + (n-1-s+1) \big[qP_{n-1,m}(s-2) + pP_{n-1,m}(s-1)\big] +
+ \frac{q}{p}P_{n,m}(s) + P_{n,m}(s-1) \\
+ &= p\bigg[ \bigg\{ (m-s)\frac{p}{q} + (n-1-m-s)\frac{q}{p} \bigg\} P_{n-1,m}(s) + (n-1-s+1)P_{n-1,m}(s-1) \bigg] \\
+ &\qquad + q\bigg[ \bigg\{ (m-(s-1))\frac{p}{q} + (n-1-m-(s-1))\frac{q}{p} \bigg\} P_{n-1,m}(s-1) \\
+ &\hspace{20em} + (n-1-(s-1)+1)P_{n-1,m}(s-2) \bigg] \\
+ &\qquad - \bigg(p + \frac{q^2}{p}\bigg) P_{n-1,m}(s-1) - qP_{n-1,m}(s-2) + \frac{q^2}{p}P_{n-1,m}(s-1) + qP_{n-1,m}(s) \\
+ &\qquad + qP_{n-1,m}(s-2) + pP_{n-1,m}(s-1) \\
+ &= p(s+1)P_{n-1,m}(s+1) + qsP_{n-1,m}(s) + qP_{n-1,m}(s) \\
+ & = (s+1) \big[ qP_{n-1,m}(s) + pP_{n-1,m}(s+1) \big] = (s+1)P_{n,m}(s+1),
+\end{align*}
+applying the induction hypothesis for $s$ and for $s-1$ together with \eqref{eq:rec0}. If $s=0$, the argument is similar:
+\begin{align*}
+\bigg\{ m\frac{p}{q} + (n-m)\frac{q}{p} \bigg\} P_{n,m}(0)
+&= p\bigg\{ m\frac{p}{q} + (n-1-m)\frac{q}{p} \bigg\} P_{n-1,m}(0) + qP_{n-1,m}(0) \\
+ &= pP_{n-1,m}(1) + qP_{n-1,m}(0) = P_{n,m}(1).
+\end{align*}
+
+
+ 
+\end{pf}
+
+
+\subsubsection{Probability ratios}
+
+(TODO) The behaviour of the privacy ratio $\pi(s;m)$ can be studied through ratios of consecutive values of the pmf $P_{n,m}(s)$.
+
+Define the \emph{probability ratio} $\rho_n(s;m) = P_{n,m}(s) / P_{n,m}(s-1)$ for $1\leq s \leq n$. Given $m$, the probability can be expressed using \eqref{eq:recP}:
+\begin{align*}
+\rho(s+1;m) &= \frac{m-s}{s+1}\frac{p}{q} + \frac{n-m-s}{s+1}\frac{q}{p} + \frac{n-s+1}{s+1} \frac{1}{\rho(s;m)} \\
+\rho(1;m) &= m\frac{p}{q} + (n-m)\frac{q}{p}
+\end{align*}
+Write
+\[ \eta(s;m) := \frac{n-s+1}{s+1} \qquad\text{and}\qquad
+\gamma(s;m) := \frac{m-s}{s+1}\frac{p}{q} + \frac{n-m-s}{s+1}\frac{q}{p}, \]
+so that
+\[ \rho(s+1;m) = \eta(s;m)\inv{\rho(s;m)} + \gamma(s;m)\,; \quad
+\rho(1;m) = \gamma(0;m). \]
+
+
+----------------------------
+
+
+\subsubsection{Recursive relationship for CDFs}
+
 Summing both sides of \eqref{eq:rec1} and \eqref{eq:rec0} shows that the recursive relationship extends to cdfs as well.
 Writing $F_{n,m}(x) := \P[A_n(m) \leq x]$, we have
 \begin{equation*}%\label{eq:Frec1}
@@ -311,7 +380,7 @@ F_{n,m}(x) = q\cdot F_{n-1,m}(x-1) + p\cdot F_{n-1,m}(x)
 \qquad\qquad m = 0,\dots,n-1.
 \end{equation*}
 
-Furthermore, we can express the difference on incrementing $m$ as follows. Denote $P_{n,m}(s) := \P[A_n(m) = s]$. Then
+Furthermore, we can express the difference on incrementing $m$ as follows:
 \begin{align*}
  F_{n,m}(x) &- F_{n,m-1}(x) \\
 &= p F_{n-1,m-1}(x-1) + q F_{n-1,m-1}(x) - q F_{n-1,m-1}(x-1)
@@ -402,7 +471,6 @@ $F_{n,m}(\tau_n(m-1)) \geq \alpha$, \ie
 
     
 
-----------------------------
 
 
 \subsubsection{Approximate location relationship over $m$}
