@@ -1,0 +1,97 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 
+%% Informal notes on k-randomization.
+%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[11pt,draft]{article}
+%\documentclass[11pt,draft]{amsart}
+
+% Custom styling.
+\usepackage{mozdp}
+%% Controls enumeration labels
+%\usepackage{enumerate}
+%% Shrinks margins 
+\usepackage{fullpage}
+%% Shows equation label keys
+%\usepackage[notref]{showkeys}
+%% Title matter
+\title{}
+\author{Maxim Zhilyaev \and David Zeber}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\maketitle
+
+\section{thoughts}
+
+\begin{align}
+R = \frac{P(S|D'+0)}{P(S|D'+1)} \\
+R - 1 =   \frac{P(S|D'+0)}{P(S|D'+1)}  - 1 = \frac{P(S|D'+0) - P(S|D'+1)}{P(S|D'+1)}
+\end{align}
+ 
+\subsection{Univariate case}
+
+\begin{align}
+P(S|D'+0) = qP(S-1) + pP(S)\\
+P(S|D'+1) = pP(S-1) + qP(S)\\
+R = 1 + \frac{P(S|D'+0) - P(S|D'+1)}{P(S|D'+1)} = 1 + \frac{ P(S) - P(S-1)}{ pP(S-1) + qP(S) } \cdot (p-q) 
+\end{align}
+
+Assume \[ \delta(S) = P(S) - P(S-1) \]
+
+\begin{align}
+R = 1 + \frac{ P(S) - P(S-1)}{ pP(S-1) + qP(S) } \cdot (p-q)  = 1 +  \frac{ \delta(S) }{ pP(S-1) + q(P(S-1) + \delta(S)) } \cdot (p-q) \\
+R = 1 +  \frac{\delta(S) (p-q) }{ P(S-1) + q\delta(S)}
+\end{align}
+
+As $m$ changes from $0$ to $N$,  and $S$ is chosen to be $S=\mu_m - 3*\sigma$, it appears that $\delta(S)$ increases slightly, while $P(S-1)$ increades significantly when $m$ grows.
+Basically, the reason why $R_0$ is the largest at the left end of range is simply because  probabilities at the end-point of the rage are smaller for $m=0$ than for $m>0$.
+Perhaps we can bound $\delta(S)$, the differences shouldn't be very large especially for large $N$, and perhaps we can achieve good bound using normal assumption, and then simply show that denominator is smallest when $m=0$, which I think is the case.
+
+\subsection{a variation of same idea}
+
+Consider $R_m$ at the left end of the range (denoted as $S_m$) when $m$ is changing from $0$ to $N$.   
+
+\begin{align}
+R_0 =  \frac{P(S_0|D_0+0)}{P(S_0|D_0+1)}  \\
+R_1 =  \frac{P(S_1|D_1+1)}{P(S_1|D_1+1)}  \\
+... \\
+R_N =  \frac{P(S_N|D_N+0)}{P(S_N|D_N+1)}  \\
+\end{align}
+
+Let's consider a situation when all numerators are equal:
+\[
+P(S_0|D_0+0) = P(S_1|D_1+1) = ... = P(S_N|D_N+0)
+\]
+
+Then the ratio $R_m$ will only depend on the denominator.   Suppose we choose a quantile probability of 0.005.  Now,  let's fin the corresponding PDF probability for that quintile for $m=N$ distribution.  Call this probability $y$.
+The corresponding $S_N$ for that $y$ will be $l$ units away from the mean $\mu_N$.  
+
+I believe it can be shown for all distributions with $m<N$  that  a) $S_m$ corresponding to that $y$ is at least $l$ units (or further) away from $\mu_m$,  and b)  $S_m$ falls into smaller quintile, and c)  $P(S_m|D_m+1)$ is smallest when $D'=0$.   Basically, we fix the numerator probability for all $m$, and then prove that denominator will be smallest at $m=0$ and that point will be bellow the local-privacy range for the corresponding $D'$.
+
+\subsection{multivariate case}
+
+in the collection of $N$ vectors of length $L$, we replace a unit vector $1$ with a zero vector $0$.  Try argue same thing:
+
+\begin{align}
+R = 1 +  \frac{P(S|D'+0) - P(S|D'+1)}{P(S|D'+1)}
+\end{align}
+
+Assuming that for large $N$ the numerator is reasonably bounded (that is doesn't change with $D'$), then $R$ is dominated by the value of denominator.
+
+\begin{align}
+P(S|D'+1) = P(s_1-1,s_2,\dots,s_{2^L}|D') q^L + P(s_1,s_2-1,\dots,s_{2^L}|D') q^{L-1}p  + \dots + P(s_1,s_2,\dots,s_{2^L} - 1|D') p^L
+\end{align}
+
+It may be so, that if $D' = 0$, then $P(S|D')$ is simply smaller compared to all other $D'$, hence the linear combination of slight variations of $P(S)$ also comes out smallest.
+
+
+
+
+\end{document}
+
+
