@@ -357,16 +357,25 @@ Define the \emph{probability ratio} $\rho_n(s;m) = P_{n,m}(s) / P_{n,m}(s-1)$ fo
 \end{align*}
 Write
 \[ \eta(s) := \frac{n-s+1}{s+1} \qquad\text{and}\qquad
-\gamma_m(s) := \frac{m-s}{s+1}\frac{p}{q} + \frac{n-m-s}{s+1}\frac{q}{p}, \]
+\gamma_m(s) := \frac{1}{s+1} \left[(m-s)\frac{p}{q} + (n-m-s)\frac{q}{p}\right], \]
 so that
 \[ \rho(s+1;m) = \eta(s)\inv{\rho(s;m)} + \gamma_m(s)\,; \quad
 \rho(1;m) = \gamma_m(0). \]
 
-The probability ratio has the following properties:
+The probability ratio has the following properties (TODO):
 \begin{itemize}
 \item decreasing in $s$ for fixed $m$
 \item increasing in $m$ for fixed $s$.
 \end{itemize}
+
+Note also that $\gamma_m(s)$ can be expressed in terms of $\EP A_n(m) = \mu_m = nq + m(p-q)$:
+\begin{align*}
+(s+1)\gamma_m(s) &= \frac{(m-s)p^2 + (n-m-s)q^2}{pq}
+ = \frac{m(p^2-q^2) + nq^2 - s(p^2 + q^2)}{pq} \\
+ &= \frac{nq + m(p-q) - nq + nq^2 - s(1-2pq)}{pq}
+ = \frac{\mu_m - s -(n - 2s)pq}{pq} \\
+ &= \frac{\mu_m - s}{pq} - n + 2s.
+\end{align*} 
 
 For $\delta > 0$ let $s_m(\delta) = \lfloor \mu_m - \delta \rfloor \vee 0$, and define $R_m(\delta) := \rho(s_m(\delta); m)$. Note that $s_m(\delta + 1) = s_m(\delta) - 1$, and $R_m(\delta) \leq R_m(\delta')$ for $\delta \leq \delta'$.
 
@@ -379,15 +388,28 @@ Fix $\delta > 0$, and suppose $R_m(\delta) > R_0(\delta + 1)$ for some $m$. Then
 \[ R_0(\delta) \leq R_0(\delta+1) < R_m(\delta) \leq R_m(\delta+1),\]
 implying that
 \[ \inv{R_0(\delta + 1)} = \frac{R_0(\delta) - \gamma_0(s_0(\delta+1))}{\eta(s_0(\delta+1))} > 
-\frac{R_m(\delta) - \gamma_m(s_m(\delta+1))}{\eta(s_m(\delta+1))} = \inv{R_m(\delta + 1)}.
-\]
-Since $R_m(\delta) > R_0(\delta)$ by assumption, we obtain
-\[ \big\{\eta(s_m(\delta+1)) - \eta(s_0(\delta+1))\big\} R_0(\delta)
- + \big\{\eta(s_0(\delta+1))\gamma_m(s_m(\delta+1)) - \eta(s_m(\delta+1))\gamma_0(s_0(\delta+1))\big\} > 0, \]
-\ie
-\[ A R_0(\delta) + B > 0. \]
-On one hand, $A = \eta(s_m(\delta+1)) - \eta(s_0(\delta+1)) \leq 0$, since $s_m(\delta+1) \geq s_0(\delta+1)$, and it is easy to see that $\eta(s)$ is decreasing in $s$.
-On the other, ...
+\frac{R_m(\delta) - \gamma_m(s_m(\delta+1))}{\eta(s_m(\delta+1))} = \inv{R_m(\delta + 1)}. \]
+Since $R_m(\delta) > R_0(\delta)$ by assumption, we obtain (with $s_j := s_j(\delta+1)$):
+\begin{equation}\label{eq:deltabdineq}
+\big\{\eta(s_m) - \eta(s_0)\big\} R_0(\delta)
+ + \big\{\eta(s_0)\gamma_m(s_m) - \eta(s_m)\gamma_0(s_0)\big\} > 0.
+\end{equation}
+Note that
+\[ \eta(s_m) - \eta(s_0)
+= \frac{n - s_m + 1}{s_m + 1} - \frac{n - s_0 + 1}{s_0 + 1}
+= -\frac{(n + 2)(s_m - s_0)}{(s_0 + 1)(s_m + 1)}, \]
+and
+\begin{align*}
+\eta(s_0)&\gamma_m(s_m) - \eta(s_m)\gamma_0(s_0) \\
+&= \frac{n - s_0 + 1}{s_0 + 1}\cdot \frac{(\mu_m - s_m)/pq - n + 2s_m}{s_m + 1} - 
+\frac{n - s_m + 1}{s_m + 1}\cdot \frac{(\mu_0-s_0)/ pq - n + 2s_0}{s_0 + 1} \\
+ &= \frac{(n+2)(s_m-s_0) + (\mu_0 s_m - \mu_m s_0)/pq + (n+1)[\mu_m - \mu_0 - (s_m - s_0)]/pq}{(s_0 + 1)(s_m + 1)}.
+\end{align*}
+Applying these in \eqref{eq:deltabdineq} gives
+\begin{align*}
+0 < (n+2)(s_m-s_0)\big[1- R_0(\delta)\big] + \frac{\mu_0 s_m - \mu_m s_0}{pq} + (n+1)\frac{\mu_m - \mu_0 - (s_m - s_0)}{pq}
+\end{align*}
+
 \end{pf}
 
 
