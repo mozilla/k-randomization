@@ -237,6 +237,35 @@ TODO: consequences of this: \\
 - difference between numerator and denominator is basically a reweighting of the same terms in the sum \\
 - max value of ratio -  $~ (p/q)^L$ but doesn't depend on population size $n$
 
+\subsection{Local differential privacy}
+
+As noted above, differential privacy requires the privacy ratio to be uniformly
+bounded over all original and synthetic collections.
+This ensures that, regardless of the original collection, the randomization
+procedure used to generate the synthetic collection carries the same privacy
+guarantee.
+
+However, applying the differential privacy criterion to our scenario of
+independently randomized bit vectors has a number of shortcomings.
+For one thing, the maximum value of the privacy ratio becomes infeasibly large
+when reporting large vectors, since it grows exponentially in $L$, the
+dimensionality of the reports.
+In order to bound this by what is commonly accepted as a reasonable value
+(TODO), the lie probability $q$ needs to be set infeasibly high, reducing the
+utility of the collected data.
+Also, the maximum value does not depend on the population size $n$, meaning
+that no benefit is gained from having a larger population.
+Another issue is that the maximum value occurs for a synthetic collection
+which becomes increasing unlikely as the population size grows. Hence, the high
+cost in terms of utility that we are incurring is mainly spent on protection
+for very unlikely outcomes.
+
+We propose to remedy this by relaxing the differential privacy criterion 
+\eqref{eq:dpcnt} to hold for all but the most unlikely synthetic outcomes
+in $\Ssp$.
+We say that $A$ is $\epsilon$-\textbf{locally differentially private} if
+
+
 \section{The case $L = 1$}
 
 It is instructive to first consider the case where each record in the collection consists of a single bit, as the expressions simplify considerably.
@@ -309,7 +338,7 @@ and
 \quad\text{for}\ \ 0 \leq s \leq n,\ \ 0\leq m \leq n-1.
 \]
 
-\subsection{Privacy ratio and probability ratio}
+\subsection{The probability ratio}
 
 The probabilities in the privacy ratio represent the likelihood of observing
 the same synthetic collection outcome given two different original collections.
@@ -337,15 +366,16 @@ The function $g$ is increasing over $x>0$, since
 Therefore, properties of monotonicity and extrema established for $\rho_n$ (for
 all $n$) carry over to $\pi_n$ as well.
 
+The probability ratio can be expressed in a concise way using the following 
+recursive property of the distribution of $A_n(m)$.
 
-We now establish a relationship between consecutive pmf values $P_{n,m}(s)$ for fixed $n$ and $m$.
-
-\begin{prop}
+\begin{lem}
 For $n \geq 1$,
 \begin{equation} \label{eq:recP}
 (s+1) P_{n,m}(s+1) = \bigg\{ (m-s)\frac{p}{q} + (n-m-s)\frac{q}{p} \bigg\} P_{n,m}(s) + (n-s+1) P_{n,m}(s-1)
 \end{equation}
-for $0 \leq m \leq n$ and $0 \leq s \leq n-1$ (with $P_{n,m}(-1) := 0$).\end{prop}
+for $0 \leq m \leq n$ and $0 \leq s \leq n-1$ (with $P_{n,m}(-1) := 0$).
+\end{lem}
 \begin{pf}
 We proceed by induction on $n$.
 Suppose first $n=1$, $s = 0$.
@@ -373,17 +403,9 @@ applying the induction hypothesis for $s$ and for $s-1$ together with \eqref{eq:
 &= p\bigg\{ m\frac{p}{q} + (n-1-m)\frac{q}{p} \bigg\} P_{n-1,m}(0) + qP_{n-1,m}(0) \\
  &= pP_{n-1,m}(1) + qP_{n-1,m}(0) = P_{n,m}(1).
 \end{align*}
-
-
- 
 \end{pf}
 
-
-\subsection{Probability ratios}
-
-(TODO) The behaviour of the privacy ratio $\pi(s;m)$ can be studied through ratios of consecutive values of the pmf $P_{n,m}(s)$.
-
-Define the \emph{probability ratio} $\rho_n(s;m) = P_{n,m}(s) / P_{n,m}(s-1)$ for $1\leq s \leq n$. Given $m$, the probability can be expressed using \eqref{eq:recP}:
+Given $m$, the probability ratio can be expressed using \eqref{eq:recP}:
 \begin{align*}
 \rho(s+1;m) &= \frac{m-s}{s+1}\frac{p}{q} + \frac{n-m-s}{s+1}\frac{q}{p} + \frac{n-s+1}{s+1} \frac{1}{\rho(s;m)} \\
 \rho(1;m) &= m\frac{p}{q} + (n-m)\frac{q}{p}
@@ -410,19 +432,32 @@ The probability ratio has the following properties (TODO):
 \item increasing in $m$ for fixed $s$.
 \end{itemize}
 
-In addition, we are interested in the behaviour of $\rho(s;m)$ in the case where
-$s$ and $m$ vary together, with $s$ maintaining a fixed distance from the mean
-$\mu_m$.
-Because of the discreteness, the path of $\rho$ is not monotonic.
-However, we show that it is bounded by a value of $\rho(\cdot\,;0)$, if the
-distance from the mean is large enough.
+\subsection{Bounding the probability ratio}
 
-For $\delta > 0$ let $s_m(\delta) = \lceil \mu_m - \delta \rceil \vee 0$, and define $R_m(\delta) := \rho(s_m(\delta); m)$.
+For $A$ to satisfy local differential privacy, the privacy ratio $\pi_n(s;m)$
+must be bounded for all $s$ except for a set of small probability with respect
+to the distribution $\P[A_n(m) = \cdot]$.
+Furthermore, this bound must hold regardless of the original collection
+described through $m$.
+
+Fix $\delta > 0$.
+Given $m$, we show that, for $s\in[\mu_m-\delta, n]$, the probability ratio
+is bounded by a value of $\rho(s; 0)$, where $s$ is expressed in terms of
+$\mu_0-\delta$.
+Together with the fact that
+$P_{n,m}(\mu_m - \delta) \leq P_{n,0}(\mu_0 - \delta)$ (TODO),
+this implies that the bound for local differential privacy, required to hold
+for all $m$, can be computed in terms of $A_n(0)$ alone.
+Note that, since $\rho$ is decreasing in $s$ for fixed $m$, it is sufficient
+to consider the probability ratio at the smallest integer value belonging to
+the interval $[\mu_m-\delta, n]$.
+
+For $\delta > 0$ let $s_m(\delta) = \lceil \mu_m - \delta \rceil \vee 1$, and define $R_m(\delta) := \rho(s_m(\delta); m)$.
 Note that $R_m(\delta) \leq R_m(\delta')$ for $\delta \leq \delta'$.
 
 \begin{prop}
 \[ R_m(\delta) \leq R_0(\delta + 1) \]
-for all $m$, provided $\delta > \sigma$.
+for all $m$, provided $\delta > npq = \Var A_n(0)$.
 \end{prop}
 \begin{pf}
 Fix $\delta > 0$.
