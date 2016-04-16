@@ -235,10 +235,9 @@ Conditioning on the value of the modified record, we can write
 
 TODO: consequences of this: \\
 - difference between numerator and denominator is basically a reweighting of the same terms in the sum \\
-- max value of ratio
+- max value of ratio -  $~ (p/q)^L$ but doesn't depend on population size $n$
 
-
-\subsection{The case $L = 1$}
+\section{The case $L = 1$}
 
 It is instructive to first consider the case where each record in the collection consists of a single bit, as the expressions simplify considerably.
 
@@ -273,7 +272,7 @@ the privacy ratio becomes
 Hence, in the $L=1$ case, it suffices to study the behaviour of $\pi(s;m)$.
 
 
-\subsubsection{Recursive relationship over $n$ and $m$}
+\subsection{Recursive relationship over $n$ and $m$}
 
 The conditioning argument \eqref{eq:prcond} yields a recursive relationship that lets us express the distribution of $A_n$ in terms of that of $A_{n-1}$.
 
@@ -346,7 +345,7 @@ applying the induction hypothesis for $s$ and for $s-1$ together with \eqref{eq:
 \end{pf}
 
 
-\subsubsection{Probability ratios}
+\subsection{Probability ratios}
 
 (TODO) The behaviour of the privacy ratio $\pi(s;m)$ can be studied through ratios of consecutive values of the pmf $P_{n,m}(s)$.
 
@@ -362,12 +361,6 @@ so that
 \[ \rho(s+1;m) = \eta(s)\inv{\rho(s;m)} + \gamma_m(s)\,; \quad
 \rho(1;m) = \gamma_m(0). \]
 
-The probability ratio has the following properties (TODO):
-\begin{itemize}
-\item decreasing in $s$ for fixed $m$
-\item increasing in $m$ for fixed $s$.
-\end{itemize}
-
 Note also that $\gamma_m(s)$ can be expressed in terms of $\EP A_n(m) = \mu_m = nq + m(p-q)$:
 \begin{align*}
 (s+1)\gamma_m(s) &= \frac{(m-s)p^2 + (n-m-s)q^2}{pq}
@@ -377,15 +370,41 @@ Note also that $\gamma_m(s)$ can be expressed in terms of $\EP A_n(m) = \mu_m = 
  &= \frac{\mu_m - s}{pq} - n + 2s.
 \end{align*} 
 
-For $\delta > 0$ let $s_m(\delta) = \lfloor \mu_m - \delta \rfloor \vee 0$, and define $R_m(\delta) := \rho(s_m(\delta); m)$. Note that $s_m(\delta + 1) = s_m(\delta) - 1$, and $R_m(\delta) \leq R_m(\delta')$ for $\delta \leq \delta'$.
+The probability ratio has the following properties (TODO):
+\begin{itemize}
+\item decreasing in $s$ for fixed $m$
+\item increasing in $m$ for fixed $s$.
+\end{itemize}
+
+In addition, we are interested in the behaviour of $\rho(s;m)$ in the case where
+$s$ and $m$ vary together, with $s$ maintaining a fixed distance from the mean
+$\mu_m$.
+Because of the discreteness, the path of $\rho$ is not monotonic.
+However, we show that it is bounded by a value of $\rho(\cdot\,;0)$, if the
+distance from the mean is large enough.
+
+For $\delta > 0$ let $s_m(\delta) = \lceil \mu_m - \delta \rceil \vee 0$, and define $R_m(\delta) := \rho(s_m(\delta); m)$.
+Note that $R_m(\delta) \leq R_m(\delta')$ for $\delta \leq \delta'$.
 
 \begin{prop}
 \[ R_m(\delta) \leq R_0(\delta + 1) \]
 for all $m$, provided $\delta > \sigma$.
 \end{prop}
 \begin{pf}
-Fix $\delta > 0$, and suppose $R_m(\delta) > R_0(\delta + 1)$ for some $m$. Then, we have
-\[ R_0(\delta) \leq R_0(\delta+1) < R_m(\delta) \leq R_m(\delta+1),\]
+Fix $\delta > 0$.
+(TODO)
+If $s_0(\delta) = 0$, then
+$R_m(\delta) \leq \rho(0;m) \leq \rho(0;0) = R_0(\delta+1)$ by
+monotonicity.
+
+Assume $s_0(\delta) \geq 1$, and let 
+$\delta' := \delta + 1 - \{\lceil \mu_0 - \delta \rceil - (\mu_0 - \delta)\} = \mu_0 - \lceil \mu_0 - \delta \rceil + 1$, \ie 
+$\delta' = \inf \{\lambda : s_0(\lambda) = s_0(\delta) - 1\}$, the point between $\delta$ and $\delta + 1$ at which $s_0(\cdot)$ decrements by 1.
+Then $\mu_0 - \delta'$ is an integer, and 
+$s_0(\delta') = \lceil \mu_0 - \delta \rceil - 1 = s_0(\delta + 1)$.
+Suppose $R_m(\delta) > R_0(\delta')$ for some $m$.
+Then, we have
+\[ R_0(\delta) \leq R_0(\delta') < R_m(\delta) \leq R_m(\delta'),\]
 implying that
 \[ \inv{R_0(\delta + 1)} = \frac{R_0(\delta) - \gamma_0(s_0(\delta+1))}{\eta(s_0(\delta+1))} > 
 \frac{R_m(\delta) - \gamma_m(s_m(\delta+1))}{\eta(s_m(\delta+1))} = \inv{R_m(\delta + 1)}. \]
@@ -405,6 +424,16 @@ and
 \frac{n - s_m + 1}{s_m + 1}\cdot \frac{(\mu_0-s_0)/ pq - n + 2s_0}{s_0 + 1} \\
  &= \frac{(n+2)(s_m-s_0) + (\mu_0 s_m - \mu_m s_0)/pq + (n+1)[\mu_m - \mu_0 - (s_m - s_0)]/pq}{(s_0 + 1)(s_m + 1)}.
 \end{align*}
+
+Now, write $\delta' := \delta - \{\lceil \mu_0 - \delta \rceil - (\mu_0 - \delta)\} = \mu_0 - \lceil \mu_0 - \delta \rceil$, so that
+$s_0 = \mu_0 - \delta' - 1$.
+Then
+\begin{align*}
+ \mu_0 s_m - \mu_m s_0 &= \mu_0(s_m - s_0) + \mu_0(\mu_0 - \delta' - 1) - (\mu_0 + m(p-q))(\mu_0 - \delta' - 1) \\
+ &= \mu_0(s_m - s_0) - m(p-q)(\mu_0 - \delta' - 1).
+\end{align*}
+
+
 Applying these in \eqref{eq:deltabdineq} gives
 \begin{align*}
 0 < (n+2)(s_m-s_0)\big[1- R_0(\delta)\big] + \frac{\mu_0 s_m - \mu_m s_0}{pq} + (n+1)\frac{\mu_m - \mu_0 - (s_m - s_0)}{pq}
@@ -416,7 +445,7 @@ Applying these in \eqref{eq:deltabdineq} gives
 ----------------------------
 
 
-\subsubsection{Recursive relationship for CDFs}
+\subsection{Recursive relationship for CDFs}
 
 Summing both sides of \eqref{eq:rec1} and \eqref{eq:rec0} shows that the recursive relationship extends to cdfs as well.
 Writing $F_{n,m}(x) := \P[A_n(m) \leq x]$, we have
@@ -460,7 +489,7 @@ P_{n, m}(s+1) - P_{n, m-1}(s) = q \big\{ P_{n-1, m-1}(s+1) - P_{n-1, m-1}(s-1) \
 \]
 
 
-\subsubsection{Privacy Ratio}
+\subsection{Privacy Ratio}
 
 Using the recursive relationships \eqref{eq:rec1} and \eqref{eq:rec0}, we have
 \[ \pi(s; m) = \frac{\P[A_n(m) = s]}{\P[A_n(m+1) = s]}
@@ -496,7 +525,7 @@ Therefore,
 \end{align*}
 
 
-\subsubsection{Quantiles}
+\subsection{Quantiles}
 
 Denote by $\tau_n(m)$ the $\alpha$-th quantile of $F_{n,m}$:
 \[ \tau_n(m) = \inf\{y : F_{n,m}(y) \geq \alpha \}. \]
@@ -517,13 +546,13 @@ $F_{n,m}(\tau_n(m-1)) \geq \alpha$, \ie
 
 
 
-\subsubsection{Asymptotic approach}
+\subsection{Asymptotic approach}
 
     
 
 
 
-\subsubsection{Approximate location relationship over $m$}
+\subsection{Approximate location relationship over $m$}
 
 The family $\{A_n(m),\, m = 0,\dots,n\}$ are in fact approximately location-shifted versions of each other.
 Indeed, note that
