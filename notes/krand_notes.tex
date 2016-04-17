@@ -413,18 +413,22 @@ Given $m$, the probability ratio can be expressed using \eqref{eq:recP}:
 Write
 \[ \eta(s) := \frac{n-s+1}{s+1} \qquad\text{and}\qquad
 \gamma_m(s) := \frac{1}{s+1} \left[(m-s)\frac{p}{q} + (n-m-s)\frac{q}{p}\right], \]
-so that
-\[ \rho(s+1;m) = \eta(s)\inv{\rho(s;m)} + \gamma_m(s)\,; \quad
-\rho(1;m) = \gamma_m(0). \]
+to get
+\begin{equation}\label{eq:probrrec}
+\rho(s+1;m) = \eta(s)\inv{\rho(s;m)} + \gamma_m(s)\,; \quad
+\rho(1;m) = \gamma_m(0). 
+\end{equation}
 
-Note also that $\gamma_m(s)$ can be expressed in terms of $\EP A_n(m) = \mu_m = nq + m(p-q)$:
-\begin{align*}
-(s+1)\gamma_m(s) &= \frac{(m-s)p^2 + (n-m-s)q^2}{pq}
- = \frac{m(p^2-q^2) + nq^2 - s(p^2 + q^2)}{pq} \\
- &= \frac{nq + m(p-q) - nq + nq^2 - s(1-2pq)}{pq}
- = \frac{\mu_m - s -(n - 2s)pq}{pq} \\
- &= \frac{\mu_m - s}{pq} - n + 2s.
-\end{align*} 
+Note also that $\gamma_m(s)$ can be expressed in terms of
+$\EP A_n(m) = \mu_m = nq + m(p-q)$:
+\[ (s+1)\gamma_m(s) = \frac{\mu_m - s}{pq} - n + 2s. \]
+%\begin{align*}
+% &= \frac{(m-s)p^2 + (n-m-s)q^2}{pq}
+% = \frac{m(p^2-q^2) + nq^2 - s(p^2 + q^2)}{pq} \\
+% &= \frac{nq + m(p-q) - nq + nq^2 - s(1-2pq)}{pq}
+% = \frac{\mu_m - s -(n - 2s)pq}{pq} \\
+% &= 
+%\end{align*} 
 
 The probability ratio has the following properties (TODO):
 \begin{itemize}
@@ -436,24 +440,26 @@ The probability ratio has the following properties (TODO):
 
 For $A$ to satisfy local differential privacy, the privacy ratio $\pi_n(s;m)$
 must be bounded for all $s$ except for a set of small probability with respect
-to the distribution $\P[A_n(m) = \cdot]$.
+to the distribution $\P[A_n(m) = \cdot\,]$.
 Furthermore, this bound must hold regardless of the original collection
 described through $m$.
 
 Fix $\delta > 0$.
-Given $m$, we show that, for $s\in[\mu_m-\delta, n]$, the probability ratio
-is bounded by a value of $\rho(s; 0)$, where $s$ is expressed in terms of
+Given $m$, we show that the probability ratio for $s\in[\mu_m-\delta, n]$ 
+is bounded by a value $\rho(s^*; 0)$, where $s^*$ is expressed in terms of
 $\mu_0-\delta$.
 Together with the fact that
-$P_{n,m}(\mu_m - \delta) \leq P_{n,0}(\mu_0 - \delta)$ (TODO),
+$P_{n,m}(\mu_m - \delta) \leq P_{n,0}(\mu_0 - \delta)$ (TODO - is this
+necessary?),
 this implies that the bound for local differential privacy, required to hold
 for all $m$, can be computed in terms of $A_n(0)$ alone.
 Note that, since $\rho$ is decreasing in $s$ for fixed $m$, it is sufficient
 to consider the probability ratio at the smallest integer value belonging to
 the interval $[\mu_m-\delta, n]$.
 
-For $\delta > 0$ let $s_m(\delta) = \lceil \mu_m - \delta \rceil \vee 1$, and define $R_m(\delta) := \rho(s_m(\delta); m)$.
-Note that $R_m(\delta) \leq R_m(\delta')$ for $\delta \leq \delta'$.
+For $\delta > 0$ let $s_m(\delta) := \lceil \mu_m - \delta \rceil \vee 1$, and define $R_m(\delta) := \rho(s_m(\delta); m)$.
+Note that $R_m(\delta) \leq R_m(\delta')$ for $\delta \leq \delta'$, and
+$s_m(\delta + 1) = (s_m(\delta) - 1) \vee 1$.
 
 \begin{prop}
 \[ R_m(\delta) \leq R_0(\delta + 1) \]
@@ -462,27 +468,32 @@ for all $m$, provided $\delta > npq = \Var A_n(0)$.
 \begin{pf}
 Fix $\delta > 0$.
 (TODO)
-If $s_0(\delta) = 0$, then
-$R_m(\delta) \leq \rho(0;m) \leq \rho(0;0) = R_0(\delta+1)$ by
-monotonicity.
+If $s_0(\delta) = 1$
 
-Assume $s_0(\delta) \geq 1$, and let 
+Assume $s_0(\delta) \geq 2$.
+
+and let 
 $\delta' := \delta + 1 - \{\lceil \mu_0 - \delta \rceil - (\mu_0 - \delta)\} = \mu_0 - \lceil \mu_0 - \delta \rceil + 1$, \ie 
-$\delta' = \inf \{\lambda : s_0(\lambda) = s_0(\delta) - 1\}$, the point between $\delta$ and $\delta + 1$ at which $s_0(\cdot)$ decrements by 1.
+$\delta' = $, the point between $\delta$ and $\delta + 1$ at which $s_0(\cdot)$ decrements by 1.
 Then $\mu_0 - \delta'$ is an integer, and 
 $s_0(\delta') = \lceil \mu_0 - \delta \rceil - 1 = s_0(\delta + 1)$.
-Suppose $R_m(\delta) > R_0(\delta')$ for some $m$.
+
+Suppose $R_m(\delta) > R_0(\delta + 1)$ for some $m$.
 Then, we have
-\[ R_0(\delta) \leq R_0(\delta') < R_m(\delta) \leq R_m(\delta'),\]
+\[ R_0(\delta) \leq R_0(\delta + 1) < R_m(\delta) \leq R_m(\delta + 1),\]
 implying that
-\[ \inv{R_0(\delta + 1)} = \frac{R_0(\delta) - \gamma_0(s_0(\delta+1))}{\eta(s_0(\delta+1))} > 
-\frac{R_m(\delta) - \gamma_m(s_m(\delta+1))}{\eta(s_m(\delta+1))} = \inv{R_m(\delta + 1)}. \]
-Since $R_m(\delta) > R_0(\delta)$ by assumption, we obtain (with $s_j := s_j(\delta+1)$):
+\[ \inv{R_0(\delta + 1)} =
+\frac{R_0(\delta) - \gamma_0(s_0(\delta+1))}{\eta(s_0(\delta+1))} > 
+\frac{R_m(\delta) - \gamma_m(s_m(\delta+1))}{\eta(s_m(\delta+1))} =
+\inv{R_m(\delta + 1)} \]
+via \eqref{eq:probrrec}.
+Since $R_m(\delta) > R_0(\delta)$ by assumption, we obtain (with
+$s_j := s_j(\delta+1)$):
 \begin{equation}\label{eq:deltabdineq}
 \big\{\eta(s_m) - \eta(s_0)\big\} R_0(\delta)
  + \big\{\eta(s_0)\gamma_m(s_m) - \eta(s_m)\gamma_0(s_0)\big\} > 0.
 \end{equation}
-Note that
+Furthermore,
 \[ \eta(s_m) - \eta(s_0)
 = \frac{n - s_m + 1}{s_m + 1} - \frac{n - s_0 + 1}{s_0 + 1}
 = -\frac{(n + 2)(s_m - s_0)}{(s_0 + 1)(s_m + 1)}, \]
@@ -491,22 +502,41 @@ and
 \eta(s_0)&\gamma_m(s_m) - \eta(s_m)\gamma_0(s_0) \\
 &= \frac{n - s_0 + 1}{s_0 + 1}\cdot \frac{(\mu_m - s_m)/pq - n + 2s_m}{s_m + 1} - 
 \frac{n - s_m + 1}{s_m + 1}\cdot \frac{(\mu_0-s_0)/ pq - n + 2s_0}{s_0 + 1} \\
- &= \frac{(n+2)(s_m-s_0) + (\mu_0 s_m - \mu_m s_0)/pq + (n+1)[\mu_m - \mu_0 - (s_m - s_0)]/pq}{(s_0 + 1)(s_m + 1)}.
+ &= \frac{(n+2)(s_m-s_0) + (\mu_0 s_m - \mu_m s_0)/pq + (n+1)[\mu_m - \mu_0 - (s_m - s_0)]/pq}{(s_0 + 1)(s_m + 1)},
 \end{align*}
+so \eqref{eq:deltabdineq} implies
+\begin{equation}\label{eq:deltabdineq2}
+(n+2)(s_m - s_0)(1-R_0(\delta)) + \frac{\mu_0 s_m - \mu_m s_0 +
+(n+1)[\mu_m - \mu_0 - (s_m - s_0)]}{pq} > 0.
+\end{equation}
+Now, for $j\in\{0, m\}$, let
+$\delta_j :=
+\delta - \{\lceil \mu_j - \delta \rceil - (\mu_j - \delta)\} =
+\mu_j - \lceil \mu_j - \delta \rceil$, \ie
+$\delta_j = \inf\{ \lambda : s_j(\lambda) = s_j(\delta)\}$,
+and let $\delta' = \max\{\delta_0, \delta_m\}$.
+Then $s_m(\delta') = s_m(\delta)$, $s_0(\delta') = s_0(\delta)$, and
+$s_j(\delta') = \mu_j - \delta'$ (an integer) for the $j$ for which
+$\delta' = \delta_j$.
+We assume that $\delta' = \delta_0$; the case $\delta' = \delta_m$ is similar.
+(TODO)
+Consequently,
+\[ s_m - s_0 = (s_m(\delta') - 1) - (s_0(\delta') - 1) =
+\lceil \mu_0  + m(p-q) - \delta_0 \rceil - (\mu_0 - \delta_0) =
+\lceil m(p-q) \rceil, \]
+and
+\[ \mu_0 s_m - \mu_m s_0 = \mu_0(s_m - s_0) - m(p-q) s_0 =
+\mu_0\big(\lceil m(p-q) \rceil - m(p-q)\big) + m(p-q)(\delta' + 1).
+\]
 
-Now, write $\delta' := \delta - \{\lceil \mu_0 - \delta \rceil - (\mu_0 - \delta)\} = \mu_0 - \lceil \mu_0 - \delta \rceil$, so that
-$s_0 = \mu_0 - \delta' - 1$.
-Then
-\begin{align*}
- \mu_0 s_m - \mu_m s_0 &= \mu_0(s_m - s_0) + \mu_0(\mu_0 - \delta' - 1) - (\mu_0 + m(p-q))(\mu_0 - \delta' - 1) \\
- &= \mu_0(s_m - s_0) - m(p-q)(\mu_0 - \delta' - 1).
-\end{align*}
-
-
-Applying these in \eqref{eq:deltabdineq} gives
-\begin{align*}
-0 < (n+2)(s_m-s_0)\big[1- R_0(\delta)\big] + \frac{\mu_0 s_m - \mu_m s_0}{pq} + (n+1)\frac{\mu_m - \mu_0 - (s_m - s_0)}{pq}
-\end{align*}
+Applying these identities in \eqref{eq:deltabdineq2} gives
+\[ (n+2)\lceil m(p-q) \rceil (1-R_0(\delta)) + \frac{m(p-q)(\delta' + 1)}{pq}
++ \frac{n+1-\mu_0}{pq}\big(m(p-q) - \lceil m(p-q) \rceil\big) > 0.
+\]
+Dropping the third term in the sum, since it is negative, yields
+\[ (n+2)(R_0(\delta) - 1) < \frac{\delta' + 1}{pq}\frac{m(p-q)}{\lceil m(p-q) \rceil}
+ < \frac{\delta' + 1}{pq}.
+\]
 
 \end{pf}
 
