@@ -457,40 +457,38 @@ Note that, since $\rho$ is decreasing in $s$ for fixed $m$, it is sufficient
 to consider the probability ratio at the smallest integer value belonging to
 the interval $[\mu_m-\delta, n]$.
 
-For $\delta > 0$ let $s_m(\delta) := \lceil \mu_m - \delta \rceil \vee 1$, and define $R_m(\delta) := \rho(s_m(\delta); m)$.
+TODO: how to handle the left endpoint. What is the min value of $\delta$?
+
+For $\delta > 0$ let $s_m(\delta) := \lceil \mu_m - \delta \rceil \vee 0$, and define $R_m(\delta) := \rho(s_m(\delta); m)$.
 Note that $R_m(\delta) \leq R_m(\delta')$ for $\delta \leq \delta'$, and
-$s_m(\delta + 1) = (s_m(\delta) - 1) \vee 1$.
+$s_m(\delta + 1) = (s_m(\delta) - 1) \vee 0$.
 
 \begin{prop}
-\[ R_m(\delta) \leq R_0(\delta + 1) \]
-for all $m$, provided $\delta > npq = \Var A_n(0)$.
+\[ R_m(\delta) \leq R_0(\delta + 2)\qquad\text{for}\ \ m = 0,\dots,n \]
+provided $\delta > \sigma_0 + 1$, where
+$\sigma_0^2 = \Var A_n(0) = npq$.
 \end{prop}
+
 \begin{pf}
-Fix $\delta > 0$.
+Fix $\delta > \sigma_0 + 1$.
 (TODO)
-If $s_0(\delta) = 1$
+If $s_0(\delta) < 2$
 
-Assume $s_0(\delta) \geq 2$.
-
-and let 
-$\delta' := \delta + 1 - \{\lceil \mu_0 - \delta \rceil - (\mu_0 - \delta)\} = \mu_0 - \lceil \mu_0 - \delta \rceil + 1$, \ie 
-$\delta' = $, the point between $\delta$ and $\delta + 1$ at which $s_0(\cdot)$ decrements by 1.
-Then $\mu_0 - \delta'$ is an integer, and 
-$s_0(\delta') = \lceil \mu_0 - \delta \rceil - 1 = s_0(\delta + 1)$.
-
-Suppose $R_m(\delta) > R_0(\delta + 1)$ for some $m$.
+Assume $s_0(\delta) \geq 2$, and suppose $R_m(\delta) > R_0(\delta + 2)$ for
+some $m$.
 Then, we have
-\[ R_0(\delta) \leq R_0(\delta + 1) < R_m(\delta) \leq R_m(\delta + 1),\]
+\[ R_0(\delta) \leq R_0(\delta + 1) \leq R_0(\delta + 2) < R_m(\delta) \leq
+R_m(\delta + 1),\]
 implying that
-\[ \inv{R_0(\delta + 1)} =
-\frac{R_0(\delta) - \gamma_0(s_0(\delta+1))}{\eta(s_0(\delta+1))} > 
+\[ \inv{R_0(\delta + 2)} =
+\frac{R_0(\delta+1) - \gamma_0(s_0(\delta+2))}{\eta(s_0(\delta+2))} > 
 \frac{R_m(\delta) - \gamma_m(s_m(\delta+1))}{\eta(s_m(\delta+1))} =
 \inv{R_m(\delta + 1)} \]
 via \eqref{eq:probrrec}.
-Since $R_m(\delta) > R_0(\delta)$ by assumption, we obtain (with
-$s_j := s_j(\delta+1)$):
+Write $s_m := s_m(\delta+1)$, $s_0 := s_0(\delta + 2)$.
+Since $R_m(\delta) > R_0(\delta+1)$ by assumption, we obtain:
 \begin{equation}\label{eq:deltabdineq}
-\big\{\eta(s_m) - \eta(s_0)\big\} R_0(\delta)
+\big\{\eta(s_m) - \eta(s_0)\big\} R_0(\delta + 1)
  + \big\{\eta(s_0)\gamma_m(s_m) - \eta(s_m)\gamma_0(s_0)\big\} > 0.
 \end{equation}
 Furthermore,
@@ -502,43 +500,74 @@ and
 \eta(s_0)&\gamma_m(s_m) - \eta(s_m)\gamma_0(s_0) \\
 &= \frac{n - s_0 + 1}{s_0 + 1}\cdot \frac{(\mu_m - s_m)/pq - n + 2s_m}{s_m + 1} - 
 \frac{n - s_m + 1}{s_m + 1}\cdot \frac{(\mu_0-s_0)/ pq - n + 2s_0}{s_0 + 1} \\
- &= \frac{(n+2)(s_m-s_0) + (\mu_0 s_m - \mu_m s_0)/pq + (n+1)[\mu_m - \mu_0 - (s_m - s_0)]/pq}{(s_0 + 1)(s_m + 1)},
+ &= \frac{(n+2)(s_m-s_0) + (\mu_0 s_m - \mu_m s_0)/pq +
+ (n+1)[\mu_m - \mu_0 - (s_m - s_0)]/pq}{(s_0 + 1)(s_m + 1)},
 \end{align*}
 so \eqref{eq:deltabdineq} implies
-\begin{equation}\label{eq:deltabdineq2}
-(n+2)(s_m - s_0)(1-R_0(\delta)) + \frac{\mu_0 s_m - \mu_m s_0 +
-(n+1)[\mu_m - \mu_0 - (s_m - s_0)]}{pq} > 0.
-\end{equation}
-Now, for $j\in\{0, m\}$, let
-$\delta_j :=
-\delta - \{\lceil \mu_j - \delta \rceil - (\mu_j - \delta)\} =
-\mu_j - \lceil \mu_j - \delta \rceil$, \ie
-$\delta_j = \inf\{ \lambda : s_j(\lambda) = s_j(\delta)\}$,
-and let $\delta' = \max\{\delta_0, \delta_m\}$.
-Then $s_m(\delta') = s_m(\delta)$, $s_0(\delta') = s_0(\delta)$, and
-$s_j(\delta') = \mu_j - \delta'$ (an integer) for the $j$ for which
-$\delta' = \delta_j$.
-We assume that $\delta' = \delta_0$; the case $\delta' = \delta_m$ is similar.
-(TODO)
+\begin{align}
+-(n+2)(s_m - s_0)&(R_0(\delta + 1) - 1) + \nonumber\\
+&\frac{\mu_0 (s_m - s_0) - m(p-q) s_0}{pq} +
+\frac{(n+1)[m(p-q) - (s_m - s_0)]}{pq} > 0. \label{eq:deltabdineq2}
+\end{align}
+Now, let
+$\delta_0 :=
+\delta - \{\lceil \mu_0 - \delta \rceil - (\mu_0 - \delta)\} =
+\mu_0 - \lceil \mu_0 - \delta \rceil$, \ie
+$\delta_0 = \inf\{ \lambda : s_0(\lambda) = s_0(\delta)\}$.
+Then $s_0(\delta) = s_0(\delta_0) = \mu_0 - \delta_0$, an integer, and
+$s_m(\delta_0) - s_m(\delta) \in\{0, 1\}$, since
+$0 \leq \delta-\delta_0 < 1$.
 Consequently,
-\[ s_m - s_0 = (s_m(\delta') - 1) - (s_0(\delta') - 1) =
-\lceil \mu_0  + m(p-q) - \delta_0 \rceil - (\mu_0 - \delta_0) =
-\lceil m(p-q) \rceil, \]
+since
+\[ s_m(\delta_0) - s_0(\delta_0) = \lceil \mu_0  + m(p-q) - \delta_0 \rceil -
+(\mu_0 - \delta_0) = \lceil m(p-q) \rceil, \]
+\begin{align*}
+s_m - s_0 &= (s_m(\delta) - 1) - (s_0(\delta) - 2) =
+s_m(\delta) - s_m(\delta_0) + \lceil m(p-q) \rceil + 1 \\
+ &\in \big\{\lceil m(p-q) \rceil, \lceil m(p-q) \rceil + 1 \big\},
+\end{align*}
 and
-\[ \mu_0 s_m - \mu_m s_0 = \mu_0(s_m - s_0) - m(p-q) s_0 =
-\mu_0\big(\lceil m(p-q) \rceil - m(p-q)\big) + m(p-q)(\delta' + 1).
-\]
-
+\begin{align*}
+\mu_0(s_m - s_0) - m(p-q) s_0 & = \mu_0(s_m-s_0) - m(p-q)(s_0(\delta_0) - 2) \\
+ &= \mu_0[(s_m-s_0) - m(p-q)] + m(p-q)(\delta_0 + 2).
+\end{align*}
 Applying these identities in \eqref{eq:deltabdineq2} gives
-\[ (n+2)\lceil m(p-q) \rceil (1-R_0(\delta)) + \frac{m(p-q)(\delta' + 1)}{pq}
-+ \frac{n+1-\mu_0}{pq}\big(m(p-q) - \lceil m(p-q) \rceil\big) > 0.
+\[ 
+-(n+2)(s_m - s_0)(R_0(\delta + 1) - 1) +
+\frac{m(p-q)(\delta_0 + 2)}{pq}
++ \frac{n+1-\mu_0}{pq}\big(m(p-q) - (s_m-s_0)\big) > 0.
 \]
-Dropping the third term in the sum, since it is negative, yields
-\[ (n+2)(R_0(\delta) - 1) < \frac{\delta' + 1}{pq}\frac{m(p-q)}{\lceil m(p-q) \rceil}
- < \frac{\delta' + 1}{pq}.
+Since $s_m-s_0 \geq m(p-q)$,
+\begin{equation}\label{eq:deltabdineq3}
+(n+2)(R_0(\delta+1) - 1) <
+\frac{\delta_0 + 2}{pq}\frac{m(p-q)}{s_m - s_0} < \frac{\delta_0 + 2}{pq}.
+\end{equation}
+Next, recall that
+$R_0(\delta+1) = P_{n,0}(s_0(\delta+1)) / P_{n,0}(s_0(\delta+1) - 1)$.
+Since $P_{n,0}(\cdot) = \P[Bin(n,q) = \cdot\,]$, 
+\[ R_0(\delta+1) - 1 =
+\frac{n - s_0(\delta+1) + 1}{s_0(\delta+1)}\cdot \frac{q}{p} - 1 =
+\frac{\mu_0 - (\mu_0 - \delta_0 - 1) + q}{p(\mu_0 - \delta_0 - 1)} =
+\frac{\delta_0 + q + 1}{p(\mu_0 - \delta_0 - 1)}.
 \]
-
+Hence, substituting this expression in \eqref{eq:deltabdineq3} yields
+\begin{align*}
+(\delta_0 + 2)(\mu_0 - \delta_0 - 1) &> (n+2)q(\delta_0 + q + 1) >
+\mu_0(\delta_0 + q + 1) \\
+\iff
+-\delta_0^2 - 3\delta_0 + 2\mu_0 - 2 &>  (1+q)\mu_0 \\
+\iff
+-\delta_0^2 - 3\delta_0 + npq &> 0,
+\end{align*}
+which requires that $\delta_0$ lie between the roots of the quadratic equation.
+In particular,
+\[ \delta_0 \leq -\frac{3}{2} + \frac{1}{2}\sqrt{9 + 4npq} \leq
+-\frac{3}{2} + \frac{3}{2} + \sqrt{npq} = \sqrt{npq}. \]
+Finally, since $0 \leq \delta-\delta_0 < 1$, we conclude that
+\[ \delta = \delta_0 + \delta - \delta_0 < \sigma_0 + 1, \]
+contradicting our initial choice of $\delta$.
 \end{pf}
+
 
 
 ----------------------------
