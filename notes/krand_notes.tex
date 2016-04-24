@@ -48,7 +48,7 @@ Each record is an element of some space $\Dsp$, and a database $\xv$ is a vector
 
 We wish to release information retrieved from the database by means of a \textbf{query}, a function $A$ mapping the database into another space: $\map{A}{\Dsp^n}{\Ssp}$. The result of applying a query to a database is termed a \textbf{transcript}.
 The query usually applies some aggregation to the database records, and so the output space $\Ssp$ is generally of lower dimensionality than the original database.
-If the query is randomized, \ie $A(\xv) = A(\xv; \xi)$ for a random element $\xi$, then the transcript will be a random element of $\Ssp$.
+If the query is \textbf{randomized}, \ie $A(\xv) = A(\xv; \xi)$ for a random element $\xi$, then the transcript will be a random element of $\Ssp$.
 
 The notion of differential privacy for a database query is that the resulting transcript does not change substantially when a record in the database is modified,
 \ie transcripts are not sensitive to particular individual records in the database.
@@ -165,6 +165,7 @@ Set $\Dsp = \{0,1\}^L$. We use the term \textbf{collection} (of records) interch
 We consider a randomized query $A$ that randomizes each record in the collection independently, and aggregates the results by reporting occurrence counts for every possible randomization outcome.
 We adopt this aggregation step as a model for anonymization. After anonymization, any link to the original collection or ordering is lost, and the information contained in the results is embodied solely by the reported values.
 
+(TODO)
 In the following, we rely on the fact that $\Dsp$ is finite, and we assume a specific enumeration $\Dsp = (d_1,\dots,d_{2^L})$. The ordering is unimportant at this point, although it will be convenient to assume that $d_1 =  (1,\dots,1)$ and $d_{2^L} = (0,\dots,0)$.
 
 \begin{defn}
@@ -183,9 +184,10 @@ We call $R(\xv)$ the \textbf{synthetic} collection obtained from the \textbf{ori
 \right)
 \]
 Note that, if $\Phi(\yv) = (s_1,\dots,s_{2^L})$, then $s_1 + \cdots + s_{2^L} = n$.
+\item Finally, define $A := \Phi \circ R$.
 \end{enumerate}
-Finally,
-\[ A  = \Phi \circ R. \]
+%Finally,
+%\[ A  = \Phi \circ R. \]
 \end{defn}
 
 The distribution of $A(\xv)$ is given by
@@ -197,9 +199,16 @@ The distribution of $A(\xv)$ is given by
 &= \sum_{\yv:\Phi(\yv) = s} \prod_{i=1}^n p^{L - \delta(x_i,y_i)}\cdot
 q^{\delta(x_i,y_i)}
 = \sum_{\yv:\Phi(\yv) = s} p^{nL - \delta(\xv,\yv)}\cdot
-q^{\delta(\xv,\yv)}  \nonumber
+q^{\delta(\xv,\yv)}  \nonumber \\
+&= p^{nL}\sum_{\yv:\Phi(\yv) = s} \left(\frac{q}{p}\right)^{\delta(\xv,\yv)}
 \end{align}
-Note that the support of $A$ is the support of a multinomial random variable with $n$ trials: \[\Ssp_n := \bigg\{s \in \Ssp : \sum_j s_j = n \bigg\}.\]
+where $\delta(\xv,\yv) = \sum_{i=1}^n \delta(x_i,y_i)$ can be considered the distance between collections $\xv$ and $\yv$.
+Note that the support of $A$ is the support of a multinomial random variable with $n$ trials: \[\Ssp_n := \bigg\{s \in \Ssp : \sum_j s_j = n \bigg\},\]
+and $\{\yv:\Phi(\yv) = s\}$ is the set of all permutations of the collection
+\[ \big(\underbrace{d_1,\dots,d_1}_{s_1},\,
+   \underbrace{d_2,\dots,d_2}_{s_2},\,\dots,\,
+   \underbrace{d_{2^L},\dots,d_{2^L}}_{s_{2^L}}\big).
+\]
 
 
 \section{The privacy ratio}
@@ -216,22 +225,36 @@ with
 We take this further by studying the behaviour of the privacy ratio and how it varies across the support of $A$ and across collections. This will allow us to understand in which situations it is at or near its bound.
 
 Without loss of generality (in light of \eqref{eq:Adist}), assume that the element differing between $\xv$ and $\xv'$ is the first one, and denote $\xvt = (x_2,\dots,x_n)$.
-In other words, $\xv = (x_1,\xvt)$ and $\xv' = (x'_1, \xvt)$.
-We also write $\iv_j = (0,\dots,0,1,0,\dots,0)$, the vector with a 1 in the $j$-th position and the rest 0.
+Then $\xv = (x,\xvt)$ and $\xv' = (x', \xvt)$.
+Also write $\one_j = (0,\dots,0,1,0,\dots,0)$, the vector with a $1$ in the $j$-th position and the rest $0$, and let $\sv_{-j} := \sv - \one_j$.
 %For convenience, introduce the notation
 %$\sm_j = (s_1,\dots,s_{j-1},s_j - 1,s_{j+1},\dots,s_{2^L})$.
 
-Conditioning on the value of the modified record, we can write
+Conditioning on the value of the modified record, the privacy ratio becomes
 \begin{equation} \label{eq:prcond}
-\pi(\sv;\xvt,x_1,x_1') = \frac{\displaystyle\sum_{j=1}^{2^L}
-\P[A(x'_1) = \iv_j] \P[A(\xvt) = \sv - \iv_j]}
+\pi(\sv;\xvt,x,x') = \frac{\displaystyle\sum_{j=1}^{2^L}
+\P[A(x') = \one_j] \P[A(\xvt) = \sv_{-i}]}
 {\displaystyle\sum_{j=1}^{2^L}
-\P[A(x_1) = \iv_j] \P[A(\xvt) = \sv - \iv_j]}
+\P[A(x) = \one_j] \P[A(\xvt) = \sv_{-i}]}
 = \frac{\displaystyle\sum_{j=1}^{2^L}
-\P[R(x'_1) = d_j] \P[A(\xvt) = \sv - \iv_j]}
+\P[R(x') = d_j] \P[A(\xvt) = \sv_{-i}]}
 {\displaystyle\sum_{j=1}^{2^L}
-\P[R(x_1) = d_j] \P[A(\xvt) = \sv - \iv_j]}.
+\P[R(x) = d_j] \P[A(\xvt) = \sv_{-i}]},
 \end{equation}
+where we understand $\P[A(\xvt) = \sv_{-i}] = 0$ if $\sv_i = 0$.
+For convenience, we introduce the notation $p_j := \P[R(x) = d_j]$,
+$p'_j := \P[R(x') = d_j]$, and $P(\sv, \xv) := \P[A(\xv) = \sv]$, and express
+the privacy ratio as
+\[ \pi(\sv;\xv,x,x') = \frac{\displaystyle\sum_{j=1}^{2^L}
+p'_j P(\sv_{-i},\xv)}{\displaystyle\sum_{j=1}^{2^L} p_j P(\sv_{-i},\xv)}, \]
+dropping the tilde so that $\xv$ now denotes a collection of size $n-1$.
+
+\begin{prop}
+Given an original collection consisting of $(x, \xv)$, the privacy ratio is maximized when the modification $x'$ is chosen to be the opposite of $x$:
+\[ \pi(\sv; \xv, x, x^*) \geq \pi(\sv; \xv, x, x') \]
+for any $\sv\in\Ssp_n$, $x'\in \Dsp$, where $\delta(x, x^*) = L$.
+\end{prop}
+
 
 TODO: consequences of this: \\
 - difference between numerator and denominator is basically a reweighting of the same terms in the sum \\

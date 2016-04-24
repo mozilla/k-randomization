@@ -110,7 +110,14 @@ cshift <- ddist[m > 0 & ssc >= srange[1] & ssc <= srange[2]][,
 setkey(cshift, s, m)
 ddiff <- ddiff[cshift]
 
-
+## Look at ratios of consecutive PMF values.
+probr <- ddist[, list(s = s[-1], pr = pmf[-1]/pmf[-(n+1)]), by = m]
+mum <- data.table(m = 0:n)[, mu := n*q + m*(1-2*q)]
+deltas <- mum[m == 0, 0:floor(mu - 1)]
+mus <- mum[, list(delta = deltas, s = floor(mu - deltas)), by = m]
+setkey(mus, m, s)
+setkey(probr, m, s)
+probrm <- probr[mus]
 
 
 ##########################################################
