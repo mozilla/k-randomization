@@ -126,8 +126,10 @@ This can be expressed concisely as
 \quad\text{where } \xi\sim Ber(p). \]
 We extend the procedure to \textbf{bit vector randomization} by applying the randomization independently to each bit in the vector.
 Given a bit vector $x = (b_1,\dots,b_L)$, define
-\[ R(x) = R(x;\xi) = \big(R(b_1;\xi_1), \dots, R(b_L;\xi_L)\big)
-\quad\text{where } \xi = (\xi_1,\dots,\xi_L) \iid Ber(p). \]
+\begin{equation}\label{eq:bitvecrand}
+R(x) = R(x;\xi) = \big(R(b_1;\xi_1), \dots, R(b_L;\xi_L)\big)
+\quad\text{where } \xi = (\xi_1,\dots,\xi_L) \iid Ber(p).
+\end{equation}
 \end{defn}
 
 \begin{rmk}
@@ -149,9 +151,9 @@ For a single bit, the randomization has lied when the outcome is different from 
 \[ \P[R(b) = y] = p^{I(b = y)}\cdot q^{I(b \neq y)}
 = p^{1 - \delta(b,y)}\cdot q^{\delta(b,y)}. \]
 For a bit vector $x$, this becomes
-\[ \P[R(x) = y] = p^{\sum I(x_\ell = y_\ell)}\cdot q^{\sum I(x_\ell \neq y_\ell)}
-= p^{L-\delta(x,y)}\cdot q^{\delta(x,y)}.
-\]
+\[ \P[R(x) = y] = p^{\sum I(x_\ell = y_\ell)}\cdot 
+q^{\sum I(x_\ell \neq y_\ell)}
+= p^{L-\delta(x,y)}\cdot q^{\delta(x,y)}. \]
 Note that this probability is maximized when $\delta(x,y) = 0$ (the randomized vector $y$ is identical to the original vector $x$), and minimized when $\delta(x,y) = L$.
 In the latter case, we say that $y$ is the \textbf{opposite} of $x$.
 In other words, the most likely outcome of randomizing a bit vector is obtaining an identical vector.
@@ -172,27 +174,47 @@ of the original records.
 (TODO - be more specific about the ordering)
 In the following, we rely on the fact that $\Dsp$ is finite, and we assume a specific enumeration $\Dsp = (d_1,\dots,d_{2^L})$. The ordering is unimportant at this point, although it will be convenient to assume that $d_1 =  (1,\dots,1)$ and $d_{2^L} = (0,\dots,0)$.
 
+We consider an aggregation function $\Phi$ mapping a collection of elements of
+$\Dsp$ to a vector $\sv = (s_1,\dots,s_{2^L})$, where $s_j$ counts how
+many copies of $d_j$ the collection contains.
+Note that the range of $\Phi$ is
+\[ \Ssp_n := \big\{ \sv \in \Z^{2^L}: s_j \geq 0,\,
+s_1 +\cdots + s_{2^L} = n\big\}, \]
+a subset of the standard $(2^L-1)$-simplex (whose vertices are the standard
+basis vectors in $\R^{2^L}$) consisting of the points with integer coordinates.
+
 \begin{defn}
-The randomized query $\map{A}{\Dsp^n}{\Ssp_n = \{0,\dots,n\}^{2^L}}$ maps collections of bit vectors to occurrence counts as follows.
-\begin{enumerate}
-\renewcommand{\labelenumi}{(\alph{enumi})}
-\item Extend the bit randomization $R$ to collections $\xv$ by applying it independently to each vector:
+The aggregation function $\map{\Phi}{\Dsp^n}{\Ssp_n}$ counts occurrences of
+vectors $d_1,\dots, d_{2^L} \in \Dsp$ in the collection $\yv \in \Dsp^n$:
+\[ \Phi(\yv) = \left(\sum_{i = 1}^n I(y_i = d_1),\dots,
+\sum_{i = 1}^n I(y_i = d_{2^L}) \right)
+\]
+\end{defn}
+
+We also extend the bit vector randomization \eqref{eq:bitvecrand} to
+collections $\xv\in\Dsp^n$ by applying it independently to each vector in the
+collection:
 \[ R(\xv) = R(\xv;\boldsymbol{\xi})
 = \big(R(x_1;\xi_1),\dots,R(x_n; \xi_n)\big)
 \quad\text{where } \xi_i = (\xi_{i1},\dots,\xi_{iL}) \text{ and }
 \xi_{i\ell} \iid Ber(p). \]
-We call $R(\xv)$ the \textbf{synthetic} collection obtained from the \textbf{original} collection $\xv$.
-\item Define the function $\Phi$ that counts occurrences of the elements of $\Dsp = (d_1,\dots,d_{2^L})$ in a collection $\yv$:
-\[ \Phi(\yv) := \left(\sum_{i = 1}^n I(y_i = d_1),\dots,
-\sum_{i = 1}^n I(y_i = d_{2^L}).
-\right)
-\]
-Note that, if $\Phi(\yv) = (s_1,\dots,s_{2^L})$, then $s_1 + \cdots + s_{2^L} = n$.
-\item Finally, define $A := \Phi \circ R$.
-\end{enumerate}
-%Finally,
-%\[ A  = \Phi \circ R. \]
+We call $R(\xv)$ the \textbf{synthetic} collection obtained from the
+\textbf{original} collection $\xv$.
+Note that $R(\xv)$ is itself a random element of $\Dsp^n$, and that
+$\P[R(\xv) = \yv] > 0$ for any $\yv\in\Dsp^n$, \ie any synthetic collection of
+size $n$ has a non-zero probability of being generated from any given original
+collection of the same size.
+
+The randomized query we use for reporting collections of bit vectors may now
+be defined as follows.
+
+\begin{defn}
+The randomized query $\map{A}{\Dsp^n}{\Ssp_n}$ maps collections of bit vectors
+to occurrence counts according to
+\[ A = \Phi \circ R. \]
 \end{defn}
+
+\hrulefill
 
 The distribution of $A(\xv)$ is given by
 \begin{align}
