@@ -23,12 +23,13 @@
 \newcommand{\xv}{\mathbf{x}}
 \newcommand{\yv}{\mathbf{y}}
 \newcommand{\sv}{\mathbf{s}}
+\newcommand{\mv}{\mathbf{m}}
 \newcommand{\xvt}{\tilde{\xv}}
 \newcommand{\yvt}{\tilde{\yv}}
 \newcommand{\sm}{\sv^-}
 \newcommand{\iv}{\mathbf{i}}
 \newcommand{\one}{\boldsymbol{1}}
-
+\newcommand{\zero}{\boldsymbol{0}}
 %% Title matter
 \title{K-Randomization}
 \author{Maxim Zhilyaev \and David Zeber}
@@ -148,8 +149,8 @@ the Hamming distance between the original and randomized vectors,
 \[ \delta(x,x') = \sum_{\ell = 1}^L I(x_\ell \neq x'_\ell)
 = \sum_{\ell = 1}^L |x_\ell - x'_\ell|. \]
 For a single bit, the randomization has lied when the outcome is different from the original value: 
-\[ \P[R(b) = y] = p^{I(b = y)}\cdot q^{I(b \neq y)}
-= p^{1 - \delta(b,y)}\cdot q^{\delta(b,y)}. \]
+\[ \P[R(b) = b'] = p^{I(b = b')}\cdot q^{I(b \neq b')}
+= p^{1 - \delta(b,b')}\cdot q^{\delta(b,b')}. \]
 For a bit vector $x$, this becomes
 \[ \P[R(x) = y] = p^{\sum I(x_\ell = y_\ell)}\cdot 
 q^{\sum I(x_\ell \neq y_\ell)}
@@ -214,7 +215,74 @@ to occurrence counts according to
 \[ A = \Phi \circ R. \]
 \end{defn}
 
+The distribution of the synthetic collection $R(\xv)$ is given by
+\[
+\P[R(\xv) = \yv] = \prod_{i=1}^n \P[R(x_i) = y_i] =
+\prod_{i=1}^n p^{L-\delta(x_i,y_i)}q^{\delta(x_i,y_i)} =
+p^{nL} \bigg(\frac{q}{p}\bigg)^{\sum_{i=1}^n \delta(x_i, y_i)}.
+\]
+
+(TODO: maybe this is not useful at this point)
+Writing $m(\ell) := \sum_{i=1}^n I(\delta(x_i, y_i) = \ell)$ for
+$\ell = 0,\dots,L$, the probability can be expressed as
+\[ \P[R(\xv) = \yv] = \prod_{\ell = 0}^L \big(p^{L-\ell}q^\ell\big)^{m(\ell)}.
+\]
+Hence, the distribution is determined by the magnitudes of the pairwise
+distances, and does not depend on the ordering within the collections.
+
+\subsection{Next steps}
+
+\begin{itemize}
+\item
+The distribution of $A$ is invariant under permutations of $\xv$, \ie the
+distribution remains the same if the original collection is reordered.
+
+\item
+Hence, partition $\Dsp^n$ into equivalence classes of $\Phi$, represented as
+points $\mv = (m_1,\dots,m_{2^L}) \in \Ssp_n$.
+Work with original collections represented in terms of $\mv$.
+In the $L=2$ case, it is convenient to associate the simplex $\Ssp_n \cont
+\R^4$ with the ``corner-of-the-cube'' simplex in $\R^3$ defined by the standard
+basis vectors together with the origin.
+
+\item
+View the randomized query $A$ as a mapping from $\Ssp_n$ to $\Ssp_n$.
+Hamming distance on $\Dsp^n$ corresponds to $L_1$ metric on $\Ssp_n$.
+
+\item
+Privacy ratio takes as input two ``neighbouring'' original collections (defined
+in terms of a metric on $\Ssp_n$) and a synthetic one. Behaviour of privacy
+ratio can be studied in terms of ``probability ratio'', a mapping over a single
+original collection and two neighbouring synthetic ones.
+
+\item
+Define the \textbf{privacy range} as a subset of the most likely synthetic
+outcomes for a given original collection.
+
+\item
+Goal is to uniformly bound the privacy ratio over all privacy ranges
+corresponding to all possible original collections.
+
+\item
+Work with privacy ratio for $x = \one$ and $x' = \zero$. Argue by symmetry that
+the bound on the privacy ratio only depends on the choice of $x$ and $x'$,
+regardless of remaining elements of the collection.
+Argue that without loss of generality we can choose $x'$ to be the opposite of
+$x$.
+
+\item
+Show that the privacy ratio is increasing as the synthetic collection moves
+towards the one consisting of all $\zero$.
+Direction of maximal increase is along the line connecting $\mu_{\mv} =
+\EP[\sv\given\mv]$ (must be on the line, or just in the direction?)
+
+\item
+Think of the privacy range in terms of a neighbourhood of $\mu_{\mv}$.
+\end{itemize}
+
 \hrulefill
+
+\subsection{Old stuff}
 
 The distribution of $A(\xv)$ is given by
 \begin{align}
