@@ -74,7 +74,6 @@ $\xv\in \Dsp^n$, $\xv' \in \Dsp^{n+1}$, and $x_i = x'_i$ for $i = 1,\dots,n$.
 %%% Countable output space
 
 %% TODO: countable vs. finite
-%% TODO: Lemma for bounding ratio of sums
 
 If $\Ssp$ is finite, which is common in cases where the transcript involves integer counts, then the distribution of the transcript $A(\xv)$ can be represented using its pmf $\P[A(\xv) = s]$ for $s \in \Ssp$.
 In this case, the differential privacy condition can also be expressed in terms of the pmf.
@@ -142,30 +141,35 @@ If $q = 1/2$, then $R(0)\eqdist R(1)$, and the reported value is ``completely'' 
 
 %%% Distribution of randomized bit vectors.
 
-We now consider the distribution of the randomized bit vectors.
-It can be expressed in terms of the Hamming distance between the original and randomized vectors:
+The distribution of the randomized bit vectors can be expressed in terms of
+the Hamming distance between the original and randomized vectors,
 \[ \delta(x,x') = \sum_{\ell = 1}^L I(x_\ell \neq x'_\ell)
 = \sum_{\ell = 1}^L |x_\ell - x'_\ell|. \]
 For a single bit, the randomization has lied when the outcome is different from the original value: 
 \[ \P[R(b) = y] = p^{I(b = y)}\cdot q^{I(b \neq y)}
-= (1-q)^{1 - \delta(b,y)}\cdot q^{\delta(b,y)}. \]
+= p^{1 - \delta(b,y)}\cdot q^{\delta(b,y)}. \]
 For a bit vector $x$, this becomes
 \[ \P[R(x) = y] = p^{\sum I(x_\ell = y_\ell)}\cdot q^{\sum I(x_\ell \neq y_\ell)}
-= (1-q)^{L-\delta(x,y)}\cdot q^{\delta(x,y)}.
+= p^{L-\delta(x,y)}\cdot q^{\delta(x,y)}.
 \]
 Note that this probability is maximized when $\delta(x,y) = 0$ (the randomized vector $y$ is identical to the original vector $x$), and minimized when $\delta(x,y) = L$.
 In the latter case, we say that $y$ is the \textbf{opposite} of $x$.
 In other words, the most likely outcome of randomizing a bit vector is obtaining an identical vector.
 
-\subsection{Reporting for bit records}
+\subsection{Privacy-preserving reporting for bit records}
 
-We now place ourselves in the setting of Section \ref{sec:dp} for bit-vector user records, as required in the sequel.
+We now adapt the framework of Section \ref{sec:dp} to the task of reporting
+user records encoded as bit-vectors.
 
 Set $\Dsp = \{0,1\}^L$. We use the term \textbf{collection} (of records) interchangeably with ``database''.
 We consider a randomized query $A$ that randomizes each record in the collection independently, and aggregates the results by reporting occurrence counts for every possible randomization outcome.
-We adopt this aggregation step as a model for anonymization. After anonymization, any link to the original collection or ordering is lost, and the information contained in the results is embodied solely by the reported values.
+We adopt this aggregation step as a model for \textbf{anonymization}.
+After anonymization, we cannot associate a specific randomized record with
+a specific record out of the original collection, and so the ordering of
+records in the synthetic collection conveys no information about the ordering
+of the original records.
 
-(TODO)
+(TODO - be more specific about the ordering)
 In the following, we rely on the fact that $\Dsp$ is finite, and we assume a specific enumeration $\Dsp = (d_1,\dots,d_{2^L})$. The ordering is unimportant at this point, although it will be convenient to assume that $d_1 =  (1,\dots,1)$ and $d_{2^L} = (0,\dots,0)$.
 
 \begin{defn}
@@ -1003,6 +1007,59 @@ a'c\lambda^2 + b'c\lambda\mu + aa'\lambda\mu + ab'\mu^2 \\
 which is implied by \eqref{eq:abccond}.
 \end{pf}
 
+%The next lemma shows how to maximize a weighted sum through the ordering of the
+%weights.
+%\begin{lem}
+%Suppose $a_1 \geq a_2 \geq \cdots \geq a_m$ and $\lambda_1,\dots,\lambda_m \in
+%\R$, and consider the weighted sum of the $a_i$ formed using permutations of
+%the weights $\lambda_i$.
+%Then
+%\begin{equation}\label{eq:lempermsum}
+%\sum_{i=1}^m \lambda_{i} a_i \geq \sum_{i=1}^m \lambda_{\sigma(i)} a_i
+%\end{equation}
+%for all permutations $\sigma$ of $(1,\dots,m)$ if and only if 
+%\begin{equation}\label{eq:lempermorder}
+%\lambda_1 \geq \cdots \geq \lambda_m.
+%\end{equation}
+%\end{lem}
+%\begin{pf}
+%\pfrightdir
+%For $m=1$, the result is trivial.
+%Assume \eqref{eq:lempermsum} implies \eqref{eq:lempermorder} for
+%$\lambda_1,\dots,\lambda_{m-1}$,
+%%any values $a'_1 \geq \cdots \geq a'_{m-1}$ and weights
+%%$\lambda'_1,\dots,\lambda'_{m-1}$,
+%and suppose \eqref{eq:lempermsum} holds for
+%$\lambda_1,\dots,\lambda_m$.
+%We observe that \eqref{eq:lempermsum} holds for $\lambda_1,\dots,\lambda_{m-1}$
+%as well.
+%Indeed, let $\sigma$ be a permutation of $(1,\dots,m-1)$.
+%Then $\tau = (\sigma(1),\dots,\sigma(m-1),m)$ is a permutation of
+%$(1,\dots,m)$, and
+%\begin{equation*}
+%\sum_{i=1}^{m-1} \lambda_i a_i - \sum_{i=1}^{m-1} \lambda_{\sigma(i)} a_i
+%= \sum_{i=1}^m \lambda_i a_i -
+%\bigg[\sum_{i=1}^{m-1} \lambda_{\sigma(i)} a_i + \lambda_m a_m \bigg]
+%\geq 0
+%\end{equation*}
+%by applying \eqref{eq:lempermsum} to the permutation $\tau$.
+%Therefore, $\lambda_1 \geq \cdots \geq \lambda_{m-1}$ by our induction
+%hypothesis.
+%Finally, we show that $\lambda_m \leq \lambda_{m-1}$.
+%If $\lambda_m > \lambda_{m-1}$, consider the permutation swapping $m$ and $m-1$:
+%$\sigma' = (1,\dots,m-2, m, m-1)$.
+%We have
+%\begin{equation*}
+%\sum_{i=1}^m \lambda_i a_i - \sum_{i=1}^m \lambda_{\sigma'(i)} a_i =
+%(\lambda_{m-1}- \lambda_m)a_{m-1} + (\lambda_m - \lambda_{m-1})a_m =
+%(\lambda_{m-1} - \lambda_m)(a_{m-1} - a_m) < 0,
+%\end{equation*}
+%contradicting \eqref{eq:lempermsum}.
+%We conclude that $\lambda_1 \geq \cdots \geq \lambda_m$.
+%
+%\pfleftdir
+%\end{pf}
+%
 
 \section{Old stuff}
 
