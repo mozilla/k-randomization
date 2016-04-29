@@ -24,6 +24,7 @@
 \newcommand{\yv}{\mathbf{y}}
 \newcommand{\sv}{\mathbf{s}}
 \newcommand{\mv}{\mathbf{m}}
+\newcommand{\ev}{\mathbf{e}}
 \newcommand{\xvt}{\tilde{\xv}}
 \newcommand{\yvt}{\tilde{\yv}}
 \newcommand{\sm}{\sv^-}
@@ -341,6 +342,71 @@ the privacy ratio as
 \[ \pi(\sv;\xv,x,x') = \frac{\displaystyle\sum_{j=1}^{2^L}
 p'_j P(\sv_{-i},\xv)}{\displaystyle\sum_{j=1}^{2^L} p_j P(\sv_{-i},\xv)}, \]
 dropping the tilde so that $\xv$ now denotes a collection of size $n-1$.
+
+
+\subsection{The space $\Ssp_n$}
+
+Recall that we consider the randomized query $A$ a mapping from the simplex
+subset $\Ssp_n$ to itself.
+Denote the standard basis vectors in $\R^{2^L}$ by
+$\ev_j = (0,\dots, 0, 1, 0,\dots, 0)$.
+
+Viewing a point $\sv = (s_1,\dots,s_{2^L}) \in\Ssp_n$ as a vector of counts,
+we consider as its ``neighbours'' those points $\sv'$ for which one of the
+counts differs by 1: $\abs{s_i - s'_i} = 1$ for some $j$.
+Because of the constraint $\sum_k s_k = \sum_k s'_k = n$, neighbouring points
+must differ in exactly two coordinates: $s_i - s'_i = 1 = s'_j - s_j$ for some
+$i \neq j$.
+In other words, neighbours of $\sv$ are those points belonging to the set
+$\{\sv'\in\Ssp_n : \sv' = \sv + \ev_j - \ev_i, i \neq j \}$.
+We call the vector $\ev_{ij} := \ev_j - \ev_i$ a \textbf{step from $i$ to $j$};
+note that adding a step from $i$ to $j$ to the counts vector $\sv$ has the
+effect of shifting one count from bucket $i$ to bucket $j$.
+The neighbours of $\sv$ are then those points in $\Ssp_n$ that can be reached
+in a single step. Note also that to step from $i$ to $j$ and remain in $\Ssp_n$,
+$\sv$ must have a non-zero count in bucket $i$.
+
+In fact, the neighbours of $\sv$ are also the closest points in $\Ssp_n$ in
+the Euclidian sense.
+The (squared) Euclidian distance between two points $\sv$ and $\sv'$ is given by
+\begin{align*}
+\norm{\sv - \sv'}_2^2 &= \sum_{k = 1}^{2^L} (s_k - s'_k)^2 =
+\sum_{k = 1}^{2^L - 1} (s_k - s'_k)^2 +
+\bigg[\sum_{k = 1}^{2^L-1} (s_k - s'_k) \bigg]^2 \\
+&= \sum_{k = 1}^{2^L - 1} 2(s_k - s'_k)^2 +
+\sum_{1 \leq k < \ell \leq 2^L-1} (s_k - s'_k)(s_\ell - s'_\ell),
+\end{align*}
+using the fact that $s_{2^L} = n - \sum_{k=1}^{2^L-1} s_k$.
+On one hand, the distance between neighbouring points is
+$\norm{\sv - \sv'}_2^2= 2$.
+On the other, this is the smallest possible distance between $\sv\neq\sv'$.
+Without loss of generality, assume $s_1 \neq s'_1$.
+Since $s_1, s'_1 \in \{0,\dots,n\}$, the minimum distance occurs when
+$s_k = s'_k = 0$ for $k = 2,\dots,2^L-1$, and $\abs{s_k - s'_k} = 1$, \ie $\sv'$
+is a neighbour of $\sv$.
+
+It is convenient to measure distance between points in $\Ssp_n$ in terms of
+the number of steps required to reach one from the other.
+Define the metric $\delta_S$ on $\Ssp_n$ as
+\[ \delta_S(\sv, \sv') := \frac{\norm{\sv - \sv'}_1}{2} =
+\frac{1}{2} \bigg\{ \sum_{k = 1}^{2^L-1} \abs{s_k - s'_k} +
+\bigg\lvert \sum_{k = 1}^{2^L-1} (s_k - s'_k) \bigg\rvert \bigg\}
+, \]
+where $\norm{\cdot}_1$ denotes the $L_1$ metric.
+Then:
+\begin{itemize}
+\item $\delta_s(\sv,\sv')$ is equal the minimum number of steps required to
+reach $\sv'$ from $\sv$.
+
+\item The neighbours of $\sv$ are those points $\sv' \in \Ssp_n$ such that
+$\delta_S(\sv, \sv') = 1$.
+\end{itemize}
+
+\subsection{The probability ratio}
+
+We observed previously that the privacy ratio can be expressed in terms of the
+ratio of probabilities of obtaining neighbouring synthetic collections starting
+from a common original collection.
 
 
 \hrulefill
