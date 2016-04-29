@@ -201,10 +201,15 @@ collection:
 \xi_{i\ell} \iid Ber(p). \]
 We call $R(\xv)$ the \textbf{synthetic} collection obtained from the
 \textbf{original} collection $\xv$.
-Note that $R(\xv)$ is itself a random element of $\Dsp^n$, and that
-$\P[R(\xv) = \yv] > 0$ for any $\yv\in\Dsp^n$, \ie any synthetic collection of
-size $n$ has a non-zero probability of being generated from any given original
-collection of the same size.
+Note that $R(\xv)$ is itself a random element of $\Dsp^n$, with distribution
+given by
+\[ \P[R(\xv) = \yv] = \prod_{i=1}^n \P[R(x_i) = y_i] =
+\prod_{i=1}^n p^{L-\delta(x_i,y_i)}q^{\delta(x_i,y_i)} =
+p^{nL} \bigg(\frac{q}{p}\bigg)^{\sum_{i=1}^n \delta(x_i, y_i)}.
+\]
+Thus, $\P[R(\xv) = \yv] > 0$ for any $\yv\in\Dsp^n$, \ie any synthetic
+collection of size $n$ has a non-zero probability of being generated from any
+given original collection of the same size.
 
 The randomized query we use for reporting collections of bit vectors may now
 be defined as follows.
@@ -214,21 +219,6 @@ The randomized query $\map{A}{\Dsp^n}{\Ssp_n}$ maps collections of bit vectors
 to occurrence counts according to
 \[ A = \Phi \circ R. \]
 \end{defn}
-
-The distribution of the synthetic collection $R(\xv)$ is given by
-\[
-\P[R(\xv) = \yv] = \prod_{i=1}^n \P[R(x_i) = y_i] =
-\prod_{i=1}^n p^{L-\delta(x_i,y_i)}q^{\delta(x_i,y_i)} =
-p^{nL} \bigg(\frac{q}{p}\bigg)^{\sum_{i=1}^n \delta(x_i, y_i)}.
-\]
-
-(TODO: maybe this is not useful at this point)
-Writing $m(\ell) := \sum_{i=1}^n I(\delta(x_i, y_i) = \ell)$ for
-$\ell = 0,\dots,L$, the probability can be expressed as
-\[ \P[R(\xv) = \yv] = \prod_{\ell = 0}^L \big(p^{L-\ell}q^\ell\big)^{m(\ell)}.
-\]
-Hence, the distribution is determined by the magnitudes of the pairwise
-distances, and does not depend on the ordering within the collections.
 
 \subsection{Next steps}
 
@@ -283,6 +273,15 @@ Think of the privacy range in terms of a neighbourhood of $\mu_{\mv}$.
 \hrulefill
 
 \subsection{Old stuff}
+
+
+(TODO: maybe this is not useful at this point)
+Writing $m(\ell) := \sum_{i=1}^n I(\delta(x_i, y_i) = \ell)$ for
+$\ell = 0,\dots,L$, the probability can be expressed as
+\[ \P[R(\xv) = \yv] = \prod_{\ell = 0}^L \big(p^{L-\ell}q^\ell\big)^{m(\ell)}.
+\]
+Hence, the distribution is determined by the magnitudes of the pairwise
+distances, and does not depend on the ordering within the collections.
 
 The distribution of $A(\xv)$ is given by
 \begin{align}
@@ -342,6 +341,13 @@ the privacy ratio as
 \[ \pi(\sv;\xv,x,x') = \frac{\displaystyle\sum_{j=1}^{2^L}
 p'_j P(\sv_{-i},\xv)}{\displaystyle\sum_{j=1}^{2^L} p_j P(\sv_{-i},\xv)}, \]
 dropping the tilde so that $\xv$ now denotes a collection of size $n-1$.
+
+
+\hrulefill
+
+\subsection{Further stuff}
+
+TODO: Is this true?
 
 \begin{prop}
 Given an original collection consisting of $(x, \xv)$, the privacy ratio is maximized when the modification $x'$ is chosen to be the opposite of $x$:
