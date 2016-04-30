@@ -411,86 +411,87 @@ from a common original collection.
 We formalize this notion as follows.
 
 \begin{defn}
-The \textbf{probability ratio} between neighbouring synthetic collections
-is given by
+Given $i\neq j$, the \textbf{probability ratio} from $i$ to $j$ is given by
 \[ \rho_n(\sv, i, j; \mv) :=
 \frac{\P[A_n(\mv) = \sv]}{\P[A_n(\mv) = \sv + \ev_{ij}]} =
 \frac{P_n(\sv, \mv)}{P_n(\sv + \ev_{ij},\mv)}
 \]
-for $\sv\in\Ssp_n$ such that $s_i \geq 1$.
+for $\mv,\sv\in\Ssp_n$ such that $s_i \geq 1$.
 \end{defn}
 
 The probability ratio describes how the likelihood of obtaining synthetic
 collections changes as we step between neighbouring synthetic outcomes in
 $\Ssp_n$.
+We now show that, by conditioning on the randomization outcome of one of the
+vectors in the original collection, the probability ratio for a collection of
+size $n$ can be expressed in terms of probability ratios for a collection of
+size $n-1$ over various synthetic collections.
 
-Note that, by conditioning on the randomization outcome of one of the vectors
-in the original collection, the probability ratio for a collection of size $n$
-can be expressed in terms of probability ratios for a collection of size $n-1$
-over various synthetic collections.
-Denote $\sv_{-i} := \sv - \ev_i$.
-Assume without loss of generality that $m_1 \geq 1$ (otherwise reorder the
-$d_j$). (TODO: are we assuming a specific ordering anywhere else?)
-
-We have
-\begin{align}
-\rho_n(\sv, i, j; \mv) &=
-\frac{
-\displaystyle\sum_{k = 1}^{2^L} p_{1k} P_{n-1}(\sv_{-k}, \mv_{-1}) }{
-\displaystyle\sum_{k = 1}^{2^L} p_{1k} P_{n-1}(\sv_{-k} + \ev_{ij}, \mv_{-1}) }
-\nonumber \\ &= \frac{
-p_{11}\displaystyle \frac{P_{n-1}(\sv_{-1}, \mv_{-1})}
-{P_{n-1}(\sv_{-1} + \ev_{ij}, \mv_{-1})} +
-\displaystyle\sum_{k = 2}^{2^L} p_{1k}
-\frac{P_{n-1}(\sv_{-k}, \mv_{-1})}{P_{n-1}(\sv_{-1} + \ev_{ij}, \mv_{-1})} }{
-p_{11} + \displaystyle\sum_{k = 2}^{2^L} p_{1k}
-\frac{P_{n-1}(\sv_{-k} + \ev_{ij}, \mv_{-1})}
-{P_{n-1}(\sv_{-1} + \ev_{ij}, \mv_{-1})} }.
-\label{eq:gprobratiodecomp}
-\end{align}
-Observe that
-\[ \frac{P_{n-1}(\sv_{-1}, \mv_{-1})}{P_{n-1}(\sv_{-1} + \ev_{ij}, \mv_{-1})}
-= \rho_{n-1}(\sv_{-1}, i, j; \mv_{-1}), \]
-and for $k = 2,\dots,2^L$,
-\begin{align*}
-\frac{P_{n-1}(\sv_{-k}, \mv_{-1})}{P_{n-1}(\sv_{-1} + \ev_{ij}, \mv_{-1})}
-&= \frac{P_{n-1}(\sv_{-k}, \mv_{-1})}{P_{n-1}(\sv_{-k} + \ev_{1k}, \mv_{-1})}
-\cdot
-\frac{P_{n-1}(\sv_{-1}, \mv_{-1})}{P_{n-1}(\sv_{-1} + \ev_{ij}, \mv_{-1})} \\
-&= \rho_{n-1}(\sv_{-k}, 1, k; \mv_{-1})\cdot
-\rho_{n-1}(\sv_{-1}, i, j; \mv_{-1})
-\end{align*}
+Denote $\sv_{-i} := \sv - \ev_i$, and fix $1 \leq r \leq 2^L$ such that
+$m_r \geq 1$.
+Consider $i$ such that $s_i \geq 2$.
+Conditioning on the outcome of randomizing one of the original $d_r$ vectors,
+we have
+\begin{equation*}
+\rho_n(\sv, i, j; \mv) = \frac{
+\displaystyle\sum_{k = 1}^{2^L} p_{rk} P_{n-1}(\sv_{-k}, \mv_{-r})}{
+\displaystyle\sum_{k = 1}^{2^L} p_{rk} P_{n-1}(\sv_{-k} + \ev_{ij}, \mv_{-r})}.
+\end{equation*}
+If $s_k = 0$ for some $k$, we interpret $P_{n-1}(\sv_{-k}, \mv_{-r}) = 0$, and
+we consider the corresponding term omitted from the sum.
+Abbreviating $Q(\cdot) := P_{n-1}(\,\cdot\,, \mv_{-r})$ for clarity, and
+dividing through by $Q(\sv_{-i} + \ev_{ij})$, yields
+\begin{equation} \label{eq:gprobratiodecomp}
+\rho_n(\sv, i, j; \mv) = \frac{
+p_{ri}\displaystyle \frac{Q(\sv_{-i})}{Q(\sv_{-i} + \ev_{ij})} +
+\displaystyle\sum_{k\neq i} p_{rk} \frac{Q(\sv_{-k})}{Q(\sv_{-i} + \ev_{ij})} }{
+p_{ri} + p_{rj} \displaystyle\frac{Q(\sv_{-i})}{Q(\sv_{-i} + \ev_{ij})} +
+\displaystyle\sum_{k\neq i, j} p_{rk}
+\frac{Q(\sv_{-k} + \ev_{ij})}{Q(\sv_{-i} + \ev_{ij})} }.
+\end{equation}
+Furthermore,
+\[ \frac{Q(\sv_{-i})}{Q(\sv_{-i} + \ev_{ij})} =
+%\frac{P_{n-1}(\sv_{-1}, \mv_{-1})}{P_{n-1}(\sv_{-1} + \ev_{ij}, \mv_{-1})}
+\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}), \]
+%and for $k = 2,\dots,2^L$,
+\begin{equation*}
+\frac{Q(\sv_{-k})}{Q(\sv_{-i} + \ev_{ij})} =
+%\frac{P_{n-1}(\sv_{-k}, \mv_{-1})}{P_{n-1}(\sv_{-1} + \ev_{ij}, \mv_{-1})}
+\frac{Q(\sv_{-k})}{Q(\sv_{-k} + \ev_{ik})}
+%\frac{P_{n-1}(\sv_{-k}, \mv_{-1})}{P_{n-1}(\sv_{-k} + \ev_{1k}, \mv_{-1})}
+\frac{Q(\sv_{-i})}{Q(\sv_{-i} + \ev_{ij})}
+%\frac{P_{n-1}(\sv_{-1}, \mv_{-1})}{P_{n-1}(\sv_{-1} + \ev_{ij}, \mv_{-1})} \\
+= \rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})
+\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}),
+\end{equation*}
 and
-\begin{align*}
-\frac{P_{n-1}(\sv_{-k} + \ev_{ij}, \mv_{-1})}
-{P_{n-1}(\sv_{-1} + \ev_{ij}, \mv_{-1})}
-&= \frac{P_{n-1}(\sv_{-k} + \ev_{ij}, \mv_{-1})}
-{P_{n-1}(\sv_{-k} + \ev_{1k} + \ev_{ij}, \mv_{-1})}
-= \rho_{n-1}(\sv_{-k} + \ev_{ij}, 1, k; \mv_{-1}).
-\end{align*}
+\begin{equation*}
+\frac{Q(\sv_{-k} + \ev_{ij})}{Q(\sv_{-i} + \ev_{ij})} =
+\frac{Q(\sv_{-k} + \ev_{ij})}{Q(\sv_{-k} + \ev_{ij} + \ev_{ik})} =
+%&= \frac{P_{n-1}(\sv_{-k} + \ev_{ij}, \mv_{-1})}
+%{P_{n-1}(\sv_{-k} + \ev_{1k} + \ev_{ij}, \mv_{-1})}
+\rho_{n-1}(\sv_{-k} + \ev_{ij}, i, k; \mv_{-r}).
+\end{equation*}
 Applying these identities in \eqref{eq:gprobratiodecomp} gives
-\begin{align*}
-\rho_n(\sv, i, j; \mv) &=
-\frac{
-p_{11}\cdot\rho_{n-1}(\sv_{-1}, i, j; \mv_{-1}) +
-\displaystyle\sum_{k = 2}^{2^L} p_{1k}\cdot
-\rho_{n-1}(\sv_{-k}, 1, k; \mv_{-1})\rho_{n-1}(\sv_{-1}, i, j; \mv_{-1})
-}{
-p_{11} + \displaystyle\sum_{k = 2}^{2^L} p_{1k}\cdot
-\rho_{n-1}(\sv_{-k} + \ev_{ij}, 1, k; \mv_{-1})}.
-\end{align*}
-TODO: case when $k = j$  or $k = i$?
+\begin{equation} \label{eq:gprobratiodecomprho}
+\rho_n(\sv, i, j; \mv) = \frac{
+p_{ri}\cdot\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) +
+\displaystyle\sum_{k \neq i} p_{rk}\cdot
+\rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) }{
+p_{r1} + p_{rj}\cdot\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) +
+\displaystyle\sum_{k \neq i,j} p_{rk}\cdot
+\rho_{n-1}(\sv_{-k} + \ev_{ij}, i, k; \mv_{-r})}.
+\end{equation}
 
-TODO: generalize over the index we are conditioning on, and dividing by?
-Handle the case when $m_1 = 0$, or when any of the probabilities in the first
-line are zero.
-
-An important property of the probability ratio is monotonicity.
-In particular, the ratio is nondecreasing when stepping in a direction that
-decreases the $i$-th count.
+We now use this relationship to establish an important monotonicity property:
+the probability ratio from $i$ to $j$ is nondecreasing when stepping in a
+direction that decreases the $i$-th count, \ie away from the corner of $\Ssp_n$
+at point $n\cdot\ev_i$.
 
 \begin{prop}
-\[ \rho_n(\sv, i, j; \mv) \leq \rho_n(\sv + \ev_{i\ell}, i, j; \mv) \]
+\begin{equation} \label{eq:gprobratioincr}
+\rho_n(\sv, i, j; \mv) \leq \rho_n(\sv + \ev_{i\ell}, i, j; \mv)
+\end{equation}
 for $\sv\in\Ssp_n$ with $s_i \geq 1$ and $\ell \neq i$.
 \end{prop}
 
