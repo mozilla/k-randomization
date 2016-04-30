@@ -482,9 +482,17 @@ p_{11} + \displaystyle\sum_{k = 2}^{2^L} p_{1k}\cdot
 TODO: case when $k = j$  or $k = i$?
 
 TODO: generalize over the index we are conditioning on, and dividing by?
-Handle the case when $m_1 = 0$.
+Handle the case when $m_1 = 0$, or when any of the probabilities in the first
+line are zero.
 
-An important property of the probability ratio is monotonicity. In particular,
+An important property of the probability ratio is monotonicity.
+In particular, the ratio is nondecreasing when stepping in a direction that
+decreases the $i$-th count.
+
+\begin{prop}
+\[ \rho_n(\sv, i, j; \mv) \leq \rho_n(\sv + \ev_{i\ell}, i, j; \mv) \]
+for $\sv\in\Ssp_n$ with $s_i \geq 1$ and $\ell \neq i$.
+\end{prop}
 
 
 \hrulefill
