@@ -478,7 +478,7 @@ Applying these identities in \eqref{eq:gprobratiodecomp} gives
 p_{ri}\cdot\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) +
 \displaystyle\sum_{k \neq i} p_{rk}\cdot
 \rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) }{
-p_{r1} + p_{rj}\cdot\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) +
+p_{ri} + p_{rj}\cdot\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) +
 \displaystyle\sum_{k \neq i,j} p_{rk}\cdot
 \rho_{n-1}(\sv_{-k} + \ev_{ij}, i, k; \mv_{-r})}.
 \end{equation}
@@ -489,11 +489,67 @@ direction that decreases the $i$-th count, \ie away from the corner of $\Ssp_n$
 at point $n\cdot\ev_i$.
 
 \begin{prop}
+Fix a direction $i\in \{1,\dots,2^L\}$.
+Given any original collection $\mv\in\Ssp_n$ and synthetic collection
+$\sv\in\Ssp_n$ with $s_i \geq 2$,
 \begin{equation} \label{eq:gprobratioincr}
 \rho_n(\sv, i, j; \mv) \leq \rho_n(\sv + \ev_{i\ell}, i, j; \mv)
+%\qquad\text{for } \ell = 1,\dots,2^L \text{ such that } \ell \neq i.
 \end{equation}
-for $\sv\in\Ssp_n$ with $s_i \geq 1$ and $\ell \neq i$.
+for all $1 \leq j,\ell \leq 2^L$ such that $j\neq i$ and $\ell\neq i$.
 \end{prop}
+\begin{pf}
+We proceed by induction on $n$.
+Suppose first that $n=2$.
+Then either $\mv = 2\ev_r$ or $\mv = \ev_r + \ev_{r'}$, and
+$\sv = \ev_k + \ev_{k'}$.
+In the first case, $\sv$ is Multinomial with probabilities $\textbf{p}_{r}$:
+\[ P_2(\sv, 2\ev_r) = 2\inv{(s_k!s_{k'}!)} p_{rk}^{s_k}p_{rk'}^{s_k'}, \]
+and so, for $s\in\Ssp_2$ such that $s_i \geq 1$,
+\[ \rho_2(\sv, i, j; 2\ev_r) = \frac{s_j + 1}{s_i}\frac{p_{ri}}{p_{rj}}.
+\]
+Assumimg $\sv = 2\ev_i$, since we require $s_i \geq 2$, we have
+\[ \rho_2(2\ev_i, i, j; 2\ev_r) = \frac{1}{2}\frac{p_{ri}}{p_{rj}} \leq
+[I(\ell = j) + 1]\frac{p_{ri}}{p_{rj}} =
+\rho_2(\ev_i + \ev_\ell, i, j; 2\ev_r),
+\]
+verifying \eqref{eq:gprobratioincr} in this case.
+If $\mv = \ev_r + \ev_{r'}$,
+\[ P_2(\sv, \ev_r + \ev_{r'}) = p_{rk}p_{r'k'} + p_{rk'}p_{r'k}I(k \neq k'), \]
+and so
+\[ \rho_2(2\ev_i, i, j; \ev_r + \ev_{r'}) =
+\frac{p_{ri}p_{r'i}}{p_{ri}p_{r'j} + p_{rj}p_{r'i}} \leq
+\frac{p_{ri}p_{r'\ell} + p_{r\ell}p_{r'i}}
+{p_{rj}p_{r'\ell} + p_{r\ell}p_{r'j}I(\ell \neq j)} =
+\rho_2(\ev_i + \ev_\ell, i, j; \ev_r + \ev_{r'})
+\]
+iff
+\begin{align*}
+0 &\leq (p_{ri}p_{r'j} + p_{rj}p_{r'i})(p_{ri}p_{r'\ell} + p_{r\ell}p_{r'i}) -
+p_{ri}p_{r'i}[p_{rj}p_{r'\ell} + p_{r\ell}p_{r'j}I(\ell \neq j)] \\
+&= p_{ri}^2p_{r'j}p_{r'\ell} + p_{rj}p_{r\ell}p_{r'i}^2
+%+ p_{ri}p_{r'\ell}p_{rj}p_{r'i}
++ p_{ri}p_{r'j}p_{r\ell}p_{r'i}
+%- p_{ri}p_{r'i}p_{rj}p_{r'\ell}
+%- p_{ri}p_{r'i}p_{r\ell}p_{r'j}
+I(\ell = j),
+\end{align*}
+a sum of positive terms.
+Suppose now that $n>2$, and assume \eqref{eq:gprobratioincr} holds for $n-1$
+over all original and synthetic collections in $\Ssp_{n-1}$ with $s_i \geq 2$.
+%whenever $\mv,\sv\in\Ssp_{n-1}$ such that $s_i \geq 2$.
+Consider $\mv,\sv\in\Ssp_n$ such that $s_i\geq 2$ and $j,\ell\neq i$.
+Choose $r$ such that $m_r \geq 1$, and apply the decompostion
+\eqref{eq:gprobratiodecomprho} to $\rho_n(\sv, i, j; \mv)$, writing it in terms
+of
+\[ \Big(\rho_{n-1}(\,\cdot\,,i, k; \mv_{-r});\; 1 \leq k \leq 2^l,
+k\neq i\big). \]
+By assumption,
+\[ \rho_{n-1}(\sv',i, k; \mv_{-r}) \leq
+\rho_{n-1}(\sv' + \ev_{i\ell} ,i, k; \mv_{-r}) \]
+for each $k$.
+TODO: what about when $s_i = 2$ and we get $\sv_{-i}$?
+\end{pf}
 
 
 \hrulefill
