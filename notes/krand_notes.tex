@@ -467,10 +467,14 @@ Furthermore,
 and
 \begin{equation*}
 \frac{Q(\sv_{-k} + \ev_{ij})}{Q(\sv_{-i} + \ev_{ij})} =
-\frac{Q(\sv_{-k} + \ev_{ij})}{Q(\sv_{-k} + \ev_{ij} + \ev_{ik})} =
+\frac{Q(\sv_{-k})}{Q(\sv_{-i} + \ev_{ij})}
+\frac{Q(\sv_{-k}  + \ev_{ij})}{Q(\sv_{-k})} =
+\frac{\rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})
+\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r})}{\rho_{n-1}(\sv_{-k}, i, j; \mv_{-r})}.
+%\frac{Q(\sv_{-k} + \ev_{ij})}{Q(\sv_{-k} + \ev_{ij} + \ev_{ik})} =
 %&= \frac{P_{n-1}(\sv_{-k} + \ev_{ij}, \mv_{-1})}
 %{P_{n-1}(\sv_{-k} + \ev_{1k} + \ev_{ij}, \mv_{-1})}
-\rho_{n-1}(\sv_{-k} + \ev_{ij}, i, k; \mv_{-r}).
+%\rho_{n-1}(\sv_{-k} + \ev_{ij}, i, k; \mv_{-r}).
 \end{equation*}
 Applying these identities in \eqref{eq:gprobratiodecomp} gives
 \begin{equation} \label{eq:gprobratiodecomprho}
@@ -480,7 +484,10 @@ p_{ri}\cdot\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) +
 \rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) }{
 p_{ri} + p_{rj}\cdot\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) +
 \displaystyle\sum_{k \neq i,j} p_{rk}\cdot
-\rho_{n-1}(\sv_{-k} + \ev_{ij}, i, k; \mv_{-r})}.
+\frac{\rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})
+\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r})}{\rho_{n-1}(\sv_{-k}, i, j; \mv_{-r})}
+%\rho_{n-1}(\sv_{-k} + \ev_{ij}, i, k; \mv_{-r})
+}.
 \end{equation}
 
 We now use this relationship to establish an important monotonicity property:
@@ -559,7 +566,8 @@ TODO: what about when $s_i = 2$ and we get $\sv_{-i}$?
 TODO: Is this true?
 
 \begin{prop}
-Given an original collection consisting of $(x, \xv)$, the privacy ratio is maximized when the modification $x'$ is chosen to be the opposite of $x$:
+Given an original collection consisting of $(x, \xv)$, the privacy ratio is
+maximized when the modification $x'$ is chosen to be the opposite of $x$:
 \[ \pi(\sv; \xv, x, x^*) \geq \pi(\sv; \xv, x, x') \]
 for any $\sv\in\Ssp_n$, $x'\in \Dsp$, where $\delta(x, x^*) = L$.
 \end{prop}
