@@ -21,6 +21,100 @@ n <- 50
 q <- 0.2
 #q <- 0.1
 
+L <- 2
+ntypes <- 2^L
+## Try computing distributions for L=2.
+## Assume the multinomial categories 1, 2, 3, 4 correspond to
+## (11), (10), (01), (00) respectively.
+
+## Take a given initial configuration.
+initconfig <- c(3, 2, 3, 2)
+n <- sum(initconfig)
+## Create a table of all possible synthetic collections.
+synthcoll <- as.data.table(do.call(expand.grid, rep(list(1:ntypes), n)))
+synthcollcols <- sprintf("x%s", 1:n)
+setnames(synthcoll, synthcollcols)
+## Summarize collections by mapping to multinomial counts.
+bincols <- sprintf("inbin%s", 1:n)
+mncols <- sprintf("s%s", 1:ntypes)
+for(j in 1:ntypes) {
+    synthcoll[, eval(bincols) := lapply(synthcollcols, function(v) { 
+        get(v) == j })]
+    synthcoll[, eval(mncols[[j]]) := Reduce("+", lapply(bincols, function(bc) {
+        synthcoll[[bc]] }))]
+    synthcoll[, eval(bincols) := NULL]
+}
+## Now compute probabilities of obtaining each synthetic collection.
+## First find the distance metric between the original and synthetic.
+distvals <- list(c(0, 1, 1, 2), c(1, 0, 2, 1), c(1, 2, 0, 1), c(2, 1, 1, 0))
+distfn <- function(v, j) { distvals[[j]][v] }
+initcoll <- rep(1:4, each = initconfig)
+synthcoll[, d := {
+    dvals <- mapply(function(origv, scol) { distfn(get(scol), origv) },
+        initcoll, synthcollcols, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+    Reduce("+", dvals) }]
+synthcoll[, p := (1-q)^(n*L)*(q/(1-q))^d, by = d]
+
+## The probability of getting any multinomial outcome can now be obtained by
+## summing the relevant rows in the table.
+mnprobs <- synthcoll[, list(p = sum(p)), by = mncols]
+setkeyv(mnprobs, mncols)
+
+## Compute the probability ratio for a given sequence of s values, given as
+## a data table with 4 columns named by mncols.
+probratio <- function(s, i, j) {
+    num <- mnprobs[s, p]
+    sdenom <- copy(s)[, eval(mncols[[i]]) := get(mncols[[i]]) - 1][,
+       eval(mncols[[j]]) := get(mncols[[j]]) + 1]
+    denom <- mnprobs[sdenom, p]
+    num / denom
+}
+
+## Get some data.
+#s <- mnprobs[s4 == 0][, p := NULL]
+s <- mnprobs[s3 == 0][, p := NULL]
+s[, pr := probratio(s, 4, 2)]
+
+
+
+#-------------
+
+## Create a table of all possible multinomial outcomes.
+n <- 10
+mnvals <- as.data.table(do.call(expand.grid, rep(list(0:n), ntypes- 1)))
+cols <- sprintf("s%s", 1:(ntypes))
+setnames(mnvals, cols[-length(cols)])
+mnvals[, eval(cols[ntypes]) := n - rowSums(mnvals)]
+mnvals <- mnvals[get(cols[ntypes]) >= 0]
+
+## Probability of getting a given outcome (s_1,...,s_{2^L}):
+## Product of 2^L multinomial probabilities, summed over all subsets of size
+## 2^L of rows of mnvals such that the j-th column sum is equal to s_j.
+
+## Figure out general form for probabilities later on.
+## Matrix of probabilities for each component multinomial.
+mnprobs <- rbind(
+    c((1-q)^2, q*(1-q), q*(1-q), q^2),
+    c(q*(1-q), (1-q)^2, q^2, q*(1-q)),
+    c(q*(1-q), q^2, (1-q)^2, q*(1-q)),
+    c(q^2, q*(1-q), q*(1-q), (1-q)^2))
+
+## Compute the probability of generating a vector with values (s_1,...,s_{2^L})
+## from a sum of 2^L multinomials, with m_i trials each.
+dmnsum <- function(s, m, mnp) {
+    ## Find all combinations outcomes for each multinomial that together
+    ## will combine to give the required s.
+    suboutcomes <- lapply(s, function(v) {
+        vv <- as.data.table(do.call(expand.grid, rep(list(0:v), ntypes)))
+        vv[rowSums(vv) == v]
+    })
+}
+
+
+##########################################################
+
+## Graphs for L=1 case.
+
 alpha <- c(
 #    0.000001,
 #    0.000005,
