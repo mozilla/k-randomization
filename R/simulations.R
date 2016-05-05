@@ -301,6 +301,20 @@ plotcdfs <- function(ddist, quants = NULL) {
     gp
 }
 
+## Plot the probability ratio P[s]/P[s-1] over s = 1,...,n, for each m.
+plotprobratio <- function(ddist) {
+    dd <- ddist[, list(s = s[-1], p = pmf[-1]/pmf[-.N]), by = m]
+    ggplot(dd, aes(x = s, y = p)) + geom_line() +
+        geom_point(size = 0.5) +
+        facet_wrap(~ m
+            #, scales = "free_y"
+            ) +
+        theme(text = element_text(size = 6)) +
+        labs(title = sprintf("P[A(m) = s]/P[A(m) = s-1] for each s = 0:%s",
+            ddist[, max(m)]),
+            x = "s", y = "Prob ratio")
+}
+
 ## Plot probabilities over m for each s value.
 plotsprob <- function(ddist, ratio = FALSE) {
     dd <- if(ratio) {
