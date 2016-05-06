@@ -8,7 +8,8 @@
 ## Generate the distribution of Y ~ MN(m_1, p) + ... + MN(m_{2^L}, p),
 ## a sum of multinomials, where p is a vector of category probabilities.
 ## Returns a data table containing all valid multinomial outcomes over n
-## trials together with their associated probabilities.
+## trials together with their associated probabilities, keyed by the outcome
+## columns.
 ## Input is m, a vector of length 2^L whose sum is n, giving the number of
 ## trials from each original vector type in the original collection, and a
 ## transition matrix P whose i-th row gives the outcome probabilities for
@@ -19,12 +20,12 @@ mnprobs <- function(m, P) {
     ## First generate a reference table of all combinations of numbers
     ## 0:n.
     ## This can be subsetted to find collections of multinomial outcomes.
-    outcomes <- as.data.table(expand.grid(rep(list(0:n), ntypes)))
+    outcomes <- do.call(CJ, rep(list(0:n), ntypes))
     setnames(outcomes, sprintf("s%s", seq_along(outcomes)))
     ## Add in row sums to be used for subsetting.
     outcomes[, rowsum := rowSums(outcomes)]
-    ## The rows of interest must sum to at most 10.
-    outcomes <- outcomes[rowsum <= 10]
+    ## The rows of interest must sum to at most n.
+    outcomes <- outcomes[rowsum >= 1 & rowsum <= n]
     ## For each multinomial component, find its full pmf.
     ## Take outer product of all possible combinations of all component
     ## probabilities, then aggregate by total outcome to get the overall
@@ -57,11 +58,38 @@ mnprobs <- function(m, P) {
     }
     ## The result of this should include all multinomial combinations for
     ## n trials.
-    if(nrow(mnpmf) != outcomes[rowsum == 10, .N])
+    if(nrow(mnpmf) != outcomes[rowsum == n, .N])
         stop(paste("There was an error computing the distribution for",
             "multinomial sums."))
     mnpmf[, oldi := NULL]
+    setkeyv(mnpmf, scols)
     mnpmf
+}
+
+
+## Compute the probability ratio from i to j for all possible s values
+## (all s such that s_i >= 1).
+## Supply a distribution table as returned by mnprobs(), and the indices for
+## the direction of interest.
+## A new table will be returned with the "s" columns and a column "pr" with
+## the probability ratio values, excluding s value rows for which the
+## probability ratio is not defined.
+## The original distribution table is not modified.
+probratio <- function(mndist, i, j) {
+    distdt <- copy(mndist)
+    setnames(distdt, "p", "pnum")
+    scols <- grep("^s", names(distdt), value = TRUE)
+    newscols <- sprintf("new%s", scols)
+    ## Compute the modified s values for the denominator.
+    distdt[, eval(newscols) := lapply(scols, function(ncol) {
+        newcol <- get(ncol)
+        if(grepl(i, ncol)) { newcol <- newcol - 1 } else {
+            if(grepl(j, ncol)) { newcol <- newcol + 1 }}
+        newcol})]
+    ## Restrict to valid values.
+    setkeyv(distdt, newscols)
+    distdt <- mndist[distdt, nomatch = 0]
+    setnames(distdt, "p", "pdenom")
 }
 
 ## Compute the transition matrix mapping an original bit vector of length L

@@ -24,55 +24,16 @@ ntypes <- 2^L
 ## Vector-wise transition probabilities for applying the randomization.
 pmat <- transmatrix(L, q)
 
-
+## The configuration of the original collection.
+m <- c(10, 5, 6, 9)
+## Compute the distribution P[A(m) = s].
+mndist <- mnprobs(m, pmat)
+## Compute distribution for P[A(m_{-1} = s)].
+## This will be used to verify the recursion formula applied by conditioning
+## on one of the original vectors of type 1.
+ddist <- mnprobs(m - c(1,0,0,0), pmat)
 
 ##-----------------------------------------------------------------
-
-## Computations for the case L=1.
-
-n <- 50
-#n <- 1000
-#n <- 100
-#n <- 200
-
-#q <- 0.1
-
-## Try computing distributions for L=2.
-## Assume the multinomial categories 1, 2, 3, 4 correspond to
-## (11), (10), (01), (00) respectively.
-
-## Take a given initial configuration.
-initconfig <- c(3, 2, 3, 2)
-n <- sum(initconfig)
-## Create a table of all possible synthetic collections.
-synthcoll <- as.data.table(do.call(expand.grid, rep(list(1:ntypes), n)))
-synthcollcols <- sprintf("x%s", 1:n)
-setnames(synthcoll, synthcollcols)
-## Summarize collections by mapping to multinomial counts.
-bincols <- sprintf("inbin%s", 1:n)
-mncols <- sprintf("s%s", 1:ntypes)
-for(j in 1:ntypes) {
-    synthcoll[, eval(bincols) := lapply(synthcollcols, function(v) { 
-        get(v) == j })]
-    synthcoll[, eval(mncols[[j]]) := Reduce("+", lapply(bincols, function(bc) {
-        synthcoll[[bc]] }))]
-    synthcoll[, eval(bincols) := NULL]
-}
-## Now compute probabilities of obtaining each synthetic collection.
-## First find the distance metric between the original and synthetic.
-distvals <- list(c(0, 1, 1, 2), c(1, 0, 2, 1), c(1, 2, 0, 1), c(2, 1, 1, 0))
-distfn <- function(v, j) { distvals[[j]][v] }
-initcoll <- rep(1:4, each = initconfig)
-synthcoll[, d := {
-    dvals <- mapply(function(origv, scol) { distfn(get(scol), origv) },
-        initcoll, synthcollcols, SIMPLIFY = FALSE, USE.NAMES = FALSE)
-    Reduce("+", dvals) }]
-synthcoll[, p := (1-q)^(n*L)*(q/(1-q))^d, by = d]
-
-## The probability of getting any multinomial outcome can now be obtained by
-## summing the relevant rows in the table.
-mnprobs <- synthcoll[, list(p = sum(p)), by = mncols]
-setkeyv(mnprobs, mncols)
 
 ## Compute the probability ratio for a given sequence of s values, given as
 ## a data table with 4 columns named by mncols.
@@ -87,7 +48,9 @@ probratio <- function(s, i, j) {
 ## Get some data.
 #s <- mnprobs[s4 == 0][, p := NULL]
 s <- mnprobs[s3 == 0][, p := NULL]
-s[, pr := probratio(s, 4, 2)]
+s[, pr2 := probratio(s, 4, 2)]
+s[, pr3 := probratio(s, 4, 3)]
+s[, pr2 := probratio(s, 4, 2)]
 
 
 
