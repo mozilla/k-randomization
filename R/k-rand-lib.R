@@ -5,6 +5,84 @@
 #############################################################################
 
 
+## Generate the distribution of Y ~ MN(m_1, p) + ... + MN(m_{2^L}, p),
+## a sum of multinomials, where p is a vector of category probabilities.
+## Returns a data table containing all valid multinomial outcomes over n
+## trials together with their associated probabilities.
+## Input is m, a vector of length 2^L whose sum is n, giving the number of
+## trials from each original vector type in the original collection, and a
+## transition matrix P whose i-th row gives the outcome probabilities for
+## the m_i trials based on original type i vectors.
+mnprobs <- function(m, P) {
+    n <- sum(m)
+    ntypes <- length(m)
+    ## First generate a reference table of all combinations of numbers
+    ## 0:n.
+    ## This can be subsetted to find collections of multinomial outcomes.
+    outcomes <- as.data.table(expand.grid(rep(list(0:n), ntypes)))
+    setnames(outcomes, sprintf("s%s", seq_along(outcomes)))
+    ## Add in row sums to be used for subsetting.
+    outcomes[, rowsum := rowSums(outcomes)]
+    ## The rows of interest must sum to at most 10.
+    outcomes <- outcomes[rowsum <= 10]
+    ## For each multinomial component, find its full pmf.
+    ## Take outer product of all possible combinations of all component
+    ## probabilities, then aggregate by total outcome to get the overall
+    ## probabilities.
+    mnpmf <- outcomes[rowsum == m[[1]]][, rowsum := NULL][, oldi := .I]
+    mnpmf[, p := dmultinom(as.integer(.SD[1]), prob = P[1,]), by = oldi]
+    scols <- grep("^s", names(mnpmf), value = TRUE)
+    for(j in 2:ntypes) {
+        ## Ignore components with no trials.
+        if(m[[j]] == 0) next
+        ## Compute the distribution for the next component.
+        newmnpmf <- outcomes[rowsum == m[[j]]][, rowsum := NULL][, i := .I]
+        newmnpmf[, p := dmultinom(as.integer(.SD[1]), prob = P[j,]), by = i]
+        setnames(newmnpmf, sprintf("new%s", names(newmnpmf)))
+        setkey(newmnpmf, newi)
+        setkey(mnpmf, oldi)
+        ## Take the cartesian product.
+        combined <- CJ(oldi = mnpmf$oldi, newi = newmnpmf$newi)
+        setkey(combined, oldi)
+        combined <- mnpmf[combined]
+        setkey(combined, newi)
+        combined <- newmnpmf[combined]
+        ## Find product of all combinations of probabilities.
+        combined[, p := p * newp]
+        ## Find the total outcomes for each category.
+        combined[, eval(scols) := lapply(scols, function(ncol) {
+            get(ncol) + get(sprintf("new%s", ncol)) })]
+        ## Aggregate over unique outcomes.
+        mnpmf <- combined[, list(p = sum(p)), by = scols][, oldi := .I]
+    }
+    ## The result of this should include all multinomial combinations for
+    ## n trials.
+    if(nrow(mnpmf) != outcomes[rowsum == 10, .N])
+        stop(paste("There was an error computing the distribution for",
+            "multinomial sums."))
+    mnpmf[, oldi := NULL]
+    mnpmf
+}
+
+## Compute the transition matrix mapping an original bit vector of length L
+## to its randomized version.
+## Assumes the bit vectors are ordered in decreasing order of their binary
+## numeric values, eg. (11), (10), (01), (00).
+## Returns a stochastic matrix with 2^L rows and columns.
+transmatrix <- function(L, q) {
+    probs <- c(1-q, q)
+    init <- rbind(probs, rev(probs))
+    if(L == 1) return(init)
+    pmat <- init
+    ## For L > 1, the transition matrix can be computed by repeated applying
+    ## a Kronecker product with the original matrix.
+    ## This corresponds to conditioning on the first bit.
+    for(j in 2:L) pmat <- kronecker(pmat, init)
+    return(pmat)
+}
+
+##-----------------------------------------------------------------
+
 ## Compute the distribution of Y ~ Bin(m, p) + Bin(n-m, q), where p = 1-q.
 ## This is interpreted as Y ~ Bin(n, q) if m = 0 and Y ~ Bin(n, p) if m = n.
 ## Returns a vector of length n+1 giving the pmf of Y (entry i is P[Y = i-1]).

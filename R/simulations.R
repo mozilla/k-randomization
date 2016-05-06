@@ -13,16 +13,30 @@ library(ggplot2)
 
 source("k-rand-lib.R")
 
+## Computations for the general case.
+
+## Bitwise randomization probability.
+q <- 0.2
+## The dimesion of the bit vectors.
+L <- 2
+## The number of unique vectors in the space.
+ntypes <- 2^L
+## Vector-wise transition probabilities for applying the randomization.
+pmat <- transmatrix(L, q)
+
+
+
+##-----------------------------------------------------------------
+
+## Computations for the case L=1.
+
 n <- 50
 #n <- 1000
 #n <- 100
 #n <- 200
 
-q <- 0.2
 #q <- 0.1
 
-L <- 2
-ntypes <- 2^L
 ## Try computing distributions for L=2.
 ## Assume the multinomial categories 1, 2, 3, 4 correspond to
 ## (11), (10), (01), (00) respectively.
