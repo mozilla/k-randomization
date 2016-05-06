@@ -32,59 +32,88 @@ mndist <- mnprobs(m, pmat)
 ## This will be used to verify the recursion formula applied by conditioning
 ## on one of the original vectors of type 1.
 ddist <- mnprobs(m - c(1,0,0,0), pmat)
+## Column names, for reference.
+scols <- grep("^s", names(distdt), value = TRUE)
+newscols <- sprintf("new%s", scols)
 
-##-----------------------------------------------------------------
+i <- 1
+j <- 4
+pr <- probratio(mndist, i, j)
 
-## Compute the probability ratio for a given sequence of s values, given as
-## a data table with 4 columns named by mncols.
-probratio <- function(s, i, j) {
-    num <- mnprobs[s, p]
-    sdenom <- copy(s)[, eval(mncols[[i]]) := get(mncols[[i]]) - 1][,
-       eval(mncols[[j]]) := get(mncols[[j]]) + 1]
-    denom <- mnprobs[sdenom, p]
-    num / denom
+
+## For a given e_{kr} shift vector, compute side-by-side probability ratio
+## values for the original and shifted vectors.
+## Returns a table containing columns "prorig" and "prnew".
+## Does not modify the original pr table.
+compareprs <- function(pr, from, to) {
+    prcomp <- copy(pr)
+    setnames(prcomp, "pr", "prorig")
+    ## Compute the shifted s values.
+    shiftsvals(prcomp, from, to)
+    ## Keep only valid ones.
+    setkeyv(prcomp, newscols)
+    prcomp <- prcomp[pr, nomatch = 0]
+    setnames(prcomp, "pr", "prnew")
+    prcomp
 }
 
-## Get some data.
-#s <- mnprobs[s4 == 0][, p := NULL]
-s <- mnprobs[s3 == 0][, p := NULL]
-s[, pr2 := probratio(s, 4, 2)]
-s[, pr3 := probratio(s, 4, 3)]
-s[, pr2 := probratio(s, 4, 2)]
+## Check monotonicity and maximality of the privacy ratio from i to j in all
+## relevant directions, for all valid s values:
+## - Moving away from i is increasing
+##      > rho(s, i, j) <= rho(s + e_{ik}, i, j)
+## - Moving towards j when i is constant is increasing
+##      > rho(s, i, j) <= rho(s + e_{kj}, i, j), k != j
+## - Moving from i to j increases more than moving away from i in another
+##   direction
+##      > rho(s + e_{ik}, i, j) <= rho(s + e_{ij}, i, j), k != j
+## - Moving from i to j increases more than moving towards j from another
+##   direction when i is constant
+##      > rho(s + e_{kj}, i, j) <= rho(s + e_{ij}, i, j), k != j
+##
+checkprproperties <- function(pr, i, j) {
+    cat(sprintf("Parameters: 2^L = %s, n = %s, m = %s, i = %s, j = %s\n",
+        ntypes, n, sprintf("(%s)", paste(m, collapse = ",")), i, j))
+    k <- 1:ntypes
+    k <- k[k != i]
+    awayfromi <- as.logical(lapply(k, function(ind) {
+        compareprs(pr, i, ind)[, all(prnew >= prorig)]
+    }))
+    if(all(awayfromi)) cat("Moving away from i always increasing\n")
+    else cat(sprintf("Moving away from i not increasing when k = %s\n",
+        paste(k[!awayfromi], collapse = ",")))
 
+    ## k is now all indices except i or j.
+    k <- k[k != j]
+    towardsj <- as.logical(lapply(k, function(ind) {
+        compareprs(pr, ind, j)[, all(prnew >= prorig)]
+    }))
+    if(all(towardsj)) cat("Moving towards j always increasing\n")
+    else cat(sprintf("Moving towards j not increasing when k = %s\n",
+        paste(k[!towardsi], collapse = ",")))
 
+    ## Precompute the privacy ratio on shifting from i to j.
+    prij <- compareprs(pr, i, j)
+    setnames(prij, "prnew", "prij")
+    setkeyv(prij, scolnames(prij))
+    maxawayfromi <- as.logical(lapply(k, function(ind) {
+        prcomp <- compareprs(pr, i, ind)
+        setkeyv(prcomp, scolnames(prcomp))
+        prij[prcomp, nomatch = 0][, all(prij >= prnew)]
+    }))
+    if(all(maxawayfromi))
+        cat("Moving away from i increases most in j direction\n")
+    else cat(sprintf("Moving away from i increases more when k = %s than j\n",
+        paste(k[!maxawayfromi], collapse = ",")))
 
-#-------------
-
-## Create a table of all possible multinomial outcomes.
-n <- 10
-mnvals <- as.data.table(do.call(expand.grid, rep(list(0:n), ntypes- 1)))
-cols <- sprintf("s%s", 1:(ntypes))
-setnames(mnvals, cols[-length(cols)])
-mnvals[, eval(cols[ntypes]) := n - rowSums(mnvals)]
-mnvals <- mnvals[get(cols[ntypes]) >= 0]
-
-## Probability of getting a given outcome (s_1,...,s_{2^L}):
-## Product of 2^L multinomial probabilities, summed over all subsets of size
-## 2^L of rows of mnvals such that the j-th column sum is equal to s_j.
-
-## Figure out general form for probabilities later on.
-## Matrix of probabilities for each component multinomial.
-mnprobs <- rbind(
-    c((1-q)^2, q*(1-q), q*(1-q), q^2),
-    c(q*(1-q), (1-q)^2, q^2, q*(1-q)),
-    c(q*(1-q), q^2, (1-q)^2, q*(1-q)),
-    c(q^2, q*(1-q), q*(1-q), (1-q)^2))
-
-## Compute the probability of generating a vector with values (s_1,...,s_{2^L})
-## from a sum of 2^L multinomials, with m_i trials each.
-dmnsum <- function(s, m, mnp) {
-    ## Find all combinations outcomes for each multinomial that together
-    ## will combine to give the required s.
-    suboutcomes <- lapply(s, function(v) {
-        vv <- as.data.table(do.call(expand.grid, rep(list(0:v), ntypes)))
-        vv[rowSums(vv) == v]
-    })
+    maxtowardsj <- as.logical(lapply(k, function(ind) {
+        prcomp <- compareprs(pr, ind, j)
+        setkeyv(prcomp, scolnames(prcomp))
+        prij[prcomp, nomatch = 0][, all(prij >= prnew)]
+    }))
+    if(all(maxtowardsj))
+        cat("Moving towards j increases most from j direction\n")
+    else cat(sprintf("Moving towards j increases more when k = %s than i\n",
+        paste(k[!maxtowardsj], collapse = ",")))
 }
 
 

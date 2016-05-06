@@ -32,7 +32,7 @@ mnprobs <- function(m, P) {
     ## probabilities.
     mnpmf <- outcomes[rowsum == m[[1]]][, rowsum := NULL][, oldi := .I]
     mnpmf[, p := dmultinom(as.integer(.SD[1]), prob = P[1,]), by = oldi]
-    scols <- grep("^s", names(mnpmf), value = TRUE)
+    scols <- scolnames(mnpmf)
     for(j in 2:ntypes) {
         ## Ignore components with no trials.
         if(m[[j]] == 0) next
@@ -66,6 +66,11 @@ mnprobs <- function(m, P) {
     mnpmf
 }
 
+## Find the columns corresponding to s value components.
+## Assumes they will be named "s1", "s2",..., "s{2^L}".
+scolnames <- function(DT) {
+    grep("^s", names(DT), value = TRUE)
+}
 
 ## Compute the probability ratio from i to j for all possible s values
 ## (all s such that s_i >= 1).
@@ -73,23 +78,42 @@ mnprobs <- function(m, P) {
 ## the direction of interest.
 ## A new table will be returned with the "s" columns and a column "pr" with
 ## the probability ratio values, excluding s value rows for which the
-## probability ratio is not defined.
+## probability ratio is not defined, and key by the s columns.
 ## The original distribution table is not modified.
 probratio <- function(mndist, i, j) {
     distdt <- copy(mndist)
     setnames(distdt, "p", "pnum")
-    scols <- grep("^s", names(distdt), value = TRUE)
+    scols <- scolnames(distdt)
     newscols <- sprintf("new%s", scols)
     ## Compute the modified s values for the denominator.
-    distdt[, eval(newscols) := lapply(scols, function(ncol) {
-        newcol <- get(ncol)
-        if(grepl(i, ncol)) { newcol <- newcol - 1 } else {
-            if(grepl(j, ncol)) { newcol <- newcol + 1 }}
-        newcol})]
+    shiftsvals(distdt, i, j)
     ## Restrict to valid values.
     setkeyv(distdt, newscols)
-    distdt <- mndist[distdt, nomatch = 0]
+    distdt <- distdt[mndist, nomatch = 0]
     setnames(distdt, "p", "pdenom")
+    distdt[, pr := pnum / pdenom]
+    distdt <- distdt[, c(scols, "pr"), with = FALSE]
+    setkeyv(distdt, scols)
+    distdt
+}
+
+## Given a table of s values (of the form returned by mnprobs), keyed by each
+## s column, compute the corresponding shifted values s + e_{ij}.
+## These are appended as columns to the original table, with names
+## "news1",...,"news{2^L}".
+## Note that some of the shifted s values may not be valid s values in the
+## simplex S_n - this needs to be checked separately.
+shiftsvals <- function(svals, i, j) {
+    scols <- scolnames(svals)
+    newscols <- sprintf("new%s", scols)
+    ## Compute the modified s values for the denominator.
+    svals[, eval(newscols) := mapply(function(colnum, colname) {
+        newcol <- get(colname)
+        if(colnum == i) newcol <- newcol - 1
+        if(colnum == j) newcol <- newcol + 1
+        newcol
+    }, seq_along(scols), scols, SIMPLIFY = FALSE, USE.NAMES = FALSE)]
+    svals
 }
 
 ## Compute the transition matrix mapping an original bit vector of length L
