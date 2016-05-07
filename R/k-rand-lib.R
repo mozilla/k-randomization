@@ -115,7 +115,8 @@ allprobratio <- function(mnp, i) {
 ## Returns a list containing elements "num" and "denom", vectors of the
 ## probability ratio terms used in the numerator and denominators, and the final
 ## value as "val".
-prrecursion <- function(s, i, j, r, m, pmat, verbose = TRUE) {
+## The table of probability ratios can be precomputed and passed to the function.
+prrecursion <- function(s, i, j, r, m, pmat, allpr = NULL, verbose = TRUE) {
     ## We are conditioning on an original vector of type (index) r.
     ## There should be at least one in the collection.
     m[r] <- m[r] - 1
@@ -127,8 +128,10 @@ prrecursion <- function(s, i, j, r, m, pmat, verbose = TRUE) {
         cat("Conditioning on an original vector of type 1\n")
         cat(sprintf("m_{-%s} is: (%s)\n\n", r, paste(m, collapse = ",")))
     }
-    ddist <- mnprobs(m, pmat)
-    allpr <- allprobratio(ddist, i)
+    if(is.null(allpr)) {
+        ddist <- mnprobs(m, pmat)
+        allpr <- allprobratio(ddist, i)
+    }
     ## Next find the relevant s vectors in S_{n-1}.
     ## Row k is s_{-k}.
     sv <- as.data.table(t(s - diag(length(s))))

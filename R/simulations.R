@@ -114,6 +114,7 @@ checkprproperties <- function(pr, i, j) {
 
 #----------------------------------------
 
+## Shift vector that can be added to the s vectors.
 shiftv <- function(k,l) {
     v <- rep(0, ntypes)
     v[k] <- -1
@@ -121,9 +122,95 @@ shiftv <- function(k,l) {
     v
 }
 
+## Precompute the probability ratio values for a fixed m and r.
+mmr <- m
+mmr[r] <- mmr[r] - 1
+ddist <- mnprobs(mmr, pmat)
+allpr <- allprobratio(ddist, i)
+
+
 ## Compare the probability ratio computed from mndist to that computed using the
 ## recursion, conditioning on an original vector of type r.
-prr <- function(s, i, j) { prrecursion(s, i, j, 1, m, pmat, verbose = TRUE) }
+prr <- function(s, i, j, verbose = TRUE) {
+    prrecursion(s, i, j, 1, m, pmat, allpr, verbose = verbose)
+}
+
+## Shift index l.
+l <- 2
+prdecompshift <- lapply(pr[, .I[s1 >= 2]], function(ind) {
+    if(ind %% 10 == 0) cat(".")
+    if(ind %% 250 == 0) cat(sprintf("\n%s", ind))
+    s <- as.numeric(pr[ind, eval(scols), with = FALSE])
+    list(s = s, original = prr(s, i, j, FALSE),
+        shifted = prr(s + shiftv(i, l), i, j, FALSE))
+})
+## Shifted component in the denominator increases.
+w <- as.logical(lapply(prdecompshift, function(r) {
+    r$shifted$denom[l] >= r$original$denom[l]
+}))
+## Some of the ratio sum components will be NA if the s point was near the
+## boundary.
+all(w[!is.na(w)])
+## Other component in the denominator decreases.
+o <- 3
+w <- as.logical(lapply(prdecompshift, function(r) {
+    r$shifted$denom[o] <= r$original$denom[o]
+}))
+all(w[!is.na(w)])
+
+## All numerators increase.
+## Looks like denominator for shifted index increases but other index decreases.
+## What balances out the increase?
+partialprrecursion <- function(prdecomp, ind, pmat) {
+    lapply(prdecomp, function(r) {
+        r$original$num <- sum((pmat[1,] * r$original$num)[ind], na.rm = TRUE)
+        r$original$denom <- sum((pmat[1,] * r$original$denom)[ind],
+            na.rm = TRUE)
+        r$original$val <- r$original$num / r$original$denom
+        r$shifted$num <- sum((pmat[1,] * r$shifted$num)[ind], na.rm = TRUE)
+        r$shifted$denom <- sum((pmat[1,] * r$shifted$denom)[ind], na.rm = TRUE)
+        r$shifted$val <- r$shifted$num / r$shifted$denom
+        r
+    })
+}
+
+prshiftij <- partialprrecursion(prdecompshift, c(i,j,l), pmat)
+w <- as.logical(lapply(prshiftij, function(r) {
+    r$shifted$val >= r$original$val
+}))
+all(w)
+## Increase in denom when k = l is balanced out by increases in i and j terms.
+## denom for shifted is never more than denom for original.
+w <- as.logical(lapply(prshiftij, function(r) {
+    r$shifted$denom <= r$original$denom
+}))
+all(w)
+
+prshifti <- partialprrecursion(prdecompshift, c(i,l), pmat)
+w <- as.logical(lapply(prshifti, function(r) {
+    r$shifted$denom <= r$original$denom
+}))
+all(w)
+w <- as.logical(lapply(prshifti, function(r) {
+    r$shifted$val >= r$original$val
+}))
+all(w)
+## Shifted denominator is always smaller when only including component i and
+## shifted index.
+
+prshiftj <- partialprrecursion(prdecompshift, c(j,l), pmat)
+w <- as.logical(lapply(prshiftj, function(r) {
+    r$shifted$denom >= r$original$denom
+}))
+all(w)
+w <- as.logical(lapply(prshiftj, function(r) {
+    r$shifted$val >= r$original$val
+}))
+all(w)
+## Shifted denominator is always larger when only including component j and
+## shifted index.
+## However, the value of the shifted ratio (restricted to these two terms) is
+## larger than the original.
 
 
 
