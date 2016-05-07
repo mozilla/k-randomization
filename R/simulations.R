@@ -28,12 +28,8 @@ pmat <- transmatrix(L, q)
 m <- c(10, 5, 6, 9)
 ## Compute the distribution P[A(m) = s].
 mndist <- mnprobs(m, pmat)
-## Compute distribution for P[A(m_{-1} = s)].
-## This will be used to verify the recursion formula applied by conditioning
-## on one of the original vectors of type 1.
-ddist <- mnprobs(m - c(1,0,0,0), pmat)
 ## Column names, for reference.
-scols <- grep("^s", names(distdt), value = TRUE)
+scols <- scolnames(mndist)
 newscols <- sprintf("new%s", scols)
 
 i <- 1
@@ -57,7 +53,7 @@ compareprs <- function(pr, from, to) {
     prcomp
 }
 
-## Check monotonicity and maximality of the privacy ratio from i to j in all
+## Check monotonicity and maximality of the probability ratio from i to j in all
 ## relevant directions, for all valid s values:
 ## - Moving away from i is increasing
 ##      > rho(s, i, j) <= rho(s + e_{ik}, i, j)
@@ -91,7 +87,7 @@ checkprproperties <- function(pr, i, j) {
     else cat(sprintf("Moving towards j not increasing when k = %s\n",
         paste(k[!towardsi], collapse = ",")))
 
-    ## Precompute the privacy ratio on shifting from i to j.
+    ## Precompute the probability ratio on shifting from i to j.
     prij <- compareprs(pr, i, j)
     setnames(prij, "prnew", "prij")
     setkeyv(prij, scolnames(prij))
@@ -114,6 +110,43 @@ checkprproperties <- function(pr, i, j) {
         cat("Moving towards j increases most from j direction\n")
     else cat(sprintf("Moving towards j increases more when k = %s than i\n",
         paste(k[!maxtowardsj], collapse = ",")))
+}
+
+#----------------------------------------
+
+## Compare the probability ratio computed from mndist to that computed using the
+## recursion on ddist, conditioning on an original vector of type r.
+## Supply s as a vector of length 2^L summing to n.
+## Returns a list containing elements "num" and "denom", vectors of the
+## probability ratio terms used in the numerator and denominators, and the final
+## value as "val".
+prrecursion <- function(s, i, j, r, m, pmat) {
+    ## We are conditioning on an original vector of type (index) r.
+    ## There should be at least one in the collection.
+    m[r] <- m[r] - 1
+    if(m[r] < 0)
+        stop(sprintf("No original vectors of type %s in the collection.", r))
+    ## Compute probability ratios with respect to the original collection m_{-r}.
+    ddist <- mnprobs(m, pmat)
+    allpr <- allprobratio(ddist, i)
+    ## Next find the relevant s vectors in S_{n-1}.
+    ## Row k is s_{-k}.
+    sv <- as.data.table(t(s - diag(length(s))))
+    setnames(sv, scols)
+    ## Find the probability ratios for these s values.
+    ## Some may be NA if s is not valid (ie. s_k = 0).
+    ## These terms should be removed from the final sum.
+    sv <- allpr[sv]
+    ## PR terms in the numerator: rho(s_{-k}, i, k) (or 1 when k = i).
+    prnum <- as.numeric(lapply(1:nrow(sv), function(k) {
+        if(k == i) return(1)
+        sv[k, sprintf("pr%s%s", i, k), with = FALSE][[1]]
+    }))
+    ## PR terms in the denominator: numerator terms / rho(s_{-k}, i, j)
+    ## (or 1 when k = j).
+    prdenom <- prnum / sv[, sprintf("pr%s%s", i, j), with = FALSE][[1]]
+    prdenom[j] <- 1
+    sum(pmat[r,] * prnum, na.rm = TRUE) / sum(pmat[r,] * prdenom, na.rm = TRUE)
 }
 
 

@@ -80,8 +80,8 @@ scolnames <- function(DT) {
 ## the probability ratio values, excluding s value rows for which the
 ## probability ratio is not defined, and key by the s columns.
 ## The original distribution table is not modified.
-probratio <- function(mndist, i, j) {
-    distdt <- copy(mndist)
+probratio <- function(mnp, i, j) {
+    distdt <- copy(mnp)
     setnames(distdt, "p", "pnum")
     scols <- scolnames(distdt)
     newscols <- sprintf("new%s", scols)
@@ -89,12 +89,25 @@ probratio <- function(mndist, i, j) {
     shiftsvals(distdt, i, j)
     ## Restrict to valid values.
     setkeyv(distdt, newscols)
-    distdt <- distdt[mndist, nomatch = 0]
+    distdt <- distdt[mnp, nomatch = 0]
     setnames(distdt, "p", "pdenom")
     distdt[, pr := pnum / pdenom]
     distdt <- distdt[, c(scols, "pr"), with = FALSE]
     setkeyv(distdt, scols)
     distdt
+}
+
+## Compute the probability ratio in all directions away from i, for all
+## possible s.
+allprobratio <- function(mnp, i) {
+    jdirs <- 1:length(scolnames(mnp))
+    jdirs <- jdirs[jdirs != i]
+    prfori <- lapply(jdirs, function(j) { 
+        prdt <- probratio(mnp, i, j)
+        setnames(prdt, "pr", sprintf("pr%s%s", i, j))
+        prdt
+    })
+    Reduce(function(x, y) { merge(x, y, by = scols) }, prfori)
 }
 
 ## Given a table of s values (of the form returned by mnprobs), keyed by each
