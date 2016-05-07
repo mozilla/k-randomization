@@ -110,6 +110,62 @@ allprobratio <- function(mnp, i) {
     Reduce(function(x, y) { merge(x, y, by = scols) }, prfori)
 }
 
+## Work through the recursion formula for the probability ratio.
+## Supply s as a vector of length 2^L summing to n.
+## Returns a list containing elements "num" and "denom", vectors of the
+## probability ratio terms used in the numerator and denominators, and the final
+## value as "val".
+prrecursion <- function(s, i, j, r, m, pmat, verbose = TRUE) {
+    ## We are conditioning on an original vector of type (index) r.
+    ## There should be at least one in the collection.
+    m[r] <- m[r] - 1
+    if(m[r] < 0)
+        stop(sprintf("No original vectors of type %s in the collection.", r))
+    ## Compute probability ratios with respect to the original collection
+    ## m_{-r}.
+    if(verbose) {
+        cat("Conditioning on an original vector of type 1\n")
+        cat(sprintf("m_{-%s} is: (%s)\n\n", r, paste(m, collapse = ",")))
+    }
+    ddist <- mnprobs(m, pmat)
+    allpr <- allprobratio(ddist, i)
+    ## Next find the relevant s vectors in S_{n-1}.
+    ## Row k is s_{-k}.
+    sv <- as.data.table(t(s - diag(length(s))))
+    setnames(sv, scols)
+    ## Find the probability ratios for these s values.
+    ## Some may be NA if s is not valid (ie. s_k = 0).
+    ## These terms should be removed from the final sum.
+    sv <- allpr[sv]
+    if(verbose) {
+        cat(sprintf("Probability ratios for s_{-k} from %s to k:\n", i))
+        print(sv)
+    }
+    ## PR terms in the numerator: rho(s_{-k}, i, k) (or 1 when k = i).
+    prnum <- as.numeric(lapply(1:nrow(sv), function(k) {
+        if(k == i) return(1)
+        sv[k, sprintf("pr%s%s", i, k), with = FALSE][[1]]
+    }))
+    ## PR terms in the denominator: numerator terms / rho(s_{-k}, i, j)
+    ## (or 1 when k = j).
+    prdenom <- prnum / sv[, sprintf("pr%s%s", i, j), with = FALSE][[1]]
+    prdenom[j] <- 1
+    prfinal <- sum(pmat[r,] * prnum, na.rm = TRUE) /
+        sum(pmat[r,] * prdenom, na.rm = TRUE)
+    if(verbose) {
+        cat(sprintf("\nProbability ratio at (%s) from %s to %s: %s\n",
+            paste(s, collapse = ","), i, j, round(prfinal, 5)))
+        cat(sprintf("  - numerator terms: %s\n",
+            paste(round(prnum, 5), collapse = " ")))
+        cat(sprintf("  - denominator terms: %s\n",
+            paste(round(prdenom, 5), collapse = " ")))
+        cat(sprintf("  - prob coefficients p_{%sk}: %s\n", r,
+            paste(pmat[r,], collapse = " ")))
+    }
+    invisible(list(num = prnum, denom = prdenom, val = prfinal))
+}
+
+
 ## Given a table of s values (of the form returned by mnprobs), keyed by each
 ## s column, compute the corresponding shifted values s + e_{ij}.
 ## These are appended as columns to the original table, with names

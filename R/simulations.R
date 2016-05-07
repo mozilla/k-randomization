@@ -114,40 +114,18 @@ checkprproperties <- function(pr, i, j) {
 
 #----------------------------------------
 
-## Compare the probability ratio computed from mndist to that computed using the
-## recursion on ddist, conditioning on an original vector of type r.
-## Supply s as a vector of length 2^L summing to n.
-## Returns a list containing elements "num" and "denom", vectors of the
-## probability ratio terms used in the numerator and denominators, and the final
-## value as "val".
-prrecursion <- function(s, i, j, r, m, pmat) {
-    ## We are conditioning on an original vector of type (index) r.
-    ## There should be at least one in the collection.
-    m[r] <- m[r] - 1
-    if(m[r] < 0)
-        stop(sprintf("No original vectors of type %s in the collection.", r))
-    ## Compute probability ratios with respect to the original collection m_{-r}.
-    ddist <- mnprobs(m, pmat)
-    allpr <- allprobratio(ddist, i)
-    ## Next find the relevant s vectors in S_{n-1}.
-    ## Row k is s_{-k}.
-    sv <- as.data.table(t(s - diag(length(s))))
-    setnames(sv, scols)
-    ## Find the probability ratios for these s values.
-    ## Some may be NA if s is not valid (ie. s_k = 0).
-    ## These terms should be removed from the final sum.
-    sv <- allpr[sv]
-    ## PR terms in the numerator: rho(s_{-k}, i, k) (or 1 when k = i).
-    prnum <- as.numeric(lapply(1:nrow(sv), function(k) {
-        if(k == i) return(1)
-        sv[k, sprintf("pr%s%s", i, k), with = FALSE][[1]]
-    }))
-    ## PR terms in the denominator: numerator terms / rho(s_{-k}, i, j)
-    ## (or 1 when k = j).
-    prdenom <- prnum / sv[, sprintf("pr%s%s", i, j), with = FALSE][[1]]
-    prdenom[j] <- 1
-    sum(pmat[r,] * prnum, na.rm = TRUE) / sum(pmat[r,] * prdenom, na.rm = TRUE)
+shiftv <- function(k,l) {
+    v <- rep(0, ntypes)
+    v[k] <- -1
+    v[l] <- 1
+    v
 }
+
+## Compare the probability ratio computed from mndist to that computed using the
+## recursion, conditioning on an original vector of type r.
+prr <- function(s, i, j) { prrecursion(s, i, j, 1, m, pmat, verbose = TRUE) }
+
+
 
 
 ##########################################################
