@@ -440,7 +440,8 @@ we have
 If $s_k = 0$ for some $k$, we interpret $P_{n-1}(\sv_{-k}, \mv_{-r}) = 0$, and
 we consider the corresponding term omitted from the sum.
 Abbreviating $Q(\cdot) := P_{n-1}(\,\cdot\,, \mv_{-r})$ for clarity, and
-dividing through by $Q(\sv_{-i} + \ev_{ij})$, yields
+dividing through by $Q(\sv_{-i} + \ev_{ij})$ (non-zero since $s_i \geq 2$),
+yields
 \begin{equation} \label{eq:gprobratiodecomp}
 \rho_n(\sv, i, j; \mv) = \frac{
 p_{ri}\displaystyle \frac{Q(\sv_{-i})}{Q(\sv_{-i} + \ev_{ij})} +
@@ -487,8 +488,40 @@ p_{ri} + p_{rj}\cdot\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r}) +
 \frac{\rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})
 \rho_{n-1}(\sv_{-i}, i, j; \mv_{-r})}{\rho_{n-1}(\sv_{-k}, i, j; \mv_{-r})}
 %\rho_{n-1}(\sv_{-k} + \ev_{ij}, i, k; \mv_{-r})
-}.
+},
 \end{equation}
+or, after dividing through by $\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r})$,
+\begin{equation*}
+\rho_n(\sv, i, j; \mv) = \frac{
+p_{ri} + p_{rj}\cdot\rho_{n-1}(\sv_{-j}, i, j; \mv_{-r}) +
+\displaystyle\sum_{k \neq i,j} p_{rk}\cdot\rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})}{
+\displaystyle\frac{p_{ri}}{\rho_{n-1}(\sv_{-i}, i, j; \mv_{-r})} + p_{rj} +
+\displaystyle\sum_{k \neq i,j} p_{rk}\cdot
+\frac{\rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})}{
+\rho_{n-1}(\sv_{-k}, i, j; \mv_{-r})} }.
+\end{equation*}
+Additionally,
+\[ \rho_{n-1}(\sv, i, j; \mv_{-r}) = \frac{Q(\sv)}{Q(\sv + \ev_{ij})} =
+\frac{Q(\sv + \ev_{ij} + \ev_{ji})}{Q(\sv + \ev_{ij})} =
+\rho_{n-1}(\sv + \ev_{ij}, j, i; \mv_{-r}) \]
+and
+\[ \frac{\rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})}{
+\rho_{n-1}(\sv_{-k}, i, j; \mv_{-r})} = 
+\frac{Q(\sv_{-k})}{Q(\sv_{-k} + \ev_{ik})}
+\frac{Q(\sv_{-k} + \ev_{ij})}{Q(\sv_{-k})} =
+\frac{Q(\sv_{-k} + \ev_{ij})}{Q(\sv_{-k} + \ev_{ij} + \ev_{jk})} =
+\rho_{n-1}(\sv_{-k} + \ev_{ij}, j, k; \mv_{-r}),
+\]
+leading to
+\begin{equation*}
+\rho_n(\sv, i, j; \mv) = \frac{
+p_{ri} + p_{rj}\cdot\rho_{n-1}(\sv_{-j}, i, j; \mv_{-r}) +
+\displaystyle\sum_{k \neq i,j} p_{rk}\cdot\rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})}{
+p_{rj} + p_{ri}\cdot\rho_{n-1}(\sv_{-i} + \ev_{ij}, j, i; \mv_{-r}) +
+\displaystyle\sum_{k \neq i,j} p_{rk}\cdot
+\rho_{n-1}(\sv_{-k} + \ev_{ij}, j, k; \mv_{-r}) }.
+\end{equation*}
+
 
 We now use this relationship to establish an important monotonicity property:
 the probability ratio from $i$ to $j$ is nondecreasing when stepping in a
