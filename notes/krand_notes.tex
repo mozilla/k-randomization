@@ -503,14 +503,14 @@ p_{ri} + p_{rj}\cdot\rho_{n-1}(\sv_{-j}, i, j; \mv_{-r}) +
 Additionally,
 \[ \rho_{n-1}(\sv, i, j; \mv_{-r}) = \frac{Q(\sv)}{Q(\sv + \ev_{ij})} =
 \frac{Q(\sv + \ev_{ij} + \ev_{ji})}{Q(\sv + \ev_{ij})} =
-\rho_{n-1}(\sv + \ev_{ij}, j, i; \mv_{-r}) \]
+\inv{\rho_{n-1}(\sv + \ev_{ij}, j, i; \mv_{-r})} \]
 and
-\[ \frac{\rho_{n-1}(\sv_{-k}, i, k; \mv_{-r})}{
-\rho_{n-1}(\sv_{-k}, i, j; \mv_{-r})} = 
-\frac{Q(\sv_{-k})}{Q(\sv_{-k} + \ev_{ik})}
-\frac{Q(\sv_{-k} + \ev_{ij})}{Q(\sv_{-k})} =
-\frac{Q(\sv_{-k} + \ev_{ij})}{Q(\sv_{-k} + \ev_{ij} + \ev_{jk})} =
-\rho_{n-1}(\sv_{-k} + \ev_{ij}, j, k; \mv_{-r}),
+\[ \frac{\rho_{n-1}(\sv, i, k; \mv_{-r})}{
+\rho_{n-1}(\sv, i, j; \mv_{-r})} = 
+\frac{Q(\sv)}{Q(\sv + \ev_{ik})}
+\frac{Q(\sv + \ev_{ij})}{Q(\sv)} =
+\frac{Q(\sv + \ev_{ij})}{Q(\sv + \ev_{ij} + \ev_{jk})} =
+\rho_{n-1}(\sv + \ev_{ij}, j, k; \mv_{-r}),
 \]
 leading to
 \begin{equation*}
@@ -522,6 +522,39 @@ p_{rj} + p_{ri}\cdot\rho_{n-1}(\sv_{-i} + \ev_{ij}, j, i; \mv_{-r}) +
 \rho_{n-1}(\sv_{-k} + \ev_{ij}, j, k; \mv_{-r}) }.
 \end{equation*}
 
+\hrulefill
+
+Identities:
+\begin{equation}
+\rho_n(\sv, i, j)\rho_n(\sv + \ev_{ij}, j, k) =
+\frac{P(\sv)}{P(\sv + \ev_{ij})}
+\frac{P(\sv + \ev_{ij})}{P(\sv + \ev_{ij} + \ev_{jk})} =
+\frac{P(\sv)}{P(\sv + \ev_{ik})} = \rho_n(\sv, i, k)
+\end{equation}
+\begin{equation}
+\rho_n(\sv, i, j) = \frac{1}{\rho_n(\sv + \ev_{ij}, j, i)}
+\end{equation}
+\begin{equation}
+\frac{\rho_n(\sv, i, k)}{\rho_n(\sv, i, j)} = \rho_n(\sv + \ev_{ij}, j, k) =
+\rho_n(\sv + \ev_{ij}, j, \ell)\rho_n(\sv + \ev_{ij} + \ev_{j\ell}, \ell, k) =
+\frac{\rho_n(\sv + \ev_{i\ell}, \ell, k)}{\rho_n(\sv + \ev_{i\ell}, \ell, j)}
+\end{equation}
+
+Conjectures:
+\begin{itemize}
+\item Probability ratio from $i$ to $j$ is nondecreasing when shifting in a
+direction away from $i$, with the greatest increase on shifting from $i$ to $j$:
+\begin{equation}
+\rho(\sv, i, j) \leq \rho(\sv + \ev_{ik}, i, j) \leq
+\rho(\sv + \ev_{ij}, i, j) \qquad\text{for all } k \neq i,j
+\end{equation}
+\item Probability ratio from $i$ to $j$ is nondecreasing when shifting in a
+direction towards $j$, with the greatest increase on shifting from $i$ to $j$:
+\begin{equation}
+\rho(\sv, i, j) \leq \rho(\sv + \ev_{kj}, i, j) \leq
+\rho(\sv + \ev_{ij}, i, j) \qquad\text{for all } k \neq i,j
+\end{equation}
+\end{itemize}
 
 We now use this relationship to establish an important monotonicity property:
 the probability ratio from $i$ to $j$ is nondecreasing when stepping in a
