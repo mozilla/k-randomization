@@ -17,7 +17,7 @@ source("k-rand-lib.R")
 
 ## Bitwise randomization probability.
 q <- 0.2
-## The dimesion of the bit vectors.
+## The dimension of the bit vectors.
 L <- 2
 ## The number of unique vectors in the space.
 ntypes <- 2^L
@@ -36,10 +36,14 @@ i <- 1
 j <- 4
 pr <- probratio(mndist, i, j)
 
-
-## For a given e_{kr} shift vector, compute side-by-side probability ratio
+## For a given e_{kl} shift vector, compute side-by-side probability ratio
 ## values for the original and shifted vectors.
-## Returns a table containing columns "prorig" and "prnew".
+## Also determine whether the difference from original to new is an increase,
+## decrease, or remains constant (in the sense of all.equal()).
+## Returns a table containing columns "prorig" and "prnew", and "prchange",
+## and drops s values when the probability ratio is not defined for the
+## shifted vector.
+## Column "prchange" contains strings "increase", "decrease", or "constant".
 ## Does not modify the original pr table.
 compareprs <- function(pr, from, to) {
     prcomp <- copy(pr)
@@ -47,14 +51,98 @@ compareprs <- function(pr, from, to) {
     ## Compute the shifted s values.
     shiftsvals(prcomp, from, to)
     ## Keep only valid ones.
-    setkeyv(prcomp, newscols)
+    setkeyv(prcomp, sprintf("new%s", scolnames(prcomp)))
     prcomp <- prcomp[pr, nomatch = 0]
     setnames(prcomp, "pr", "prnew")
+    ## Compute differences and direction of change.
+    prcomp[, prdiff := prnew - prorig]
+    prcomp[, prconst := 
+        unlist(lapply(prdiff, function(d) { isTRUE(all.equal(d, 0)) }))]
+    prcomp[, prchange := ifelse(prconst, "constant",
+        ifelse(prdiff > 0, "increase", "decrease"))]
     prcomp
 }
 
+## Compute the change (increasing, decreasing, constant) in probability ratio
+## from i to j between s and a neighboring point in S_n.
+## For each valid direction in S_n, compute the change starting from each s,
+## and return the unique change types.
+## Wlog only consider shifts k-to-l such that k < l.
+prchangeonshift <- function(pr) {
+    dirs <- CJ(k = 1:length(scolnames(pr)), l = 1:length(scolnames(pr)))[k < l]
+    dirs[, prchange := mapply(function(k, l) {
+        compareprs(pr, k, l)[, unique(prchange)]
+    }, k, l, SIMPLIFY = FALSE, USE.NAMES = FALSE)]
+    dirs
+}
+
+## Compute the change in probability ratio in all shift directions, for all
+## probability ratio directions.
+## This is done over all probability ratio values for all synthetic collections
+## obtained starting from the given original collection.
+## Returns a table with columns i, j, k, l and prchange.
+## prchange lists the unique change types observed in the probability ratio
+## from i to j when shifting from s to s + e_{kl}.
+## Wlog we only consider i < j and k < l.
+allprchanges <- function(morig, verbose = TRUE) {
+    mnd <- mnprobs(morig, pmat)
+    dirs <- CJ(i = 1:length(morig), j = 1:length(morig))[i < j]
+    if(verbose) cat("Comparing prob ratios...")
+    prchanges <- mapply(function(i, j) {
+        if(verbose) cat(sprintf("i = %s, j = %s...", i, j))
+        pr <- probratio(mnd, i, j)
+        prchangeonshift(pr)[, i := i][, j := j]
+    }, dirs$i, dirs$j, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+    if(verbose) cat("done\n")
+    rbindlist(prchanges)
+}
+
+## Check monotonicity of probability ratio when stepping in certain directions
+## in the space S_n.
+## Check for:
+## - moving away from i in any direction
+## - moving towards j in any direction
+## - moving from k to l (where k < l) when i and j are not opposites.
+## Returns a list of booleans indicating whether each of these properties holds.
+checkmonotonicity <- function(morig, verbose = TRUE) {
+    if(verbose) {
+        cat(sprintf("Original collection is %s (n = %s)\n",
+            paste(morig, collapse = ","), sum(morig)))
+    }
+    prchanges <- allprchanges(morig, verbose)
+    monot <- list()
+    ## Increasing in all directions moving away from i?
+    monot$awayfromi <- prchanges[k == i,
+        !("decrease" %in% unique(unlist(prchange)))] &&
+        ## Because we are only working with i < j, check that cases where k = j
+        ## are decreasing as well.
+        prchanges[l == i, !("increase" %in% unique(unlist(prchange)))]
+    ## Increasing in all directions towards j?
+    monot$towardsj <- prchanges[l == j,
+        !("decrease" %in% unique(unlist(prchange)))] &&
+        prchanges[k == j, !("increase" %in% unique(unlist(prchange)))]
+    ## Increasing when k < l and neither of k or l is i or j?
+    ## - only when i and j are not opposites.
+    ## Hard-code the case L = 2 for now.
+    monot$otherdir <- prchanges[k != i & k != j & l != i & l != j &
+        !(i == 1 & j == 4) & !(i == 2 & j == 3),
+        !("decrease" %in% unique(unlist(prchange)))]
+    if(verbose) {
+        cat(sprintf("%sll increasing on shifting from i to k\n",
+            if(monot$awayfromi) "A" else "Not a"))
+        cat(sprintf("%sll increasing on shifting from k to j\n",
+            if(monot$towardsj) "A" else "Not a"))
+        cat(sprintf("%sll increasing on shifting from k to l (k < l)\n",
+            if(monot$otherdir) "A" else "Not a"))
+        cat("\n")
+    }
+    invisible(monot)
+}
+
+#-----------------------
+
 ## Check monotonicity and maximality of the probability ratio from i to j in all
-## relevant directions, for all valid s values:
+## relevant directions (with fixed i and j), for all valid s values:
 ## - Moving away from i is increasing
 ##      > rho(s, i, j) <= rho(s + e_{ik}, i, j)
 ## - Moving towards j when i is constant is increasing
@@ -65,52 +153,140 @@ compareprs <- function(pr, from, to) {
 ## - Moving from i to j increases more than moving towards j from another
 ##   direction when i is constant
 ##      > rho(s + e_{kj}, i, j) <= rho(s + e_{ij}, i, j), k != j
-##
-checkprproperties <- function(pr, i, j) {
-    cat(sprintf("Parameters: 2^L = %s, n = %s, m = %s, i = %s, j = %s\n",
-        ntypes, n, sprintf("(%s)", paste(m, collapse = ",")), i, j))
-    k <- 1:ntypes
-    k <- k[k != i]
-    awayfromi <- as.logical(lapply(k, function(ind) {
-        compareprs(pr, i, ind)[, all(prnew >= prorig)]
-    }))
-    if(all(awayfromi)) cat("Moving away from i always increasing\n")
-    else cat(sprintf("Moving away from i not increasing when k = %s\n",
-        paste(k[!awayfromi], collapse = ",")))
+#checkprproperties <- function(pr, i, j, m) {
+#    cat(sprintf("Parameters: 2^L = %s, n = %s, m = %s, i = %s, j = %s\n",
+#        ntypes, rowSums(pr[1, scols, with = FALSE])[[1]],
+#        sprintf("(%s)", paste(m, collapse = ",")), i, j))
+#    k <- 1:ntypes
+#    k <- k[k != i]
+#    ## Check monotonicity for shifts e_{ik} in all directions k != i.
+#    awayfromi <- as.logical(lapply(k, function(ind) {
+#        compareprs(pr, i, ind)[, all(prnew >= prorig)]
+#    }))
+#    if(all(awayfromi)) cat("Moving away from i always increasing\n")
+#    else cat(sprintf("Moving away from i not increasing when k = %s\n",
+#        paste(k[!awayfromi], collapse = ",")))
+#
+#    ## k is now all indices except i or j.
+#    k <- k[k != j]
+#    towardsj <- as.logical(lapply(k, function(ind) {
+#        compareprs(pr, ind, j)[, all(prnew >= prorig)]
+#    }))
+#    if(all(towardsj)) cat("Moving towards j always increasing\n")
+#    else cat(sprintf("Moving towards j not increasing when k = %s\n",
+#        paste(k[!towardsi], collapse = ",")))
+#
+#    ## Precompute the probability ratio on shifting from i to j.
+#    prij <- compareprs(pr, i, j)
+#    setnames(prij, "prnew", "prij")
+#    setkeyv(prij, scolnames(prij))
+#    maxawayfromi <- as.logical(lapply(k, function(ind) {
+#        prcomp <- compareprs(pr, i, ind)
+#        setkeyv(prcomp, scolnames(prcomp))
+#        prij[prcomp, nomatch = 0][, all(prij >= prnew)]
+#    }))
+#    if(all(maxawayfromi))
+#        cat("Moving away from i increases most in j direction\n")
+#    else cat(sprintf("Moving away from i increases more when k = %s than j\n",
+#        paste(k[!maxawayfromi], collapse = ",")))
+#
+#    maxtowardsj <- as.logical(lapply(k, function(ind) {
+#        prcomp <- compareprs(pr, ind, j)
+#        setkeyv(prcomp, scolnames(prcomp))
+#        prij[prcomp, nomatch = 0][, all(prij >= prnew)]
+#    }))
+#    if(all(maxtowardsj))
+#        cat("Moving towards j increases most from j direction\n")
+#    else cat(sprintf("Moving towards j increases more when k = %s than i\n",
+#        paste(k[!maxtowardsj], collapse = ",")))
+#    list(awayfromi = all(awayfromi), towardsj = all(towardsj),
+#        maxawayfromi = all(maxawayfromi), maxtowardsj = all(maxtowardsj))
+#}
 
-    ## k is now all indices except i or j.
-    k <- k[k != j]
-    towardsj <- as.logical(lapply(k, function(ind) {
-        compareprs(pr, ind, j)[, all(prnew >= prorig)]
-    }))
-    if(all(towardsj)) cat("Moving towards j always increasing\n")
-    else cat(sprintf("Moving towards j not increasing when k = %s\n",
-        paste(k[!towardsi], collapse = ",")))
 
-    ## Precompute the probability ratio on shifting from i to j.
-    prij <- compareprs(pr, i, j)
-    setnames(prij, "prnew", "prij")
-    setkeyv(prij, scolnames(prij))
-    maxawayfromi <- as.logical(lapply(k, function(ind) {
-        prcomp <- compareprs(pr, i, ind)
-        setkeyv(prcomp, scolnames(prcomp))
-        prij[prcomp, nomatch = 0][, all(prij >= prnew)]
-    }))
-    if(all(maxawayfromi))
-        cat("Moving away from i increases most in j direction\n")
-    else cat(sprintf("Moving away from i increases more when k = %s than j\n",
-        paste(k[!maxawayfromi], collapse = ",")))
+#checkallmonot <- function(morig) {
+#    mnd <- mnprobs(morig, pmat)
+#    allincr <- lapply(1:ntypes, function(i) {
+#        jind <- 1:ntypes
+#        jind <- jind[jind != i]
+#        lapply(jind, function(j) {
+#            pr <- probratio(mnd, i, j)
+#            checkprproperties(pr, i, j, morig)
+#        })
+#    })
+#    if(all(unlist(allincr)))
+#        cat("\nIncreasing in all relevant directions!\n")
+#    else
+#        warning("Not increasing in some directions!")
+#    invisible(allincr)
+#}
 
-    maxtowardsj <- as.logical(lapply(k, function(ind) {
-        prcomp <- compareprs(pr, ind, j)
-        setkeyv(prcomp, scolnames(prcomp))
-        prij[prcomp, nomatch = 0][, all(prij >= prnew)]
-    }))
-    if(all(maxtowardsj))
-        cat("Moving towards j increases most from j direction\n")
-    else cat(sprintf("Moving towards j increases more when k = %s than i\n",
-        paste(k[!maxtowardsj], collapse = ",")))
+mvals <- mndist[s1 >= 2][sample(.N, 20), scols, with = FALSE]
+for(i in mvals[, .I]) {
+    checkallmonot(as.numeric(mvals[i]))
 }
+
+## What happens across directions involving neither i nor j?
+#checkotherdir <- function(mnd = NULL, morig = NULL) {
+#    nullargs <- unlist(eapply(environment(), is.null))
+#    if(all(nullargs) || !any(nullargs))
+#        stop("Exactly one of the function args must be supplied")
+#    if(is.null(mnd)) {
+#        cat(sprintf("Original collection is %s\n",
+#            paste(morig, collapse = ",")))
+#        mnd <- mnprobs(morig, pmat)
+#    }
+#    allincr <- lapply(1:ntypes, function(i) {
+#        jind <- 1:ntypes
+#        jind <- jind[jind != i]
+#        lapply(jind, function(j) {
+#            pr <- probratio(mnd, i, j)
+#            otherdirs <- jind[jind != j]
+#            cpr <- compareprs(pr, otherdirs[1], otherdirs[2])
+#            cpr[, dpr := prnew - prorig]
+#            cpr[, nodiff := unlist(lapply(dpr, function(d) {
+#                isTRUE(all.equal(d, 0))
+#            }))]
+#            cat(sprintf("i = %s, j = %s: ", i, j))
+#            otherdirincr <- cpr[, all(dpr > 0 | nodiff)]
+#            otherdirdecr <- cpr[, all(dpr < 0 | nodiff)]
+#            dirstr <- sprintf("on shift from %s to %s", otherdirs[1],
+#                otherdirs[2])
+#            incrstr <- if(cpr[, all(nodiff)]) "Constant" else {
+#                if(otherdirincr) "Increasing" else {
+#                    if(otherdirdecr) "Decreasing" else
+#                        "Both increasing and decreasing"
+#                }
+#            }
+#            cat(sprintf("%s %s\n", incrstr, dirstr))
+#            otherdirincr
+#        })
+#        cat("\n")
+#    })
+#    invisible(allincr)
+#}
+
+mvals <- mndist[s1 == 0][sample(.N, 10), scols, with = FALSE]
+for(i in mvals[, .I]) {
+    checkmonotonicity(morig = as.numeric(mvals[i]))
+}
+
+
+
+#pr14 <- probratio(mndist, 1, 4)
+#cpr14 <- compareprs(pr14, 2, 3)[, incr := prnew >= prorig]
+#pr12 <- probratio(mndist, 1, 2)
+#cpr12 <- compareprs(pr12, 3, 4)[, incr := prnew >= prorig]
+#pr13 <- probratio(mndist, 1, 3)
+#cpr13 <- compareprs(pr13, 2, 4)[, incr := prnew >= prorig]
+
+
+## Increasing for j = 2, 3, but not for j = 4.
+## Something to do with the fact that p_{14} is the smallest?
+
+
+
+
 
 #----------------------------------------
 
