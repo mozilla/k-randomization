@@ -30,31 +30,36 @@ mnprobs <- function(m, P) {
     ## Take outer product of all possible combinations of all component
     ## probabilities, then aggregate by total outcome to get the overall
     ## probabilities.
-    mnpmf <- outcomes[rowsum == m[[1]]][, rowsum := NULL][, oldi := .I]
-    mnpmf[, p := dmultinom(as.integer(.SD[1]), prob = P[1,]), by = oldi]
+    firstnonzero <- min(which(m > 0))
+    mnpmf <- outcomes[rowsum == m[[firstnonzero]]][, rowsum := NULL][,
+        oldi := .I]
+    mnpmf[, p := dmultinom(as.integer(.SD[1]), prob = P[firstnonzero,]),
+        by = oldi]
     scols <- scolnames(mnpmf)
-    for(j in 2:ntypes) {
-        ## Ignore components with no trials.
-        if(m[[j]] == 0) next
-        ## Compute the distribution for the next component.
-        newmnpmf <- outcomes[rowsum == m[[j]]][, rowsum := NULL][, i := .I]
-        newmnpmf[, p := dmultinom(as.integer(.SD[1]), prob = P[j,]), by = i]
-        setnames(newmnpmf, sprintf("new%s", names(newmnpmf)))
-        setkey(newmnpmf, newi)
-        setkey(mnpmf, oldi)
-        ## Take the cartesian product.
-        combined <- CJ(oldi = mnpmf$oldi, newi = newmnpmf$newi)
-        setkey(combined, oldi)
-        combined <- mnpmf[combined]
-        setkey(combined, newi)
-        combined <- newmnpmf[combined]
-        ## Find product of all combinations of probabilities.
-        combined[, p := p * newp]
-        ## Find the total outcomes for each category.
-        combined[, eval(scols) := lapply(scols, function(ncol) {
-            get(ncol) + get(sprintf("new%s", ncol)) })]
-        ## Aggregate over unique outcomes.
-        mnpmf <- combined[, list(p = sum(p)), by = scols][, oldi := .I]
+    if(firstnonzero < ntypes) {
+        for(j in (firstnonzero + 1):ntypes) {
+            ## Ignore components with no trials.
+            if(m[[j]] == 0) next
+            ## Compute the distribution for the next component.
+            newmnpmf <- outcomes[rowsum == m[[j]]][, rowsum := NULL][, i := .I]
+            newmnpmf[, p := dmultinom(as.integer(.SD[1]), prob = P[j,]), by = i]
+            setnames(newmnpmf, sprintf("new%s", names(newmnpmf)))
+            setkey(newmnpmf, newi)
+            setkey(mnpmf, oldi)
+            ## Take the cartesian product.
+            combined <- CJ(oldi = mnpmf$oldi, newi = newmnpmf$newi)
+            setkey(combined, oldi)
+            combined <- mnpmf[combined]
+            setkey(combined, newi)
+            combined <- newmnpmf[combined]
+            ## Find product of all combinations of probabilities.
+            combined[, p := p * newp]
+            ## Find the total outcomes for each category.
+            combined[, eval(scols) := lapply(scols, function(ncol) {
+                get(ncol) + get(sprintf("new%s", ncol)) })]
+            ## Aggregate over unique outcomes.
+            mnpmf <- combined[, list(p = sum(p)), by = scols][, oldi := .I]
+        }
     }
     ## The result of this should include all multinomial combinations for
     ## n trials.
