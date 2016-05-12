@@ -20,11 +20,13 @@
 %% Some convenience aliases.
 \newcommand{\Dsp}{\mathcal{D}}
 \newcommand{\Ssp}{\mathcal{S}}
+\newcommand{\Bsp}{\mathcal{B}}
 \newcommand{\xv}{\mathbf{x}}
 \newcommand{\yv}{\mathbf{y}}
 \newcommand{\sv}{\mathbf{s}}
 \newcommand{\mv}{\mathbf{m}}
 \newcommand{\ev}{\mathbf{e}}
+\newcommand{\Pm}{\mathbf{P}}
 \newcommand{\xvt}{\tilde{\xv}}
 \newcommand{\yvt}{\tilde{\yv}}
 \newcommand{\sm}{\sv^-}
@@ -75,8 +77,6 @@ $\xv\in \Dsp^n$, $\xv' \in \Dsp^{n+1}$, and $x_i = x'_i$ for $i = 1,\dots,n$.
 
 %%% Countable output space
 
-%% TODO: countable vs. finite
-
 If $\Ssp$ is finite, which is common in cases where the transcript involves integer counts, then the distribution of the transcript $A(\xv)$ can be represented using its pmf $\P[A(\xv) = s]$ for $s \in \Ssp$.
 In this case, the differential privacy condition can also be expressed in terms of the pmf.
 \begin{prop} \label{prop:dpcnt}
@@ -102,17 +102,19 @@ using Lemma \ref{lem:rsbound}.\\
 \end{pf}
 
 
-
 \section{Bit vector reporting}
 
-Our goal is to establish differential privacy properties for user data reported in the form of vectors of bits.
-To protect user privacy, each user record is randomized prior to leaving the client and anonymized on reaching the server.
-We now describe the randomization procedure, and place ourselves in the setting of Section \ref{sec:dp} by representing it as a query applied to a database.
-
+Our goal is to establish differential privacy properties for user data reported
+in the form of vectors of bits.
+To protect user privacy, each user record is randomized prior to leaving the
+client and anonymized on reaching the server.
+We now describe the randomization procedure, and place ourselves in the setting
+of Section \ref{sec:dp} by representing it as a query applied to a database.
 
 \subsection{Bit randomization}
 
-For our purposes, a \textbf{bit} is an integer $b \in \{0,1\}$, and a \textbf{bit vector} is a vector $x \in \{0,1\}^L$.
+For our purposes, a \textbf{bit} is an integer $b \in \{0,1\}$, and a
+\textbf{bit vector} is a vector $x \in \Bsp_L := \{0,1\}^L$.
 Bits and bit vectors are randomized in the following way.
 
 \begin{defn}
@@ -160,21 +162,75 @@ Note that this probability is maximized when $\delta(x,y) = 0$ (the randomized v
 In the latter case, we say that $y$ is the \textbf{opposite} of $x$.
 In other words, the most likely outcome of randomizing a bit vector is obtaining an identical vector.
 
+%%% Randomization probabilities as a transition matrix.
+
+In general, given $x\in\Bsp_L$, the mapping $R(x)$ is itself a random element of
+$\Bsp_L$, and its distributions over $x$ can be represented by a transition
+matrix which admits a convenient form.
+This depends on enumerating the space $\Bsp_L$ in the following way.
+
+\begin{defn}
+The \textbf{recursive enumeration} of $\Bsp_L$ is a labelling of its elements
+as $\big(v_1^L,v_2^L,\dots,v_{2^L}^L\big)$, ordered as follows:
+\begin{itemize}
+\item when $L=1$, $(v_1^1, v_2^1) := (1, 0)$;
+\item for $L > 1$,
+\[ v_j^L := \begin{cases}(1, v_j^{L-1}) & 1 \leq j \leq 2^{L-1} \\
+    (0, v_{j - 2^{L-1}}^{L-1}) & 2^{L-1} + 1 \leq j \leq 2^L \end{cases}. \]
+\end{itemize}
+\end{defn}
+
+The recursive enumeration orders the vectors bitwise, placing 1 before 0.
+For example, when $L=2$,
+$\big(v_1^2, v_2^2, v_3^2, v_4^2\big) = \big((11), (10), (01), (00)\big)$.
+Alternatively, if the bit vectors are viewed as binary representations of
+integers, the recursive enumeration places them in decreasing order.
+
+Assume from now on that $v_j^L$ refers to the recursive enumeration of
+$\Bsp_L$, and write the randomization probabilities as
+$p_{ij}^L = \P[R(v_i^L) = v_j^L]$.
+Because bits within a vector are randomized independently, we have
+\begin{equation} \label{eq:transprobs}
+p_{ij}^L = \begin{cases}
+p\cdot p_{i,j}^{L-1} &
+    i \leq 2^{L-1},\; j \leq 2^{L-1} \\
+q\cdot p_{i,j - 2^{L-1}}^{L-1} &
+    i \leq 2^{L-1},\; j \geq 2^{L-1} \\
+p\cdot p_{i - 2^{L-1},j}^{L-1} &
+    i \geq 2^{L-1},\; j \leq 2^{L-1} \\
+q\cdot p_{i - 2^{L-1},j - 2^{L-1}}^{L-1} &
+    i \geq 2^{L-1},\; j \geq 2^{L-1}
+ \end{cases}.
+\end{equation}
+The distribution of $R(x)$ is summarized by the transition matrix
+$\Pm_L = \big(p_{ij}^L,\; 1 \leq i,j \leq 2^L\big)$.
+Note that this is a doubly stochastic, symmetric matrix with all $p^L$ on
+the diagonal and $q^L$ on the antidiagonal.
+Furthermore, we have
+\[ \Pm_1 = \begin{pmatrix}p & q \\ q & p \end{pmatrix} \]
+and, as a consequence of \eqref{eq:transprobs},
+\[ \Pm_L = \begin{pmatrix} p\Pm_{L-1} & q\Pm_{L-1} \\
+q\Pm_{L-1} & p\Pm_{L-1} \end{pmatrix}. \]
+In other words,
+\[ \Pm_L = \Pm_1 \otimes \Pm_{L-1}, \]
+where $\otimes$ denotes the Kronecker product.
+
+
 \subsection{Privacy-preserving reporting for bit records}
 
 We now adapt the framework of Section \ref{sec:dp} to the task of reporting
 user records encoded as bit-vectors.
 
-Set $\Dsp = \{0,1\}^L$. We use the term \textbf{collection} (of records) interchangeably with ``database''.
-We consider a randomized query $A$ that randomizes each record in the collection independently, and aggregates the results by reporting occurrence counts for every possible randomization outcome.
+Set $\Dsp = \Bsp_L$. We use the term \textbf{collection} (of records)
+interchangeably with ``database''.
+We consider a randomized query $A$ that randomizes each record in the
+collection independently, and aggregates the results by reporting occurrence
+counts for every possible randomization outcome.
 We adopt this aggregation step as a model for \textbf{anonymization}.
 After anonymization, we cannot associate a specific randomized record with
 a specific record out of the original collection, and so the ordering of
 records in the synthetic collection conveys no information about the ordering
 of the original records.
-
-(TODO - be more specific about the ordering)
-In the following, we rely on the fact that $\Dsp$ is finite, and we assume a specific enumeration $\Dsp = (d_1,\dots,d_{2^L})$. The ordering is unimportant at this point, although it will be convenient to assume that $d_1 =  (1,\dots,1)$ and $d_{2^L} = (0,\dots,0)$.
 
 We consider an aggregation function $\Phi$ mapping a collection of elements of
 $\Dsp$ to a vector $\sv = (s_1,\dots,s_{2^L})$, where $s_j$ counts how
@@ -548,13 +604,28 @@ direction away from $i$, with the greatest increase on shifting from $i$ to $j$:
 \rho(\sv, i, j) \leq \rho(\sv + \ev_{ik}, i, j) \leq
 \rho(\sv + \ev_{ij}, i, j) \qquad\text{for all } k \neq i,j
 \end{equation}
+
 \item Probability ratio from $i$ to $j$ is nondecreasing when shifting in a
 direction towards $j$, with the greatest increase on shifting from $i$ to $j$:
 \begin{equation}
 \rho(\sv, i, j) \leq \rho(\sv + \ev_{kj}, i, j) \leq
 \rho(\sv + \ev_{ij}, i, j) \qquad\text{for all } k \neq i,j
 \end{equation}
+
+\item Increase in probability ratio from $i$ to $j$ varies when shifting in a
+direction orthogonal to $(i, j)$
+%\begin{equation}
+%\rho(\sv, i, j) \leq \rho(\sv + \ev_{k\ell}, i, j)
+%\qquad\text{for all } k,\ell \neq i,j,\; k < \ell
+%\end{equation}
+
 \end{itemize}
+In fact, the maximality of the shift in the direction $(i, j)$ follows from the
+pair of the first inequalities in the statements above:
+\[ \rho(\sv + \ev_{ik}, i, j) \leq \rho(\sv + \ev_{ik} + \ev_{kj}, i, j) =
+\rho(\sv + \ev_{ij}, i, j). \]
+
+\hrulefill
 
 We now use this relationship to establish an important monotonicity property:
 the probability ratio from $i$ to $j$ is nondecreasing when stepping in a
