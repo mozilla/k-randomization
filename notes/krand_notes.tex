@@ -26,6 +26,7 @@
 \newcommand{\sv}{\mathbf{s}}
 \newcommand{\mv}{\mathbf{m}}
 \newcommand{\ev}{\mathbf{e}}
+\newcommand{\vv}{\mathbf{v}}
 \newcommand{\Pm}{\mathbf{P}}
 \newcommand{\xvt}{\tilde{\xv}}
 \newcommand{\yvt}{\tilde{\yv}}
@@ -232,20 +233,23 @@ a specific record out of the original collection, and so the ordering of
 records in the synthetic collection conveys no information about the ordering
 of the original records.
 
+TODO: can represent collections using matrices, and write $\Phi$ as 
+$X^T\mathbf{1}$ for a collection $X$ (column sums).
+
 We consider an aggregation function $\Phi$ mapping a collection of elements of
-$\Dsp$ to a vector $\sv = (s_1,\dots,s_{2^L})$, where $s_j$ counts how
-many copies of $d_j$ the collection contains.
+$\Dsp$ to a vector $s = (s_1,\dots,s_{2^L})$, where $s_j$ counts how
+many copies of $v_j$ the collection contains.
 Note that the range of $\Phi$ is
-\[ \Ssp_n := \big\{ \sv \in \Z^{2^L}: s_j \geq 0,\,
+\[ \Ssp_n := \big\{ s \in \Z^{2^L}: s_j \geq 0,\,
 s_1 +\cdots + s_{2^L} = n\big\}, \]
 a subset of the standard $(2^L-1)$-simplex (whose vertices are the standard
 basis vectors in $\R^{2^L}$) consisting of the points with integer coordinates.
 
 \begin{defn}
 The aggregation function $\map{\Phi}{\Dsp^n}{\Ssp_n}$ counts occurrences of
-vectors $d_1,\dots, d_{2^L} \in \Dsp$ in the collection $\yv \in \Dsp^n$:
-\[ \Phi(\yv) = \left(\sum_{i = 1}^n I(y_i = d_1),\dots,
-\sum_{i = 1}^n I(y_i = d_{2^L}) \right)
+vectors $v_1,\dots, v_{2^L} \in \Dsp$ in the collection $\yv \in \Dsp^n$:
+\[ \Phi(\yv) = \left(\sum_{i = 1}^n I(y_i = v_1),\dots,
+\sum_{i = 1}^n I(y_i = v_{2^L}) \right)
 \]
 \end{defn}
 
@@ -277,21 +281,62 @@ to occurrence counts according to
 \[ A = \Phi \circ R. \]
 \end{defn}
 
+For $s\in\Ssp_n$, the distribution of $A(\xv)$ is given by
+\begin{equation}\label{eq:Adist}
+\P[A(\xv) = s] = \P[\Phi(R(\xv)) = s]
+= \sum_{\yv:\Phi(\yv) = s} \P[R(\xv) = \yv]
+%= \sum_{\yv:\Phi(\yv) = s} \prod_{i=1}^n \P[R(x_i) = y_i]
+.
+\end{equation}
+Note that the set of synthetic collections included in the summation is
+$[s] := \{\yv:\Phi(\yv) = s\}$, an equivalence class of $\Phi$.
+We consider as its canonical representative the collection
+\[ \vv(s) := \big(\underbrace{v_1,\dots,v_1}_{s_1},\,
+   \underbrace{v_2,\dots,v_2}_{s_2},\,\dots,\,
+   \underbrace{v_{2^L},\dots,v_{2^L}}_{s_{2^L}}\big), \]
+which contains $s_j$ consecutive copies of $v_j$, ordered as usual.
+Observe that $[s]$ coincides with the set of all permutations of $\vv(s)$.
+
+We now show that $\P[A(\xv) = s]$ is invariant under reordering the original
+collection $\xv$.
+
+\begin{prop}
+For fixed $s\in\Ssp_n$, $\P[A(\xv) = s] = \P[A(\xv') = s]$ whenever
+$\Phi(\xv) = \Phi(\xv')$.
+\end{prop}
+\begin{pf}
+If $\Phi(\xv) = \Phi(\xv')$, there is a permutation $\sigma$ of
+$\{1,2,\dots,n\}$ such that
+$\xv'_i = \xv_{\sigma(i)}$, $1 \leq i \leq n$.
+Hence,
+\begin{align*}
+\P[A(\xv') = s] &= \sum_{[s]} \P[R(\xv') = \yv] =
+\sum_{[s]} \prod_{i = 1}^n \P[R(x_{\sigma(i)}) = y_i] =
+\sum_{[s]} \prod_{i = 1}^n \P[R(x_{i}) = y_{\inv{\sigma}(i)}] = \\
+&\sum_{\sigma\cdot\yv : \yv \in [s]} \P[R(\xv) = \yv].
+\end{align*}
+Furthermore, $\{\sigma\cdot\yv : \yv \in [s]\} = [s]$.
+Indeed, if $\yv\in [s]$, then any permutation of $\yv$ remains in $[s]$,
+since the tallies of unique components of $\yv$ remain unchanged.
+On the other hand, if $\mathbf{w} \in [s]$, consider
+$\yv' = \inv{\sigma}\cdot\mathbf{w} \in [s]$.
+We have $(\sigma\cdot\yv')_i = y'_{\inv{\sigma}(i)} =
+w_{\sigma(\inv{\sigma}(i))} = w_i$.
+Hence $\mathbf{w} \in \{\sigma\cdot\yv : \yv \in [s]\}$.
+We conclude that
+\[ \P[A(\xv') = s] = \sum_{\sigma\cdot\yv : \yv \in [s]} \P[R(\xv) = \yv] =
+\sum_{[s]} \P[R(\xv) = \yv] = \P[A(\xv) = s]. \]
+\end{pf}
+
+Consequently, we view $A$ as a mapping $\Ssp_n \rightarrow \Ssp_n$, and denote
+$A(m) := A(\vv(m))$ for $m\in\Ssp_n$ summarizing the original collection.
+
+
+\hrulefill
+
 \subsection{Next steps}
 
 \begin{itemize}
-\item
-The distribution of $A$ is invariant under permutations of $\xv$, \ie the
-distribution remains the same if the original collection is reordered.
-
-\item
-Hence, partition $\Dsp^n$ into equivalence classes of $\Phi$, represented as
-points $\mv = (m_1,\dots,m_{2^L}) \in \Ssp_n$.
-Work with original collections represented in terms of $\mv$.
-In the $L=2$ case, it is convenient to associate the simplex $\Ssp_n \cont
-\R^4$ with the ``corner-of-the-cube'' simplex in $\R^3$ defined by the standard
-basis vectors together with the origin.
-
 \item
 View the randomized query $A$ as a mapping from $\Ssp_n$ to $\Ssp_n$.
 Hamming distance on $\Dsp^n$ corresponds to $L_1$ metric on $\Ssp_n$.
@@ -340,25 +385,17 @@ $\ell = 0,\dots,L$, the probability can be expressed as
 Hence, the distribution is determined by the magnitudes of the pairwise
 distances, and does not depend on the ordering within the collections.
 
-The distribution of $A(\xv)$ is given by
 \begin{align}
-\P[A(\xv) = \sv] &= \P[\Phi(R(\xv)) = s]
-= \sum_{\yv:\Phi(\yv) = s} \P[R(\xv) = \yv] \nonumber\\
-&= \sum_{\yv:\Phi(\yv) = s} \prod_{i=1}^n \P[R(x_i) = y_i]
-\label{eq:Adist}\\
 &= \sum_{\yv:\Phi(\yv) = s} \prod_{i=1}^n p^{L - \delta(x_i,y_i)}\cdot
 q^{\delta(x_i,y_i)}
 = \sum_{\yv:\Phi(\yv) = s} p^{nL - \delta(\xv,\yv)}\cdot
 q^{\delta(\xv,\yv)}  \nonumber \\
 &= p^{nL}\sum_{\yv:\Phi(\yv) = s} \left(\frac{q}{p}\right)^{\delta(\xv,\yv)}
 \end{align}
+
+
 where $\delta(\xv,\yv) = \sum_{i=1}^n \delta(x_i,y_i)$ can be considered the distance between collections $\xv$ and $\yv$.
 Note that the support of $A$ is the support of a multinomial random variable with $n$ trials: \[\Ssp_n := \bigg\{s \in \Ssp : \sum_j s_j = n \bigg\},\]
-and $\{\yv:\Phi(\yv) = s\}$ is the set of all permutations of the collection
-\[ \big(\underbrace{d_1,\dots,d_1}_{s_1},\,
-   \underbrace{d_2,\dots,d_2}_{s_2},\,\dots,\,
-   \underbrace{d_{2^L},\dots,d_{2^L}}_{s_{2^L}}\big).
-\]
 
 
 \section{The privacy ratio}
