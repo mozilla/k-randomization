@@ -27,6 +27,7 @@
 \newcommand{\mv}{\mathbf{m}}
 \newcommand{\ev}{\mathbf{e}}
 \newcommand{\vv}{\mathbf{v}}
+\newcommand{\pv}{\mathbf{p}}
 \newcommand{\Pm}{\mathbf{P}}
 \newcommand{\xvt}{\tilde{\xv}}
 \newcommand{\yvt}{\tilde{\yv}}
@@ -189,22 +190,22 @@ integers, the recursive enumeration places them in decreasing order.
 
 Assume from now on that $v_j^L$ refers to the recursive enumeration of
 $\Bsp_L$, and write the randomization probabilities as
-$p_{ij}^L = \P[R(v_i^L) = v_j^L]$.
+\[ p_L(i,j) = \P[R(v_i^L) = v_j^L]. \]
 Because bits within a vector are randomized independently, we have
 \begin{equation} \label{eq:transprobs}
-p_{ij}^L = \begin{cases}
-p\cdot p_{i,j}^{L-1} &
+p_L(i,j) = \begin{cases}
+p\cdot p_{L-1}(i, j) &
     i \leq 2^{L-1},\; j \leq 2^{L-1} \\
-q\cdot p_{i,j - 2^{L-1}}^{L-1} &
-    i \leq 2^{L-1},\; j \geq 2^{L-1} \\
-p\cdot p_{i - 2^{L-1},j}^{L-1} &
-    i \geq 2^{L-1},\; j \leq 2^{L-1} \\
-q\cdot p_{i - 2^{L-1},j - 2^{L-1}}^{L-1} &
-    i \geq 2^{L-1},\; j \geq 2^{L-1}
+q\cdot p_{L-1}(i,j - 2^{L-1}) &
+    i \leq 2^{L-1},\; j \geq 2^{L-1} + 1 \\
+p\cdot p_{L-1}(i - 2^{L-1},j) &
+    i \geq 2^{L-1} + 1,\; j \leq 2^{L-1} \\
+q\cdot p_{L-1}(i - 2^{L-1},j - 2^{L-1}) &
+    i \geq 2^{L-1} + 1,\; j \geq 2^{L-1} + 1
  \end{cases}.
 \end{equation}
 The distribution of $R(x)$ is summarized by the transition matrix
-$\Pm_L = \big(p_{ij}^L,\; 1 \leq i,j \leq 2^L\big)$.
+\[ \Pm_L = \Big(p_L(i,j)\,;\; 1 \leq i,j \leq 2^L\Big). \]
 Note that this is a doubly stochastic, symmetric matrix with all $p^L$ on
 the diagonal and $q^L$ on the antidiagonal.
 Furthermore, we have
@@ -331,6 +332,36 @@ We conclude that
 Consequently, we view $A$ as a mapping $\Ssp_n \rightarrow \Ssp_n$, and denote
 $A(m) := A(\vv(m))$ for $m\in\Ssp_n$ summarizing the original collection.
 
+%%% Distribution of A(m) as a sum of multinomials.
+
+We now discuss a more convenient characterization of the distribution of $A(m)$
+given in \eqref{eq:Adist}.
+If all of the vectors in the original collection are the same, say $v_\ell$,
+then $A(m)$ has a multinomial distribution.
+Indeed,
+\begin{align*}
+\P[A(m) = s] &= \sum_{[s]} \prod_{i=1}^n \P[R(v_\ell) = y_i] =
+\sum_{[s]} \prod_{j = 1}^{2^L}\prod_{i: y_i = v_j} p(\ell, j) =
+\sum_{[s]} p(\ell, 1)^{s_1}\cdots p(\ell, 2^L)^{s_{2^L}} \\
+&= \frac{n!}{s_1!\cdots s_{2^L}!} p(\ell, 1)^{s_1}\cdots p(\ell, 2^L)^{s_{2^L}},
+\end{align*}
+since $[s]$ consists of all permutations of $\vv(s)$.
+
+In general, suppose $m = (m_1,\dots,m_{2^L})\in\Ssp_n$.
+Since $\Phi(\yv) = \Phi(y_1) + \cdots + \Phi(y_n)$, we have
+\[ A(m) = \Phi\big(R\big(\vv(m)\big)\big) =
+\sum_{j=1}^{2^L} \Phi\big(R\big((v_j,\dots,v_j)\big)\big) =
+\sum_{j=1}^{2^L} A\big((v_j,\dots,v_j)\big), \]
+where the terms of the sum are independent since $R$ randomizes each vector
+component independently.
+Therefore, $A(m)$ is distributed as a sum of Multinomial random vectors:
+\[ A(m) \sim MN(m_1, \pv_1) + \cdots + MN(m_{2^L}, \pv_{2^L}), \]
+where $\pv_j$ denotes the $j$-th row in the transition matrix
+$\Pm^L$, \ie $\pv_j = \big(p(j,1),\dots,p(j,2^L)\big)$.
+
+However, we can leverage the binary recursive structure of $\Dsp$ to get a
+more specific representation.
+
 
 \hrulefill
 
@@ -396,6 +427,44 @@ q^{\delta(\xv,\yv)}  \nonumber \\
 
 where $\delta(\xv,\yv) = \sum_{i=1}^n \delta(x_i,y_i)$ can be considered the distance between collections $\xv$ and $\yv$.
 Note that the support of $A$ is the support of a multinomial random variable with $n$ trials: \[\Ssp_n := \bigg\{s \in \Ssp : \sum_j s_j = n \bigg\},\]
+
+Define the partial aggregation function
+$\map{\Psi_m}{\Dsp^n}{\Ssp_{m_1} \times \cdots \times \Ssp_{m_{2^L}}}$ as
+\[ \Psi_m(\yv)= \Big(\Phi\big((y_1, \dots, y_{m_1})\big),
+\Phi\big((y_{m_1 + 1}, \dots, y_{m_1 + m_2})\big),\dots,
+\Phi\big((y_{n - m_{2^L} + 1}, \dots, y_{n})\big)\Big), \]
+and observe that
+\[ \Phi(\yv) = \big(\Psi_m(\yv)\big)_1 + \cdots + \big(\Psi_m(\yv)\big)_{2^L}.
+\]
+Thus, letting
+\[ \Ssp_m(s) := \big\{ (u_1,\dots,u_{2^L}) : u_j \in \Ssp_{m_j},
+u_1 + \dots + u_{2^L} = s \big\} \cont
+\Ssp_{m_1} \times \cdots \times \Ssp_{m_{2^L}}, \]
+we can write
+\[ [s] = \bigcup_{\mathbf{u} \in \Ssp_m(s)}
+\big\{ \yv : \Psi_m(\yv) = \mathbf{u} \big\} =
+\bigcup_{\mathbf{u} \in \Ssp_m(s)} \prod_{j = 1}^{2^L}
+\big\{\yv_j \in \Dsp^{m_j}: \Phi(\yv_j) = u_j \big\},
+\]
+where the product of sets denotes the Cartesian product.
+Hence,
+\begin{align*}
+\P[A(m) = s] &=
+\sum_{\mathbf{u} \in \Ssp_m(s)}
+\sum_{\substack{\yv_1 \in \Dsp^{m_1}\\ \Phi(\yv_1) = u_1}}\cdots
+\sum_{\substack{\yv_{2^L} \in \Dsp^{m_{2^L}}\\ \Phi(\yv_{2^L}) = u_{2^L}}}
+\prod_{j = 1}^{2^L} \P\big[R\big((v_j,\dots,v_j)\big) = \yv_j\big] \\
+&= \sum_{\mathbf{u} \in \Ssp_m(s)}\prod_{j = 1}^{2^L} 
+\sum_{\substack{\yv_j \in \Dsp^{m_j}\\ \Phi(\yv_j) = u_j}}
+\P\big[R\big((v_j,\dots,v_j)\big) = \yv_j\big] \\
+&= \sum_{\mathbf{u} \in \Ssp_m(s)}\prod_{j = 1}^{2^L} 
+\P[A(m^{(j)}) = u_j] \\
+&= \P[M_1 + \cdots + M_{2^L} = s],
+\end{align*}
+where $M_j \sim MN(m_j, \pv_j)$ are independent Multinmoial random variables,
+with $\pv_j$ denoting the $j$-th row in the transition matrix
+$\Pm^L$, \ie $\pv_j = (p(j,1),\dots,p(j,2^L))$, and $m^{(j)}$ represents an
+original collection of size $m_j$ consisting only of $v_j$.
 
 
 \section{The privacy ratio}
