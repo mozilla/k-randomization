@@ -198,9 +198,9 @@ p\cdot p_{L-1}(i, j) &
     i \leq 2^{L-1},\; j \leq 2^{L-1} \\
 q\cdot p_{L-1}(i,j - 2^{L-1}) &
     i \leq 2^{L-1},\; j \geq 2^{L-1} + 1 \\
-p\cdot p_{L-1}(i - 2^{L-1},j) &
+q\cdot p_{L-1}(i - 2^{L-1},j) &
     i \geq 2^{L-1} + 1,\; j \leq 2^{L-1} \\
-q\cdot p_{L-1}(i - 2^{L-1},j - 2^{L-1}) &
+p\cdot p_{L-1}(i - 2^{L-1},j - 2^{L-1}) &
     i \geq 2^{L-1} + 1,\; j \geq 2^{L-1} + 1
  \end{cases}.
 \end{equation}
@@ -336,8 +336,8 @@ $A(m) := A(\vv(m))$ for $m\in\Ssp_n$ summarizing the original collection.
 
 We now discuss a more convenient characterization of the distribution of $A(m)$
 given in \eqref{eq:Adist}.
-If all of the vectors in the original collection are the same, say $v_\ell$,
-then $A(m)$ has a multinomial distribution.
+If all of the vectors in the original collection are identical, say equal to
+$v_\ell$, then $A(m)$ has a multinomial distribution.
 Indeed,
 \begin{align*}
 \P[A(m) = s] &= \sum_{[s]} \prod_{i=1}^n \P[R(v_\ell) = y_i] =
@@ -350,18 +350,58 @@ since $[s]$ consists of all permutations of $\vv(s)$.
 In general, suppose $m = (m_1,\dots,m_{2^L})\in\Ssp_n$.
 Since $\Phi(\yv) = \Phi(y_1) + \cdots + \Phi(y_n)$, we have
 \[ A(m) = \Phi\big(R\big(\vv(m)\big)\big) =
-\sum_{j=1}^{2^L} \Phi\big(R\big((v_j,\dots,v_j)\big)\big) =
+\sum_{j=1}^{2^L} \Phi\big(R\big((\underbrace{v_j,\dots,v_j}_{s_j})\big)\big) =
 \sum_{j=1}^{2^L} A\big((v_j,\dots,v_j)\big), \]
 where the terms of the sum are independent since $R$ randomizes each vector
 component independently.
 Therefore, $A(m)$ is distributed as a sum of Multinomial random vectors:
-\[ A(m) \sim MN(m_1, \pv_1) + \cdots + MN(m_{2^L}, \pv_{2^L}), \]
-where $\pv_j$ denotes the $j$-th row in the transition matrix
-$\Pm^L$, \ie $\pv_j = \big(p(j,1),\dots,p(j,2^L)\big)$.
+\[ A(m) \sim MN(m_1, \pv_L(1)) + \cdots + MN(m_{2^L}, \pv_L(2^L)), \]
+where $\pv_L(j)$ denotes the $j$-th row in the transition matrix
+$\Pm_L$, \ie $\pv_L(j) = \big(p_L(j,1),\dots,p_L(j,2^L)\big)$.
 
-However, we can leverage the binary recursive structure of $\Dsp$ to get a
+Furthermore, we can leverage the binary recursive structure of $\Dsp$ to get a
 more specific representation.
-
+First, we show that conditioning on the sum of the first $2^{L-1}$ terms allows
+us to write a Multinomial on $2^L$ categories in terms of a Binomial and two
+conditionally independent Multinomials on $2^{L-1}$ categories.
+For convenience, split the range of indices $1,\dots,2^L$ into two:
+\[ J_L(1) = \big\{1,\dots,2^{L-1}\big\}\qquad\text{and}\qquad
+J_L(2) = \big\{2^{L-1} + 1,\dots,2^L \big\}. \]
+Clearly $J_L(2) = J_L(1) + 2^{L-1}$ and $J_L(1) = J_{L-1}(1) \cup J_{L-1}(2)$.
+\begin{lem}
+Suppose $p_1,\dots,p_{2^L}$ are category probabilities summing to 1, and 
+$s\in\Ssp_m$.
+Let
+\[ w = \sum_{j \in J_L(k)} p_j \qquad\text{and}\qquad
+t = \sum_{j \in J_L(k)} s_j. \]
+Then
+\begin{align*}
+\P\big[MN\big(&m, (p_1,\dots,p_{2^L})\big) = s\big] = \\
+&\P\big[Bin(m, w) = t \big]
+\P\bigg[MN\Big(t, \Big(\frac{p_i}{w},\; i \in J_L(1)\Big) \Big) =
+\big(s_i, i \in J_L(1)\big) \bigg]\\
+&\qquad\cdot \P\bigg[MN\Big(m - t, \Big(\frac{p_i}{1 - w},\;
+i \in J_L(2)\Big) \Big) =
+\big(s_i, i \in J_L(2)\big) \bigg]\\
+\end{align*}
+\end{lem}
+\begin{pf}
+\begin{align*}
+\P\big[MN\big(m,& (p_1,\dots,p_{2^L})\big) = s\big] =
+\frac{m!}{s_1!\cdots s_m!} p_1^{s_1} \cdots p_m^{s_m} \\
+&= \frac{m!}{t! (m-t)!}w^t (1-w)^{(m-t)} \cdot \frac{t!}{s_1!\cdots s_{2^{L-1}}!}
+\frac{p_1^{s_1}}{w^{s_1}}\cdots
+\frac{p_{2^{L-1}}^{s_{2^{L-1}}}}{w^{s_{2^{L-1}}}} \\
+&\qquad\cdot\frac{(m-t)!}{s_{2^{L-1}+1}!\cdots s_{2^L}!}
+\frac{p_{2^{L-1} + 1}^{s_{2^{L-1} + 1}}}{(1-w)^{s_1}}\cdots
+\frac{p_{2^L}^{s_{2^L}}}{(1-w)^{s_{2^L}}}
+\end{align*}
+\end{pf}
+In particular, if $p_j = p_L(i, j)$, the recursive structure in
+\eqref{eq:transprobs} implies that $w = p$ if $i \in J_L(1)$ and $w = q$
+otherwise.
+Also, for $j \in J_L(1)$, $p_{2^{L-1} + j}/(1-w) = p_j / w = p_{L-1}(i, j)$
+when $i \in J_L(1)$ or $p_{L-1}(i - 2^{L-1}, j)$ otherwise.
 
 \hrulefill
 
