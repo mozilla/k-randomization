@@ -368,12 +368,12 @@ For convenience, split the range of indices $1,\dots,2^L$ into two:
 \[ J_L(1) = \big\{1,\dots,2^{L-1}\big\}\qquad\text{and}\qquad
 J_L(2) = \big\{2^{L-1} + 1,\dots,2^L \big\}. \]
 Clearly $J_L(2) = J_L(1) + 2^{L-1}$ and $J_L(1) = J_{L-1}(1) \cup J_{L-1}(2)$.
-\begin{lem}
+\begin{lem} \label{lem:mndecomp}
 Suppose $p_1,\dots,p_{2^L}$ are category probabilities summing to 1, and 
 $s\in\Ssp_m$.
 Let
-\[ w = \sum_{j \in J_L(k)} p_j \qquad\text{and}\qquad
-t = \sum_{j \in J_L(k)} s_j. \]
+\[ w = \sum_{j \in J_L(1)} p_j \qquad\text{and}\qquad
+t = \sum_{j \in J_L(1)} s_j. \]
 Then
 \begin{align*}
 \P\big[MN\big(&m, (p_1,\dots,p_{2^L})\big) = s\big] = \\
@@ -398,10 +398,26 @@ i \in J_L(2)\Big) \Big) =
 \end{align*}
 \end{pf}
 In particular, if $p_j = p_L(i, j)$, the recursive structure in
-\eqref{eq:transprobs} implies that $w = p$ if $i \in J_L(1)$ and $w = q$
-otherwise.
-Also, for $j \in J_L(1)$, $p_{2^{L-1} + j}/(1-w) = p_j / w = p_{L-1}(i, j)$
-when $i \in J_L(1)$ or $p_{L-1}(i - 2^{L-1}, j)$ otherwise.
+\eqref{eq:transprobs} implies that
+\[ w = \begin{cases} p & i \in J_L(1) \\  q & i \in J_L(2) \end{cases}, \]
+and for $j \in J_L(1)$,
+\[ \frac{p_j}{w} = \frac{p_{2^{L-1} + j}}{1-w} =
+\begin{cases} p_{L-1}(i, j) & i \in J_L(1) \\
+p_{L-1}(i - 2^{L-1}, j) & i \in J_L(2) \end{cases}. \]
+
+Hence, suppose $(T, S_1, S_2)$ is distributed according to
+\begin{align*}
+T &\sim Bin(m, p) \\
+S_1 \given T = t &\sim MN(t, \pv_{L-1}(i)) \\
+S_2 \given T = t &\sim MN(m - t, \pv_{L-1}(i)),
+\end{align*}
+where $S_1$ and $S_2$ are conditionally independent given $T$.
+Then, if $S \sim MN(m, \pv_L(i))$ with $i\in J_L(1)$, Lemma \ref{lem:mndecomp}
+implies that
+\[ \P[S = s] = \P\Big[(T, S_1, S_2) = \Big(\textstyle\sum_{J_L(1)} s_j,\;
+\big(s_j, j\in J_L(1)\big),\; \big(s_j, j\in J_L(2)\big)\Big)\Big]. \]
+If $i\in J_L(2)$, the probability parameter for $T$ changes to $q$, and the
+probabilities for the $S_i$ change to $\pv_{L-1}(i - 2^{L-1})$.
 
 \hrulefill
 
