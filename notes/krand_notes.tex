@@ -394,11 +394,11 @@ Then
 \begin{align*}
 \P\big[MN\big(m, (p_1,&\dots,p_{2^L})\big) = s\big] = \\
 &\P\big[Bin(m,\; w) = t \big]
-\P\bigg[MN\Big(t,\; \Big(\frac{p_i}{w},\; i \in J_1\Big) \Big) =
-\big(s_i,\; i \in J_1\big) \bigg]\\
-&\qquad\cdot \P\bigg[MN\Big(m - t,\; \Big(\frac{p_i}{1 - w},\;
-i \in J_2\Big) \Big) =
-\big(s_i,\; i \in J_2\big) \bigg]\\
+\P\bigg[MN\Big(t,\; \Big(\frac{p_j}{w},\; j \in J_1\Big) \Big) =
+\big(s_j,\; j \in J_1\big) \bigg]\\
+&\qquad\cdot \P\bigg[MN\Big(m - t,\; \Big(\frac{p_j}{1 - w},\;
+j \in J_2\Big) \Big) =
+\big(s_j,\; j \in J_2\big) \bigg]\\
 \end{align*}
 \end{lem}
 \begin{pf}
@@ -439,8 +439,10 @@ Lemma \ref{lem:mndecomp} implies that
 %If $i\in J_2$, the probability parameter for $T$ changes to $q$, and the
 %probabilities for the $S_i$ change to $\pv_{L-1}(i - 2^{L-1})$.
 Furthermore, it is clear that if $L=1$,
-\[ MN(m,\; \pv_1(i)) \eqdist Bin\big(m,\; p \cdot I(i = 1) +
-q \cdot I(i = 2)\big).
+$MN(m,\; \pv_1(i)) \eqdist (W, m - W)$ where
+\[ W \sim \begin{cases} Bin(m,\; p) & i = 1 \\ Bin(m,\; q) & i = 2 \end{cases}.
+%Bin\big(m,\; p \cdot I(i = 1) +
+%q \cdot I(i = 2)\big).
 \]
 Intuitively, this means that we can describe the outcome of $m$ multinomial
 trials by first determining the number of trials whose result belongs to each
@@ -477,7 +479,7 @@ For $s \in \Ssp_{m_i + m_{\kappa(i)}}$,
 \begin{align*}
 \P&[M_1 + M_2 = s] = \sum_{s' \in \Ssp_{m_i}(s)} \P[M_1 = s']\P[M_2 = s - s'] \\
 &= \sum_{t = 0}^{\xi s} \sum_{u \in \Ssp_t(s_{J_1})}
-\sum_{v \in \Ssp_{m - t}(s_{J_2})}
+\sum_{v \in \Ssp_{m_i - t}(s_{J_2})}
 \P\big[(T_1, S_{11}, S_{12}) = \big(t, u, v\big)\big] \\
 &\hspace{14em} \cdot
 \P\big[(T_2, S_{21}, S_{22}) = \big(\xi s - t,\; s_{J_1} - u,\;
@@ -485,7 +487,7 @@ s_{J_2} - v\big)\big] \\
 &= \sum_{t = 0}^{\xi s} \P[T_1 = t] \P[T_2 = \xi s - t]
 \bigg\{ \sum_{u \in \Ssp_t(s_{J_1})} \P[S_{11} = u \given T_1 = t]
 \P[S_{21} = s_{J_1} - u \given T_2 = \xi s - t] \bigg\} \\
-&\hspace{4em}\cdot \bigg\{ \sum_{v \in \Ssp_{m - t}(s_{J_2})}
+&\hspace{4em}\cdot \bigg\{ \sum_{v \in \Ssp_{m_i - t}(s_{J_2})}
 \P[S_{12} = v \given T_1 = t]
 \P[S_{22} = s_{J_2} - v \given T_2 = \xi s - t] \bigg\} \\
 &= \sum_{t = 0}^{\xi s} \P\big[Bin(m_i,\; p) = t\big]
@@ -494,7 +496,7 @@ s_{J_2} - v\big)\big] \\
 \bigg\{ \sum_{u \in \Ssp_t(s_{J_1})}
 \P\big[MN(t,\; \pv_{L-1}(i)) = u \big]
 \P\big[MN(\xi s - t,\; \pv_{L-1}(i)) = s_{J_1} - u \big] \bigg\} \\
-&\hspace{4em}\cdot \bigg\{ \sum_{v \in \Ssp_{m - t}(s_{J_2})}
+&\hspace{4em}\cdot \bigg\{ \sum_{v \in \Ssp_{m_i - t}(s_{J_2})}
 \P\big[MN(m_i - t,\; \pv_{L-1}(i)) = v \big] \\
 &\hspace{12em}\cdot
 \P\big[MN(m_{\kappa(i)} - (\xi s - t),\;
