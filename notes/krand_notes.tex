@@ -241,7 +241,7 @@ We consider an aggregation function $\Phi$ mapping a collection of elements of
 $\Dsp$ to a vector $s = (s_1,\dots,s_{2^L})$, where $s_j$ counts how
 many copies of $v_j$ the collection contains.
 Note that the range of $\Phi$ is
-\[ \Ssp_n := \big\{ s \in \Z^{2^L}: s_j \geq 0,\,
+\[ \Ssp_n^L := \big\{ s \in \Z^{2^L}: s_j \geq 0,\,
 s_1 +\cdots + s_{2^L} = n\big\}, \]
 a subset of the standard $(2^L-1)$-simplex (whose vertices are the standard
 basis vectors in $\R^{2^L}$) consisting of the points with integer coordinates.
@@ -355,7 +355,9 @@ Since $\Phi(\yv) = \Phi(y_1) + \cdots + \Phi(y_n)$, we have
 where the terms of the sum are independent since $R$ randomizes each vector
 component independently.
 Therefore, $A(m)$ is distributed as a sum of Multinomial random vectors:
-\[ A(m) \sim MN(m_1, \pv_L(1)) + \cdots + MN(m_{2^L}, \pv_L(2^L)), \]
+\begin{equation} \label{eq:Adistmn}
+A(m) \sim MN(m_1, \pv_L(1)) + \cdots + MN(m_{2^L}, \pv_L(2^L)),
+\end{equation}
 where $\pv_L(j)$ denotes the $j$-th row in the transition matrix
 $\Pm_L$, \ie $\pv_L(j) = \big(p_L(j,1),\dots,p_L(j,2^L)\big)$.
 
@@ -365,24 +367,38 @@ First, we show that conditioning on the sum of the first $2^{L-1}$ terms allows
 us to write a Multinomial on $2^L$ categories in terms of a Binomial and two
 conditionally independent Multinomials on $2^{L-1}$ categories.
 For convenience, split the range of indices $1,\dots,2^L$ into two:
-\[ J_L(1) = \big\{1,\dots,2^{L-1}\big\}\qquad\text{and}\qquad
-J_L(2) = \big\{2^{L-1} + 1,\dots,2^L \big\}. \]
-Clearly $J_L(2) = J_L(1) + 2^{L-1}$ and $J_L(1) = J_{L-1}(1) \cup J_{L-1}(2)$.
+\[ J_1 = \big\{1,\dots,2^{L-1}\big\}\qquad\text{and}\qquad
+J_2 = \big\{2^{L-1} + 1,\dots,2^L \big\}. \]
+Clearly $J_2 = J_1 + 2^{L-1}$ and $J_1(L) = J_1(L-1) \cup J_2(L-1)$.
+Also, define the index shift operators
+\[ \chi(i) = \begin{cases} i & i \in J_1 \\ i - 2^{L-1} & i \in J_2
+\end{cases} \qquad\text{and}\qquad
+\kappa(i) = \begin{cases} i + 2^{L-1} & i \in J_1 \\ i & i \in J_2
+\end{cases}, \]
+so that $\chi$ and $\kappa$ select the corresponding index in $J_1$ and
+$J_2$ respectively.
+Finally, define the partial summation operator $\xi$ on $\R^{2^L}$ as
+\[ \xi s = \sum_{j \in J_1} s_j. \]
+
 \begin{lem} \label{lem:mndecomp}
 Suppose $p_1,\dots,p_{2^L}$ are category probabilities summing to 1, and 
 $s\in\Ssp_m$.
 Let
-\[ w = \sum_{j \in J_L(1)} p_j \qquad\text{and}\qquad
-t = \sum_{j \in J_L(1)} s_j. \]
+\[ w = \xi p
+%\sum_{j \in J_1} p_j
+\qquad\text{and}\qquad
+t = \xi s.
+%\sum_{j \in J_1} s_j.
+\]
 Then
 \begin{align*}
-\P\big[MN\big(&m, (p_1,\dots,p_{2^L})\big) = s\big] = \\
-&\P\big[Bin(m, w) = t \big]
-\P\bigg[MN\Big(t, \Big(\frac{p_i}{w},\; i \in J_L(1)\Big) \Big) =
-\big(s_i, i \in J_L(1)\big) \bigg]\\
-&\qquad\cdot \P\bigg[MN\Big(m - t, \Big(\frac{p_i}{1 - w},\;
-i \in J_L(2)\Big) \Big) =
-\big(s_i, i \in J_L(2)\big) \bigg]\\
+\P\big[MN\big(m, (p_1,&\dots,p_{2^L})\big) = s\big] = \\
+&\P\big[Bin(m,\; w) = t \big]
+\P\bigg[MN\Big(t,\; \Big(\frac{p_i}{w},\; i \in J_1\Big) \Big) =
+\big(s_i,\; i \in J_1\big) \bigg]\\
+&\qquad\cdot \P\bigg[MN\Big(m - t,\; \Big(\frac{p_i}{1 - w},\;
+i \in J_2\Big) \Big) =
+\big(s_i,\; i \in J_2\big) \bigg]\\
 \end{align*}
 \end{lem}
 \begin{pf}
@@ -397,29 +413,120 @@ i \in J_L(2)\Big) \Big) =
 \frac{p_{2^L}^{s_{2^L}}}{(1-w)^{s_{2^L}}}
 \end{align*}
 \end{pf}
+
 In particular, if $p_j = p_L(i, j)$, the recursive structure in
 \eqref{eq:transprobs} implies that
-\[ w = \begin{cases} p & i \in J_L(1) \\  q & i \in J_L(2) \end{cases}, \]
-and for $j \in J_L(1)$,
-\[ \frac{p_j}{w} = \frac{p_{2^{L-1} + j}}{1-w} =
-\begin{cases} p_{L-1}(i, j) & i \in J_L(1) \\
-p_{L-1}(i - 2^{L-1}, j) & i \in J_L(2) \end{cases}. \]
+\[ w = \begin{cases} p & i \in J_1 \\  q & i \in J_2 \end{cases}, \]
+and for $j \in J_1$,
+\[ \frac{p_j}{w} = \frac{p_{\kappa(j)}}{1-w} = p_{L-1}(\chi(i), j).
+%\begin{cases} p_{L-1}(i, j) & i \in J_1 \\
+%p_{L-1}(i - 2^{L-1}, j) & i \in J_2 \end{cases}.
+\]
 
-Hence, suppose $(T, S_1, S_2)$ is distributed according to
-\begin{align*}
-T &\sim Bin(m, p) \\
-S_1 \given T = t &\sim MN(t, \pv_{L-1}(i)) \\
-S_2 \given T = t &\sim MN(m - t, \pv_{L-1}(i)),
-\end{align*}
+Hence, for some $i\in J_1 \cup J_2$, suppose $(T, S_1, S_2)$ is distributed
+according to
+\begin{align}
+T &\sim Bin\big(m,\; p \cdot I_{J_1}(i) + q \cdot I_{J_2}(i)\big)\nonumber\\
+S_1 \given T = t &\sim MN\big(t,\; \pv_{L-1}(\chi(i))\big) \label{eq:mndecomp}\\
+S_2 \given T = t &\sim MN\big(m - t,\; \pv_{L-1}(\chi(i))\big), \nonumber
+\end{align}
 where $S_1$ and $S_2$ are conditionally independent given $T$.
-Then, if $S \sim MN(m, \pv_L(i))$ with $i\in J_L(1)$, Lemma \ref{lem:mndecomp}
-implies that
-\[ \P[S = s] = \P\Big[(T, S_1, S_2) = \Big(\textstyle\sum_{J_L(1)} s_j,\;
-\big(s_j, j\in J_L(1)\big),\; \big(s_j, j\in J_L(2)\big)\Big)\Big]. \]
-If $i\in J_L(2)$, the probability parameter for $T$ changes to $q$, and the
-probabilities for the $S_i$ change to $\pv_{L-1}(i - 2^{L-1})$.
+Then, if $S \sim MN(m, \pv_L(i))$,
+%with $i\in J_1$
+Lemma \ref{lem:mndecomp} implies that
+\[ \P[S = s] = \P\Big[(T, S_1, S_2) = \Big(\xi s,\;
+\big(s_j,\; j\in J_1\big),\; \big(s_j\;, j\in J_2\big)\Big)\Big]. \]
+%If $i\in J_2$, the probability parameter for $T$ changes to $q$, and the
+%probabilities for the $S_i$ change to $\pv_{L-1}(i - 2^{L-1})$.
+Furthermore, it is clear that if $L=1$,
+\[ MN(m,\; \pv_1(i)) \eqdist Bin\big(m,\; p \cdot I(i = 1) +
+q \cdot I(i = 2)\big).
+\]
+Intuitively, this means that we can describe the outcome of $m$ multinomial
+trials by first determining the number of trials whose result belongs to each
+half of the categories, and then assigning the multinomial outcomes
+independently in each half.
+
+Next, we apply this decomposition to sums of independent Multinomial random
+vectors, in order to arrive at an expression for the distribution of $A(m)$
+via \eqref{eq:Adistmn}.
+
+Suppose $i\in J_1$.
+Let $M_1 \sim MN(m_i,\; \pv_L(i))$ and
+$M_2 \sim MN(m_{\kappa(i)},\; \pv_L(\kappa(i)))$ be independent, and
+let $(T_k, S_{k1}, S_{k2})$, $k = 1,2$, be independent random vectors distributed
+according to \eqref{eq:mndecomp} for $i$ and $\kappa(i)$ respectively.
+Write 
+\[ \Ssp_m(s) := \big\{ s' \in \Ssp_m : s'_j \leq s_j,\; 1 \leq j \leq 2^L \big\},
+\]
+and observe that $\Ssp_m(s)$ can be decomposed as
+\begin{align*}
+\Ssp_m(s) &= \bigcup_{t = 0}^{\xi s}
+\big\{ s' \in \Ssp_m^L: s'_j \leq s_j,\; 1 \leq j \leq 2^L,\; \xi s' = t \big\} \\
+&= \bigcup_{t = 0}^{\xi s}
+\big\{ u \in \Ssp_t^{L-1}: u_j \leq s_j, \; 1 \leq j \leq 2^{L-1} \} \times
+\big\{ v \in \Ssp_{m - t}^{L-1} : v_j \leq s_{\kappa(j)},\;
+1 \leq j \leq 2^{L-1} \} \\
+&= \bigcup_{t = 0}^{\xi s} \Ssp_{t}\big(s_{J_1}\big) \times
+\Ssp_{m - t}\big(s_{J_2}\big) 
+\end{align*}
+%\[ \Ssp_m(s) = \bigcup_{t = 0}^{\xi s} \Ssp_{t}\big((s_j, j \in J_1)\big)
+%\times \Ssp_{m - t}\big((s_j, j \in J_2)\big) \]
+by partitioning on the sum of the first $2^{L-1}$ components of the vectors.
+For $s \in \Ssp_{m_i + m_{\kappa(i)}}$,
+\begin{align*}
+\P&[M_1 + M_2 = s] = \sum_{s' \in \Ssp_{m_i}(s)} \P[M_1 = s']\P[M_2 = s - s'] \\
+&= \sum_{t = 0}^{\xi s} \sum_{u \in \Ssp_t(s_{J_1})}
+\sum_{v \in \Ssp_{m - t}(s_{J_2})}
+\P\big[(T_1, S_{11}, S_{12}) = \big(t, u, v\big)\big] \\
+&\hspace{14em} \cdot
+\P\big[(T_2, S_{21}, S_{22}) = \big(\xi s - t,\; s_{J_1} - u,\;
+s_{J_2} - v\big)\big] \\
+&= \sum_{t = 0}^{\xi s} \P[T_1 = t] \P[T_2 = \xi s - t]
+\bigg\{ \sum_{u \in \Ssp_t(s_{J_1})} \P[S_{11} = u \given T_1 = t]
+\P[S_{21} = s_{J_1} - u \given T_2 = \xi s - t] \bigg\} \\
+&\hspace{4em}\cdot \bigg\{ \sum_{v \in \Ssp_{m - t}(s_{J_2})}
+\P[S_{12} = v \given T_1 = t]
+\P[S_{22} = s_{J_2} - v \given T_2 = \xi s - t] \bigg\} \\
+&= \sum_{t = 0}^{\xi s} \P\big[Bin(m_i,\; p) = t\big]
+\P\big[Bin(m_{\kappa(i)},\; q) = \xi s - t\big] \\
+&\hspace{4em}\cdot
+\bigg\{ \sum_{u \in \Ssp_t(s_{J_1})}
+\P\big[MN(t,\; \pv_{L-1}(i)) = u \big]
+\P\big[MN(\xi s - t,\; \pv_{L-1}(i)) = s_{J_1} - u \big] \bigg\} \\
+&\hspace{4em}\cdot \bigg\{ \sum_{v \in \Ssp_{m - t}(s_{J_2})}
+\P\big[MN(m_i - t,\; \pv_{L-1}(i)) = v \big] \\
+&\hspace{12em}\cdot
+\P\big[MN(m_{\kappa(i)} - (\xi s - t),\;
+\pv_{L-1}(i)) = s_{J_2} - v \big] \bigg\} \\
+&= \sum_{t = 0}^{\xi s} \P\big[Bin(m_i,\; p) = t\big]
+\P\big[Bin(m_{\kappa(i)},\; q) = \xi s - t\big]
+\cdot \P\big[MN(\xi s,\; \pv_{L-1}(i)) = s_{J_1} \big] \\
+&\hspace{4em}\cdot
+\P\big[MN(m_i + m_{\kappa(i)} - \xi s,\; \pv_{L-1}(i)) = s_{J_2} \big] \\
+&= \P\big[Bin(m_i,\; p) + Bin(m_{\kappa(i)},\; q) = \xi s]
+\cdot \P\big[MN(\xi s,\; \pv_{L-1}(i)) = s_{J_1} \big] \\
+&\hspace{4em}\cdot
+\P\big[MN(m_i + m_{\kappa(i)} - \xi s,\; \pv_{L-1}(i)) = s_{J_2} \big]
+\end{align*}
+Therefore, if
+\[ S \sim MN\big(m_i,\; \pv_L(i)\big) +
+MN\big(m_\kappa(i),\; \pv_L(\kappa(i))\big) \]
+for $i \in J_1$, we have
+\[ \P[S = s] = \P\Big[(T, S_1, S_2) = \Big(\xi s,\;
+\big(s_j,\; j\in J_1\big),\; \big(s_j\;, j\in J_2\big)\Big)\Big], \]
+where
+\begin{align}
+T &\sim Bin\big(m_i,\; p\big) + Bin\big(m_{\kappa(i)},\; q\big)\nonumber\\
+S_1 \given T = t &\sim MN\big(t,\; \pv_{L-1}(i)\big) \nonumber\\
+S_2 \given T = t &\sim MN\big(m_i + m_{\kappa(i)} - t,\; \pv_{L-1}(i)\big),
+\nonumber
+\end{align}
+with $S_1$ and $S_2$ are conditionally independent given $T$.
+
 
 \hrulefill
+
 
 \subsection{Next steps}
 
