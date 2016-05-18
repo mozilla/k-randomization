@@ -452,23 +452,25 @@ independently in each half.
 Next, we apply this decomposition to sums of independent Multinomial random
 vectors, in order to arrive at an expression for the distribution of $A(m)$
 via \eqref{eq:Adistmn}.
+Let $M_i \sim MN(m_i,\; \pv_L(i))$ be independent, $i = 1,\dots,2^L$.
 
 Suppose $i\in J_1$.
-Let $M_1 \sim MN(m_i,\; \pv_L(i))$ and
-$M_2 \sim MN(m_{\kappa(i)},\; \pv_L(\kappa(i)))$ be independent, and
-let $(T_k, S_{k1}, S_{k2})$, $k = 1,2$, be independent random vectors distributed
-according to \eqref{eq:mndecomp} for $i$ and $\kappa(i)$ respectively.
+Let $(T_k, S_{k1}, S_{k2})$, $k = 1,2$, be independent random vectors
+distributed according to \eqref{eq:mndecomp} for $i$ and $\kappa(i)$
+respectively.
 Write 
-\[ \Ssp_m(s) := \big\{ s' \in \Ssp_m : s'_j \leq s_j,\; 1 \leq j \leq 2^L \big\},
+\[ \Ssp_m(s) := \big\{ s' \in \Ssp_m : s'_j \leq s_j,\;
+j \in J_1 \cup J_2 \big\},
 \]
 and observe that $\Ssp_m(s)$ can be decomposed as
 \begin{align*}
 \Ssp_m(s) &= \bigcup_{t = 0}^{\xi s}
-\big\{ s' \in \Ssp_m^L: s'_j \leq s_j,\; 1 \leq j \leq 2^L,\; \xi s' = t \big\} \\
+\big\{ s' \in \Ssp_m^L: s'_j \leq s_j,\; j \in J_1 \cup J_2,\;
+\xi s' = t \big\} \\
 &= \bigcup_{t = 0}^{\xi s}
-\big\{ u \in \Ssp_t^{L-1}: u_j \leq s_j, \; 1 \leq j \leq 2^{L-1} \} \times
+\big\{ u \in \Ssp_t^{L-1}: u_j \leq s_j, \; j \in J_1 \} \times
 \big\{ v \in \Ssp_{m - t}^{L-1} : v_j \leq s_{\kappa(j)},\;
-1 \leq j \leq 2^{L-1} \} \\
+j \in J_1 \} \\
 &= \bigcup_{t = 0}^{\xi s} \Ssp_{t}\big(s_{J_1}\big) \times
 \Ssp_{m - t}\big(s_{J_2}\big) 
 \end{align*}
@@ -477,7 +479,8 @@ and observe that $\Ssp_m(s)$ can be decomposed as
 by partitioning on the sum of the first $2^{L-1}$ components of the vectors.
 For $s \in \Ssp_{m_i + m_{\kappa(i)}}$,
 \begin{align*}
-\P&[M_1 + M_2 = s] = \sum_{s' \in \Ssp_{m_i}(s)} \P[M_1 = s']\P[M_2 = s - s'] \\
+\P&[M_i + M_{\kappa(i)} = s] = \sum_{s' \in \Ssp_{m_i}(s)}
+\P[M_i = s']\P[M_{\kappa(i)} = s - s'] \\
 &= \sum_{t = 0}^{\xi s} \sum_{u \in \Ssp_t(s_{J_1})}
 \sum_{v \in \Ssp_{m_i - t}(s_{J_2})}
 \P\big[(T_1, S_{11}, S_{12}) = \big(t, u, v\big)\big] \\
@@ -511,11 +514,12 @@ s_{J_2} - v\big)\big] \\
 &\hspace{4em}\cdot
 \P\big[MN(m_i + m_{\kappa(i)} - \xi s,\; \pv_{L-1}(i)) = s_{J_2} \big]
 \end{align*}
-Therefore, if
-\[ S \sim MN\big(m_i,\; \pv_L(i)\big) +
-MN\big(m_\kappa(i),\; \pv_L(\kappa(i))\big) \]
+Therefore,
+%if
+%\[ S \sim MN\big(m_i,\; \pv_L(i)\big) +
+%MN\big(m_\kappa(i),\; \pv_L(\kappa(i))\big) \]
 for $i \in J_1$, we have
-\[ \P[S = s] = \P\Big[(T, S_1, S_2) = \Big(\xi s,\;
+\[ \P[M_i + M_{\kappa(i)} = s] = \P\Big[(T, S_1, S_2) = \Big(\xi s,\;
 \big(s_j,\; j\in J_1\big),\; \big(s_j\;, j\in J_2\big)\Big)\Big], \]
 where
 \begin{align}
@@ -526,6 +530,50 @@ S_2 \given T = t &\sim MN\big(m_i + m_{\kappa(i)} - t,\; \pv_{L-1}(i)\big),
 \end{align}
 with $S_1$ and $S_2$ are conditionally independent given $T$.
 
+Finally, let $Y_i = M_i + M_{\kappa(i)}$ for $i \in J_1$.
+We consider the distribution of sums of the $Y_i$.
+
+\hrulefill
+
+
+
+%we pursue a similar result for the full distribution of $A(m)$.
+Let $M_i \sim MN(m_i,\; \pv_L(i))$ and $s\in \Ssp_n$, and write
+.
+For $a \in \{0,\dots,n\}^k$, define
+\begin{equation*}
+\Ssp(s; a) := \big\{ (s'_1,\dots,s'_k) :
+s'_j \in \Ssp_{a_j}, 1 \leq j \leq k;\ s'_1 + \cdots + s'_k \leq s \big\},
+\end{equation*}
+a collection of multinomial outcomes from various sets of trials which
+constitute a subset of the outcome $s$.
+Observe that
+%for $s'\in \Ssp(s; a)$,
+%\[ s'_1 \in \Ssp(s, a_1),\qquad s'_2 \in \Ssp(s - s'_1, a_2), \quad\dots,\quad
+%s'_k \in \Ssp(s - (s'_1 + \cdots + s'_{k-1}), a_k). \]
+\[ \Ssp(s; a) = \big\{(s'_1,\dots, s'_k) : (s'_1,\dots,s'_{k-1}) \in 
+\Ssp(s; (a_1,\dots,a_{k-1})),\ s'_k \in \Ssp(s-(s'_1 + \cdots + s'_{k-1}); a_k)
+\big\}. \]
+Let $d = 2^{L-1}$, and take
+$a = \big(m_{i} + m_{\kappa(i)}, i = 1,\dots,d\big)$.
+Then, conditioning on the $Y_i$, we have
+\begin{align*}
+\P&[M_1 + \cdots + M_{2^L} = s] =
+\sum_{s' \in \Ssp(s; a)} \P[Y_1 = s'_1]\cdots \P[Y_d = s'_d] \\
+&= \sum_{(s'_1,\dots,s'_{d-2}) \in \Ssp(s; (a_1,\dots,a_{d-2}))}
+\P[Y_1 = s'_1]\cdots \P[Y_{d-2} = s'_{d-2}] \\
+&\hspace{8em}\cdot
+\sum_{s'_{d-1} \in \Ssp(\tilde{s}; a_{d-1})}
+\P[Y_{d-1} = s'_{d-1}] \P[Y_d = \tilde{s} - s'_{d-1}],
+\end{align*}
+where $\tilde{s} = s - (s'_1 + \cdots + s'_{d-2})$.
+
+\hrulefill
+
+Note that $(Y_1,\dots,Y_{2^{L-1}})$ takes values in
+Let $\tilde{s}_0 = (s'_1,\dots,s'_{2^{L-1}-2})$,
+$\tilde{s} = s'_{2^{L-1} - 1}$, and $\tilde{t} = \sum (\tilde{s}_0)_j$.
+The previous sum becomes
 
 \hrulefill
 
