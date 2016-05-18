@@ -104,7 +104,7 @@ using Lemma \ref{lem:rsbound}.\\
 \end{pf}
 
 
-\section{Bit vector reporting}
+\section{Randomization of bit vectors}
 
 Our goal is to establish differential privacy properties for user data reported
 in the form of vectors of bits.
@@ -164,21 +164,40 @@ Note that this probability is maximized when $\delta(x,y) = 0$ (the randomized v
 In the latter case, we say that $y$ is the \textbf{opposite} of $x$.
 In other words, the most likely outcome of randomizing a bit vector is obtaining an identical vector.
 
-%%% Randomization probabilities as a transition matrix.
+\subsection{Randomization on $\Bsp_L$}
+\label{sec:transprobs}
 
 In general, given $x\in\Bsp_L$, the mapping $R(x)$ is itself a random element of
 $\Bsp_L$, and its distributions over $x$ can be represented by a transition
 matrix which admits a convenient form.
-This depends on enumerating the space $\Bsp_L$ in the following way.
+This in turn depends on enumerating the space $\Bsp_L$ as described below.
+
+In the following we rely heavily on the fact that $|\Bsp_L| = 2^L$, as well
+as the symmetry and recursive structure between ``halves'' of the cube
+whose vertices constitute $\Bsp_L$.
+To this end, we introduce the following notation. The explicit dependence
+on $L$ is dropped when its value is clear.
+Let
+\[ D(L) = 2^L \qquad\text{and}\qquad d(L) = \frac{D(L)}{2} = 2^{L-1}. \]
+Split the index range $1,\dots, D(L)$ into
+\[ J_1(L) = \big\{1,\dots,d(L)\big\} \qquad\text{and}\qquad
+J_2(L) = \big\{d(L) + 1,\dots, D(L) \big\}. \]
+Thus, $J_2 = J_1 + d$ and $J_1(L) = J_1(L-1) \cup J_2(L-1)$.
+Finally, define the index mappings
+\[ \chi_L(i) = \begin{cases} i & i \in J_1(L) \\ i - d(L) & i \in J_2(L)
+\end{cases} \qquad\text{and}\qquad
+\kappa_L(i) = \begin{cases} i + d(L) & i \in J_1(L) \\ i & i \in J_2(L)
+\end{cases}, \]
+projecting an index in $1,\dots,D$ onto $J_1$ and $J_2$, respectively.
 
 \begin{defn}
 The \textbf{recursive enumeration} of $\Bsp_L$ is a labelling of its elements
-as $\big(v_1^L,v_2^L,\dots,v_{2^L}^L\big)$, ordered as follows:
+as $\big(v_1^L,v_2^L,\dots,v_{D(L)}^L\big)$, ordered as follows:
 \begin{itemize}
 \item when $L=1$, $(v_1^1, v_2^1) := (1, 0)$;
 \item for $L > 1$,
-\[ v_j^L := \begin{cases}(1, v_j^{L-1}) & 1 \leq j \leq 2^{L-1} \\
-    (0, v_{j - 2^{L-1}}^{L-1}) & 2^{L-1} + 1 \leq j \leq 2^L \end{cases}. \]
+\[ v_j^L := \begin{cases}(1, v_j^{L-1}) & j \in J_1(L) \\
+    (0, v_{\chi_L(j)}^{L-1}) & j \in J_2(L) \end{cases}. \]
 \end{itemize}
 \end{defn}
 
@@ -191,21 +210,21 @@ integers, the recursive enumeration places them in decreasing order.
 Assume from now on that $v_j^L$ refers to the recursive enumeration of
 $\Bsp_L$, and write the randomization probabilities as
 \[ p_L(i,j) = \P[R(v_i^L) = v_j^L]. \]
-Because bits within a vector are randomized independently, we have
+Since bits within a vector are randomized independently, we have
 \begin{equation} \label{eq:transprobs}
 p_L(i,j) = \begin{cases}
 p\cdot p_{L-1}(i, j) &
-    i \leq 2^{L-1},\; j \leq 2^{L-1} \\
-q\cdot p_{L-1}(i,j - 2^{L-1}) &
-    i \leq 2^{L-1},\; j \geq 2^{L-1} + 1 \\
-q\cdot p_{L-1}(i - 2^{L-1},j) &
-    i \geq 2^{L-1} + 1,\; j \leq 2^{L-1} \\
-p\cdot p_{L-1}(i - 2^{L-1},j - 2^{L-1}) &
-    i \geq 2^{L-1} + 1,\; j \geq 2^{L-1} + 1
+    i \in J_1,\; j \in J_1 \\
+q\cdot p_{L-1}(i,\chi(j)) &
+    i \in J_1,\; j \in J_2 \\
+q\cdot p_{L-1}(\chi(i),j) &
+    i \in J_2,\; j \in J_1 \\
+p\cdot p_{L-1}(\chi(i), \chi(j)) &
+    i \in J_2,\; j \in J_2
  \end{cases}.
 \end{equation}
 The distribution of $R(x)$ is summarized by the transition matrix
-\[ \Pm_L = \Big(p_L(i,j)\,;\; 1 \leq i,j \leq 2^L\Big). \]
+\[ \Pm_L = \Big(p_L(i,j)\,;\; 1 \leq i,j \leq D(L)\Big). \]
 Note that this is a doubly stochastic, symmetric matrix with all $p^L$ on
 the diagonal and $q^L$ on the antidiagonal.
 Furthermore, we have
@@ -218,13 +237,15 @@ In other words,
 where $\otimes$ denotes the Kronecker product.
 
 
-\subsection{Privacy-preserving reporting for bit records}
+\section{Privacy-preserving reporting for bit records}
 
 We now adapt the framework of Section \ref{sec:dp} to the task of reporting
 user records encoded as bit-vectors.
 
-Set $\Dsp = \Bsp_L$. We use the term \textbf{collection} (of records)
-interchangeably with ``database''.
+Set $\Dsp = \Bsp_L = \{v_1,\dots, v_D\}$, ordered according to the recursive
+enumeration described in Section \ref{sec:transprobs}.
+We use the term \textbf{collection} (of records) interchangeably with
+``database''.
 We consider a randomized query $A$ that randomizes each record in the
 collection independently, and aggregates the results by reporting occurrence
 counts for every possible randomization outcome.
@@ -237,20 +258,21 @@ of the original records.
 TODO: can represent collections using matrices, and write $\Phi$ as 
 $X^T\mathbf{1}$ for a collection $X$ (column sums).
 
-We consider an aggregation function $\Phi$ mapping a collection of elements of
-$\Dsp$ to a vector $s = (s_1,\dots,s_{2^L})$, where $s_j$ counts how
-many copies of $v_j$ the collection contains.
+We consider an aggregation function $\Phi$ mapping a collection of $n$ elements
+of $\Dsp$ to a vector $s = (s_1,\dots,s_D)$, where $s_j$ counts how many copies
+of $v_j$ the collection contains.
 Note that the range of $\Phi$ is
-\[ \Ssp_n^L := \big\{ s \in \Z^{2^L}: s_j \geq 0,\,
-s_1 +\cdots + s_{2^L} = n\big\}, \]
-a subset of the standard $(2^L-1)$-simplex (whose vertices are the standard
-basis vectors in $\R^{2^L}$) consisting of the points with integer coordinates.
+\[ \Ssp_n^L := \big\{ s \in \{0,\dots,n\}^{D(L)}:
+%s_j \geq 0,\,
+s_1 +\cdots + s_{D(L)} = n\big\}, \]
+a subset of the standard $(D - 1)$-simplex (whose vertices are the standard
+basis vectors in $\R^D$) consisting of the points with integer coordinates.
 
 \begin{defn}
 The aggregation function $\map{\Phi}{\Dsp^n}{\Ssp_n}$ counts occurrences of
-vectors $v_1,\dots, v_{2^L} \in \Dsp$ in the collection $\yv \in \Dsp^n$:
+vectors $v_1,\dots, v_D \in \Dsp$ in the collection $\yv \in \Dsp^n$:
 \[ \Phi(\yv) = \left(\sum_{i = 1}^n I(y_i = v_1),\dots,
-\sum_{i = 1}^n I(y_i = v_{2^L}) \right)
+\sum_{i = 1}^n I(y_i = v_D) \right)
 \]
 \end{defn}
 
@@ -282,6 +304,8 @@ to occurrence counts according to
 \[ A = \Phi \circ R. \]
 \end{defn}
 
+\subsection{The distribution of $A$}
+
 For $s\in\Ssp_n$, the distribution of $A(\xv)$ is given by
 \begin{equation}\label{eq:Adist}
 \P[A(\xv) = s] = \P[\Phi(R(\xv)) = s]
@@ -294,7 +318,7 @@ $[s] := \{\yv:\Phi(\yv) = s\}$, an equivalence class of $\Phi$.
 We consider as its canonical representative the collection
 \[ \vv(s) := \big(\underbrace{v_1,\dots,v_1}_{s_1},\,
    \underbrace{v_2,\dots,v_2}_{s_2},\,\dots,\,
-   \underbrace{v_{2^L},\dots,v_{2^L}}_{s_{2^L}}\big), \]
+   \underbrace{v_D,\dots,v_D}_{s_D}\big), \]
 which contains $s_j$ consecutive copies of $v_j$, ordered as usual.
 Observe that $[s]$ coincides with the set of all permutations of $\vv(s)$.
 
@@ -336,118 +360,98 @@ $A(m) := A(\vv(m))$ for $m\in\Ssp_n$ summarizing the original collection.
 
 We now discuss a more convenient characterization of the distribution of $A(m)$
 given in \eqref{eq:Adist}.
-If all of the vectors in the original collection are identical, say equal to
-$v_\ell$, then $A(m)$ has a multinomial distribution.
-Indeed,
+First, observe that if $m = n\cdot \ev_\ell$, where $\ev_\ell$ is the $\ell$-th
+standard basis vector in $\Ssp_n$, then all of the vectors in the original
+collection are identical and equal to $v_\ell$.
+In this case, $A(m)$ has a Multinomial distribution:
 \begin{align*}
 \P[A(m) = s] &= \sum_{[s]} \prod_{i=1}^n \P[R(v_\ell) = y_i] =
-\sum_{[s]} \prod_{j = 1}^{2^L}\prod_{i: y_i = v_j} p(\ell, j) =
-\sum_{[s]} p(\ell, 1)^{s_1}\cdots p(\ell, 2^L)^{s_{2^L}} \\
-&= \frac{n!}{s_1!\cdots s_{2^L}!} p(\ell, 1)^{s_1}\cdots p(\ell, 2^L)^{s_{2^L}},
+\sum_{[s]} \prod_{j = 1}^D\prod_{i: y_i = v_j} p(\ell, j) =
+\sum_{[s]} p(\ell, 1)^{s_1}\cdots p(\ell, D)^{s_D} \\
+&= \frac{n!}{s_1!\cdots s_D!} p(\ell, 1)^{s_1}\cdots p(\ell, D)^{s_D},
 \end{align*}
 since $[s]$ consists of all permutations of $\vv(s)$.
 
-In general, suppose $m = (m_1,\dots,m_{2^L})\in\Ssp_n$.
+In general, suppose $m = (m_1,\dots,m_D)\in\Ssp_n$.
 Since $\Phi(\yv) = \Phi(y_1) + \cdots + \Phi(y_n)$, we have
 \[ A(m) = \Phi\big(R\big(\vv(m)\big)\big) =
-\sum_{j=1}^{2^L} \Phi\big(R\big((\underbrace{v_j,\dots,v_j}_{s_j})\big)\big) =
-\sum_{j=1}^{2^L} A\big((v_j,\dots,v_j)\big), \]
+\sum_{j=1}^D \Phi\big(R\big((\underbrace{v_j,\dots,v_j}_{s_j})\big)\big) =
+\sum_{j=1}^D A\big((v_j,\dots,v_j)\big), \]
 where the terms of the sum are independent since $R$ randomizes each vector
 component independently.
 Therefore, $A(m)$ is distributed as a sum of Multinomial random vectors:
 \begin{equation} \label{eq:Adistmn}
-A(m) \sim MN(m_1, \pv_L(1)) + \cdots + MN(m_{2^L}, \pv_L(2^L)),
+A(m) \sim MN(m_1, \pv_L(1)) + \cdots + MN(m_D, \pv_L(D)),
 \end{equation}
 where $\pv_L(j)$ denotes the $j$-th row in the transition matrix
-$\Pm_L$, \ie $\pv_L(j) = \big(p_L(j,1),\dots,p_L(j,2^L)\big)$.
+$\Pm_L$, \ie $\pv_L(j) = \big(p_L(j,1),\dots,p_L(j,D)\big)$.
 
 Furthermore, we can leverage the binary recursive structure of $\Dsp$ to get a
 more specific representation.
-First, we show that conditioning on the sum of the first $2^{L-1}$ terms allows
-us to write a Multinomial on $2^L$ categories in terms of a Binomial and two
-conditionally independent Multinomials on $2^{L-1}$ categories.
-For convenience, split the range of indices $1,\dots,2^L$ into two:
-\[ J_1 = \big\{1,\dots,2^{L-1}\big\}\qquad\text{and}\qquad
-J_2 = \big\{2^{L-1} + 1,\dots,2^L \big\}. \]
-Clearly $J_2 = J_1 + 2^{L-1}$ and $J_1(L) = J_1(L-1) \cup J_2(L-1)$.
-Also, define the index shift operators
-\[ \chi(i) = \begin{cases} i & i \in J_1 \\ i - 2^{L-1} & i \in J_2
-\end{cases} \qquad\text{and}\qquad
-\kappa(i) = \begin{cases} i + 2^{L-1} & i \in J_1 \\ i & i \in J_2
-\end{cases}, \]
-so that $\chi$ and $\kappa$ select the corresponding index in $J_1$ and
-$J_2$ respectively.
-Finally, define the partial summation operator $\xi$ on $\R^{2^L}$ as
-\[ \xi s = \sum_{j \in J_1} s_j. \]
-
-\begin{lem} \label{lem:mndecomp}
-Suppose $p_1,\dots,p_{2^L}$ are category probabilities summing to 1, and 
-$s\in\Ssp_m$.
 Let
-\[ w = \xi p
-%\sum_{j \in J_1} p_j
-\qquad\text{and}\qquad
-t = \xi s.
-%\sum_{j \in J_1} s_j.
-\]
-Then
-\begin{align*}
-\P\big[MN\big(m, (p_1,&\dots,p_{2^L})\big) = s\big] = \\
-&\P\big[Bin(m,\; w) = t \big]
-\P\bigg[MN\Big(t,\; \Big(\frac{p_j}{w},\; j \in J_1\Big) \Big) =
-\big(s_j,\; j \in J_1\big) \bigg]\\
-&\qquad\cdot \P\bigg[MN\Big(m - t,\; \Big(\frac{p_j}{1 - w},\;
-j \in J_2\Big) \Big) =
-\big(s_j,\; j \in J_2\big) \bigg]\\
-\end{align*}
-\end{lem}
-\begin{pf}
-\begin{align*}
-\P\big[MN\big(m,& (p_1,\dots,p_{2^L})\big) = s\big] =
-\frac{m!}{s_1!\cdots s_m!} p_1^{s_1} \cdots p_m^{s_m} \\
-&= \frac{m!}{t! (m-t)!}w^t (1-w)^{(m-t)} \cdot \frac{t!}{s_1!\cdots s_{2^{L-1}}!}
-\frac{p_1^{s_1}}{w^{s_1}}\cdots
-\frac{p_{2^{L-1}}^{s_{2^{L-1}}}}{w^{s_{2^{L-1}}}} \\
-&\qquad\cdot\frac{(m-t)!}{s_{2^{L-1}+1}!\cdots s_{2^L}!}
-\frac{p_{2^{L-1} + 1}^{s_{2^{L-1} + 1}}}{(1-w)^{s_1}}\cdots
-\frac{p_{2^L}^{s_{2^L}}}{(1-w)^{s_{2^L}}}
-\end{align*}
-\end{pf}
+\[ M_i \sim MN(m_i,\; \pv_L(i)), \quad i = 1,\dots,D. \]
+We first show that, as a consequence of \eqref{eq:transprobs}, we can express
+the distribution of $M_i$ in terms of $\pv_{L-1}(i)$.
+This is accomplished by representing an outcome of $M_i$ as follows.
+Split the multinomial categories into two groups of $d = D/2$, indexed by $J_1$
+and $J_2$ respectively.
+Out of the $m_i$ Bernoulli trials generating the multinomial outcome, determine
+the number assigned to each group according to a Binomial random variable.
+Given this value, arrange the assigned results to specific categories
+independently in each group according to a Multinomial over those $d$
+categories.
 
-In particular, if $p_j = p_L(i, j)$, the recursive structure in
-\eqref{eq:transprobs} implies that
-\[ w = \begin{cases} p & i \in J_1 \\  q & i \in J_2 \end{cases}, \]
-and for $j \in J_1$,
-\[ \frac{p_j}{w} = \frac{p_{\kappa(j)}}{1-w} = p_{L-1}(\chi(i), j).
-%\begin{cases} p_{L-1}(i, j) & i \in J_1 \\
-%p_{L-1}(i - 2^{L-1}, j) & i \in J_2 \end{cases}.
-\]
+For convenience, define the partial summation operator $\xi$ on $\R^D$ as
+\[ \xi x = \sum_{j \in J_1} x_j, \]
+and denote $x_{J_k} = (x_j,\; j \in J_k)$.
 
-Hence, for some $i\in J_1 \cup J_2$, suppose $(T, S_1, S_2)$ is distributed
-according to
+\begin{lem}
+Given $i \in \{1,\dots,D\}$, let
+\[ (T, S_1, S_2) \in \{0,\dots,m_i\} \times \{0,\dots,m_i\}^d \times
+\{0,\dots,m_i\}^d \]
+be a random element distributed according to
 \begin{align}
-T &\sim Bin\big(m,\; p \cdot I_{J_1}(i) + q \cdot I_{J_2}(i)\big)\nonumber\\
+T &\sim \begin{cases} Bin(m_i,\; p) & i \in J_1 \\
+Bin(m_i,\; q) & i \in J_2 \end{cases} \nonumber \\
+%Bin\big(m,\; p \cdot I_{J_1}(i) + q \cdot I_{J_2}(i)\big)\nonumber\\
 S_1 \given T = t &\sim MN\big(t,\; \pv_{L-1}(\chi(i))\big) \label{eq:mndecomp}\\
-S_2 \given T = t &\sim MN\big(m - t,\; \pv_{L-1}(\chi(i))\big), \nonumber
+S_2 \given T = t &\sim MN\big(m_i - t,\; \pv_{L-1}(\chi(i))\big), \nonumber
 \end{align}
 where $S_1$ and $S_2$ are conditionally independent given $T$.
-Then, if $S \sim MN(m, \pv_L(i))$,
-%with $i\in J_1$
-Lemma \ref{lem:mndecomp} implies that
-\[ \P[S = s] = \P\Big[(T, S_1, S_2) = \Big(\xi s,\;
-\big(s_j,\; j\in J_1\big),\; \big(s_j\;, j\in J_2\big)\Big)\Big]. \]
-%If $i\in J_2$, the probability parameter for $T$ changes to $q$, and the
-%probabilities for the $S_i$ change to $\pv_{L-1}(i - 2^{L-1})$.
-Furthermore, it is clear that if $L=1$,
-$MN(m,\; \pv_1(i)) \eqdist (W, m - W)$ where
-\[ W \sim \begin{cases} Bin(m,\; p) & i = 1 \\ Bin(m,\; q) & i = 2 \end{cases}.
-%Bin\big(m,\; p \cdot I(i = 1) +
-%q \cdot I(i = 2)\big).
-\]
-Intuitively, this means that we can describe the outcome of $m$ multinomial
-trials by first determining the number of trials whose result belongs to each
-half of the categories, and then assigning the multinomial outcomes
-independently in each half.
+Then, for $s \in \Ssp_{m_i}^L$,
+\[ \P[M_i = s] = \P\big[(T, S_1, S_2) = (\xi s,\; s_{J_1},\; s_{J_2})
+\big]. \]
+\end{lem}
+If $L=1$, this simplifies to $M_i \eqdist (T, m_i - T)$.
+\begin{pf}
+Taking $w = \xi \pv_L(i)$ and $t = \xi s$, we have
+\begin{align*}
+\P[M_i = s] &= \frac{m_i!}{s_1!\cdots s_D!} p_L(i,1)^{s_1} \cdots
+p_L(i,D)^{s_D} \\
+&= \frac{m_i!}{t! (m_i - t)!} w^t (1 - w)^{(m_i - t)} \cdot
+\frac{t!}{s_1!\cdots s_d!} \frac{p_L(i,1)^{s_1}}{w^{s_1}}\cdots
+\frac{p_L(i, d)^{s_d}}{w^{s_d}} \\
+&\hspace{12em}\cdot
+\frac{(m_i - t)!}{s_{d+1}!\cdots s_D!}
+\frac{p_L(i,d + 1)^{s_{d + 1}}}{(1 - w)^{s_{d+1}}}\cdots
+\frac{p_L(i,D)^{s_D}}{(1 - w)^{s_D}}.
+\end{align*}
+By \eqref{eq:transprobs}, $w = p'\cdot\sum_{j \in J_1(L)} p_{L-1}(i, j) = p'$,
+where $p' = p$ if $i \in J_1$ and $q$ otherwise.
+Furthermore, for $j\in J_1$,
+\[ \frac{p_L(i,j)}{w} = \frac{p_L(i,\kappa(j))}{1-w} = p_{L-1}(\chi(i), j). \]
+Therefore,
+\begin{equation*}
+\P[M_i = s] = \P[T = t]\cdot \P[MN(t,\; \pv_{L-1}(\chi(i))) = s_{J_1}]\cdot
+\P[MN(m_i - t,\; \pv_{L-1}(\chi(i))) = s_{J_2}].
+\end{equation*}
+\end{pf}
+
+Next, we extend this representation to sums of the (independent) $M_i$.
+
+
+\hrulefill
+
 
 Next, we apply this decomposition to sums of independent Multinomial random
 vectors, in order to arrive at an expression for the distribution of $A(m)$
@@ -532,6 +536,7 @@ with $S_1$ and $S_2$ are conditionally independent given $T$.
 
 Finally, let $Y_i = M_i + M_{\kappa(i)}$ for $i \in J_1$.
 We consider the distribution of sums of the $Y_i$.
+For $i\in J_1$ let $(T_i, S_{i1}, S_{i2})$ be independent, distributed according
 
 \hrulefill
 
