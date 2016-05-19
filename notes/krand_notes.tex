@@ -407,138 +407,130 @@ and denote $x_{J_k} = (x_j,\; j \in J_k)$.
 
 \begin{lem}
 Given $i \in \{1,\dots,D\}$, let
-\[ (T, S_1, S_2) \in \{0,\dots,m_i\} \times \{0,\dots,m_i\}^d \times
+\[ (W, S_1, S_2) \in \{0,\dots,m_i\} \times \{0,\dots,m_i\}^d \times
 \{0,\dots,m_i\}^d \]
 be a random element distributed according to
 \begin{align}
-T &\sim \begin{cases} Bin(m_i,\; p) & i \in J_1 \\
+W &\sim \begin{cases} Bin(m_i,\; p) & i \in J_1 \\
 Bin(m_i,\; q) & i \in J_2 \end{cases} \nonumber \\
 %Bin\big(m,\; p \cdot I_{J_1}(i) + q \cdot I_{J_2}(i)\big)\nonumber\\
-S_1 \given T = t &\sim MN\big(t,\; \pv_{L-1}(\chi(i))\big) \label{eq:mndecomp}\\
-S_2 \given T = t &\sim MN\big(m_i - t,\; \pv_{L-1}(\chi(i))\big), \nonumber
+S_1 \given W = w &\sim MN\big(w,\; \pv_{L-1}(\chi(i))\big) \label{eq:mndecomp}\\
+S_2 \given W = w &\sim MN\big(m_i - w,\; \pv_{L-1}(\chi(i))\big), \nonumber
 \end{align}
-where $S_1$ and $S_2$ are conditionally independent given $T$.
+where $S_1$ and $S_2$ are conditionally independent given $W$.
 Then, for $s \in \Ssp_{m_i}^L$,
-\[ \P[M_i = s] = \P\big[(T, S_1, S_2) = (\xi s,\; s_{J_1},\; s_{J_2})
+\[ \P[M_i = s] = \P\big[(W, S_1, S_2) = (\xi s,\; s_{J_1},\; s_{J_2})
 \big]. \]
 \end{lem}
-If $L=1$, this simplifies to $M_i \eqdist (T, m_i - T)$.
+If $L=1$, this simplifies to $M_i \eqdist (W, m_i - W)$.
 \begin{pf}
-Taking $w = \xi \pv_L(i)$ and $t = \xi s$, we have
+Taking $a = \xi \pv_L(i)$ and $w = \xi s$, we have
 \begin{align*}
 \P[M_i = s] &= \frac{m_i!}{s_1!\cdots s_D!} p_L(i,1)^{s_1} \cdots
 p_L(i,D)^{s_D} \\
-&= \frac{m_i!}{t! (m_i - t)!} w^t (1 - w)^{(m_i - t)} \cdot
-\frac{t!}{s_1!\cdots s_d!} \frac{p_L(i,1)^{s_1}}{w^{s_1}}\cdots
-\frac{p_L(i, d)^{s_d}}{w^{s_d}} \\
+&= \frac{m_i!}{w! (m_i - w)!} a^w (1 - a)^{(m_i - w)} \cdot
+\frac{w!}{s_1!\cdots s_d!} \frac{p_L(i,1)^{s_1}}{a^{s_1}}\cdots
+\frac{p_L(i, d)^{s_d}}{a^{s_d}} \\
 &\hspace{12em}\cdot
-\frac{(m_i - t)!}{s_{d+1}!\cdots s_D!}
-\frac{p_L(i,d + 1)^{s_{d + 1}}}{(1 - w)^{s_{d+1}}}\cdots
-\frac{p_L(i,D)^{s_D}}{(1 - w)^{s_D}}.
+\frac{(m_i - w)!}{s_{d+1}!\cdots s_D!}
+\frac{p_L(i,d + 1)^{s_{d + 1}}}{(1 - a)^{s_{d+1}}}\cdots
+\frac{p_L(i,D)^{s_D}}{(1 - a)^{s_D}}.
 \end{align*}
-By \eqref{eq:transprobs}, $w = p'\cdot\sum_{j \in J_1(L)} p_{L-1}(i, j) = p'$,
+By \eqref{eq:transprobs}, $a = p'\cdot\sum_{j \in J_1(L)} p_{L-1}(i, j) = p'$,
 where $p' = p$ if $i \in J_1$ and $q$ otherwise.
 Furthermore, for $j\in J_1$,
-\[ \frac{p_L(i,j)}{w} = \frac{p_L(i,\kappa(j))}{1-w} = p_{L-1}(\chi(i), j). \]
+\[ \frac{p_L(i,j)}{a} = \frac{p_L(i,\kappa(j))}{1-a} = p_{L-1}(\chi(i), j). \]
 Therefore,
 \begin{equation*}
-\P[M_i = s] = \P[T = t]\cdot \P[MN(t,\; \pv_{L-1}(\chi(i))) = s_{J_1}]\cdot
-\P[MN(m_i - t,\; \pv_{L-1}(\chi(i))) = s_{J_2}].
+\P[M_i = s] = \P[W = w]\cdot \P[MN(w,\; \pv_{L-1}(\chi(i))) = s_{J_1}]\cdot
+\P[MN(m_i - w,\; \pv_{L-1}(\chi(i))) = s_{J_2}].
 \end{equation*}
 \end{pf}
 
 Next, we extend this representation to sums of the (independent) $M_i$.
+Let $Y_i = M_i + M_{\kappa(i)}$.
 
-
-\hrulefill
-
-
-Next, we apply this decomposition to sums of independent Multinomial random
-vectors, in order to arrive at an expression for the distribution of $A(m)$
-via \eqref{eq:Adistmn}.
-Let $M_i \sim MN(m_i,\; \pv_L(i))$ be independent, $i = 1,\dots,2^L$.
-
-Suppose $i\in J_1$.
-Let $(T_k, S_{k1}, S_{k2})$, $k = 1,2$, be independent random vectors
-distributed according to \eqref{eq:mndecomp} for $i$ and $\kappa(i)$
-respectively.
-Write 
-\[ \Ssp_m(s) := \big\{ s' \in \Ssp_m : s'_j \leq s_j,\;
-j \in J_1 \cup J_2 \big\},
-\]
-and observe that $\Ssp_m(s)$ can be decomposed as
-\begin{align*}
-\Ssp_m(s) &= \bigcup_{t = 0}^{\xi s}
-\big\{ s' \in \Ssp_m^L: s'_j \leq s_j,\; j \in J_1 \cup J_2,\;
-\xi s' = t \big\} \\
-&= \bigcup_{t = 0}^{\xi s}
-\big\{ u \in \Ssp_t^{L-1}: u_j \leq s_j, \; j \in J_1 \} \times
-\big\{ v \in \Ssp_{m - t}^{L-1} : v_j \leq s_{\kappa(j)},\;
-j \in J_1 \} \\
-&= \bigcup_{t = 0}^{\xi s} \Ssp_{t}\big(s_{J_1}\big) \times
-\Ssp_{m - t}\big(s_{J_2}\big) 
-\end{align*}
-%\[ \Ssp_m(s) = \bigcup_{t = 0}^{\xi s} \Ssp_{t}\big((s_j, j \in J_1)\big)
-%\times \Ssp_{m - t}\big((s_j, j \in J_2)\big) \]
-by partitioning on the sum of the first $2^{L-1}$ components of the vectors.
-For $s \in \Ssp_{m_i + m_{\kappa(i)}}$,
-\begin{align*}
-\P&[M_i + M_{\kappa(i)} = s] = \sum_{s' \in \Ssp_{m_i}(s)}
-\P[M_i = s']\P[M_{\kappa(i)} = s - s'] \\
-&= \sum_{t = 0}^{\xi s} \sum_{u \in \Ssp_t(s_{J_1})}
-\sum_{v \in \Ssp_{m_i - t}(s_{J_2})}
-\P\big[(T_1, S_{11}, S_{12}) = \big(t, u, v\big)\big] \\
-&\hspace{14em} \cdot
-\P\big[(T_2, S_{21}, S_{22}) = \big(\xi s - t,\; s_{J_1} - u,\;
-s_{J_2} - v\big)\big] \\
-&= \sum_{t = 0}^{\xi s} \P[T_1 = t] \P[T_2 = \xi s - t]
-\bigg\{ \sum_{u \in \Ssp_t(s_{J_1})} \P[S_{11} = u \given T_1 = t]
-\P[S_{21} = s_{J_1} - u \given T_2 = \xi s - t] \bigg\} \\
-&\hspace{4em}\cdot \bigg\{ \sum_{v \in \Ssp_{m_i - t}(s_{J_2})}
-\P[S_{12} = v \given T_1 = t]
-\P[S_{22} = s_{J_2} - v \given T_2 = \xi s - t] \bigg\} \\
-&= \sum_{t = 0}^{\xi s} \P\big[Bin(m_i,\; p) = t\big]
-\P\big[Bin(m_{\kappa(i)},\; q) = \xi s - t\big] \\
-&\hspace{4em}\cdot
-\bigg\{ \sum_{u \in \Ssp_t(s_{J_1})}
-\P\big[MN(t,\; \pv_{L-1}(i)) = u \big]
-\P\big[MN(\xi s - t,\; \pv_{L-1}(i)) = s_{J_1} - u \big] \bigg\} \\
-&\hspace{4em}\cdot \bigg\{ \sum_{v \in \Ssp_{m_i - t}(s_{J_2})}
-\P\big[MN(m_i - t,\; \pv_{L-1}(i)) = v \big] \\
-&\hspace{12em}\cdot
-\P\big[MN(m_{\kappa(i)} - (\xi s - t),\;
-\pv_{L-1}(i)) = s_{J_2} - v \big] \bigg\} \\
-&= \sum_{t = 0}^{\xi s} \P\big[Bin(m_i,\; p) = t\big]
-\P\big[Bin(m_{\kappa(i)},\; q) = \xi s - t\big]
-\cdot \P\big[MN(\xi s,\; \pv_{L-1}(i)) = s_{J_1} \big] \\
-&\hspace{4em}\cdot
-\P\big[MN(m_i + m_{\kappa(i)} - \xi s,\; \pv_{L-1}(i)) = s_{J_2} \big] \\
-&= \P\big[Bin(m_i,\; p) + Bin(m_{\kappa(i)},\; q) = \xi s]
-\cdot \P\big[MN(\xi s,\; \pv_{L-1}(i)) = s_{J_1} \big] \\
-&\hspace{4em}\cdot
-\P\big[MN(m_i + m_{\kappa(i)} - \xi s,\; \pv_{L-1}(i)) = s_{J_2} \big]
-\end{align*}
-Therefore,
-%if
-%\[ S \sim MN\big(m_i,\; \pv_L(i)\big) +
-%MN\big(m_\kappa(i),\; \pv_L(\kappa(i))\big) \]
-for $i \in J_1$, we have
-\[ \P[M_i + M_{\kappa(i)} = s] = \P\Big[(T, S_1, S_2) = \Big(\xi s,\;
-\big(s_j,\; j\in J_1\big),\; \big(s_j\;, j\in J_2\big)\Big)\Big], \]
-where
+\begin{lem}
+Given $i \in \{1,\dots,d\}$, let
+\[ (T, U, V) \in \{0,\dots,m_i + m_{\kappa(i)}\} \times
+\{0,\dots,m_i + m_{\kappa(i)}\}^d \times \{0,\dots,m_i + m_{\kappa(i)}\}^d \]
+be a random element distributed according to
 \begin{align}
-T &\sim Bin\big(m_i,\; p\big) + Bin\big(m_{\kappa(i)},\; q\big)\nonumber\\
-S_1 \given T = t &\sim MN\big(t,\; \pv_{L-1}(i)\big) \nonumber\\
-S_2 \given T = t &\sim MN\big(m_i + m_{\kappa(i)} - t,\; \pv_{L-1}(i)\big),
+T &\sim Bin\big(m_i,\; p\big) + Bin\big(m_{\kappa(i)},\; q\big)
+\quad \text{(independent)}\nonumber\\
+U \given T = t &\sim MN\big(t,\; \pv_{L-1}(i)\big) \nonumber\\
+V \given T = t &\sim MN\big(m_i + m_{\kappa(i)} - t,\; \pv_{L-1}(i)\big),
 \nonumber
 \end{align}
-with $S_1$ and $S_2$ are conditionally independent given $T$.
-
-Finally, let $Y_i = M_i + M_{\kappa(i)}$ for $i \in J_1$.
-We consider the distribution of sums of the $Y_i$.
-For $i\in J_1$ let $(T_i, S_{i1}, S_{i2})$ be independent, distributed according
+where $U$ and $V$ are conditionally independent given $T$.
+Then, for $s \in \Ssp_{m_i + m_{\kappa(i)}}^L$,
+\[ \P[Y_i = s] = \P\big[(T, U, V) = (\xi s,\; s_{J_1},\; s_{J_2})
+\big]. \]
+\end{lem}
+\begin{pf}
+Let $(W_k, S_{k1}, S_{k2})$, $k = i, \kappa(i)$, be independent random elements
+distributed according to \eqref{eq:mndecomp}.
+Define
+\[ \Ssp_r(s) = \big\{s' \in \Ssp_r^L : s'_j \leq s_j,\, j = 1,\dots,D\}, \]
+and observe that $\Ssp_r(s)$ can be decomposed as
+\begin{align*}
+\Ssp_r(s) &= \bigcup_{t = 0}^r
+\big\{ s' \in \Ssp_r^L: s'_j \leq s_j,\, j = 1,\dots,D;\; \xi s' = t \big\} \\
+&= \bigcup_{t = 0}^r
+\big\{ u \in \Ssp_t^{L-1}: u_j \leq s_j, \; j \in J_1(L) \} \times
+\big\{ v \in \Ssp_{r - t}^{L-1} : v_j \leq s_{\kappa(j)},\;
+j \in J_1(L) \} \\
+&= \bigcup_{t = 0}^r \Ssp_{t}\big(s_{J_1}\big) \times
+\Ssp_{r - t}\big(s_{J_2}\big)
+\end{align*}
+(note that some of the sets in the union may be empty, for example if
+$t > \xi s$).
+Now,
+\[ \P[Y_i = s] = \sum_{s'} \P[M_i = s'] \P[M_{\kappa(i)} = s - s'], \]
+where the summation runs over
+$\big\{ s' : s' \in \Ssp_{m_i}^L,\; s-s' \in \Ssp_{m_{\kappa(i)}}^L \big\}
+= \Ssp_{m_i}(s)$.
+Hence,
+\begin{align*}
+\P[Y_i = s] &= \sum_{t = 0}^{m_i} \sum_{u \in \Ssp_t(s_{J_1})}
+\sum_{v \in \Ssp_{m_i - t}(s_{J_2})}
+\P\big[(W_i, S_{i1}, S_{i2}) = \big(t, u, v\big)\big] \\
+&\hspace{12em} \cdot
+\P\big[(W_{\kappa(i)}, S_{\kappa(i)1}, S_{\kappa(i)2}) =
+\big(\xi s - t,\; s_{J_1} - u,\; s_{J_2} - v\big)\big] \\
+&= \sum_{t = 0}^{m_i} \P[W_i = t] \P[W_{\kappa(i)} = \xi s - t] \\
+&\hspace{6em}\cdot
+\bigg\{ \sum_{u \in \Ssp_t(s_{J_1})} \P[S_{i1} = u \given W_i = t]
+\P[S_{\kappa(i)1} = s_{J_1} - u \given W_{\kappa(i)} = \xi s - t] \bigg\} \\
+&\hspace{6em}\cdot \bigg\{ \sum_{v \in \Ssp_{m_i - t}(s_{J_2})}
+\P[S_{i2} = v \given W_i = t]
+\P[S_{\kappa(i)2} = s_{J_2} - v \given W_{\kappa(i)} = \xi s - t] \bigg\} \\
+&= \sum_{t = 0}^{m_i} \P[W_i = t] \P[W_{\kappa(i)} = \xi s - t]
+\cdot \P[S_{i1} + S_{\kappa(i)1} = s_{J_1} \given
+W_i = t, W_{\kappa(i)} = \xi s - t] \\
+&\hspace{17em}\cdot \P[S_{i2} + S_{\kappa(i)2} = s_{J_2} \given
+W_i = t, W_{\kappa(i)} = \xi s - t].
+\end{align*}
+Recall that, given $W_k$, $S_{k1}$ and $S_{k2}$ are independent
+Multinomial random vectors, all with the same category probabilities
+$\pv_{L-1}(i)$.
+Thus, given $W_i + W_{\kappa(i)} = \xi s$,
+\[ S_{i1} + S_{\kappa(i)1} \sim MN\big(\xi s,\, \pv_{L-1}(i)\big)
+\qquad\text{and}\qquad
+S_{i2} + S_{\kappa(i)2} \sim MN\big(m_i + m_{\kappa(i)} - \xi s,\,
+\pv_{L-1}(i)\big). \]
+Therefore,
+\begin{align*}
+\P[Y_i = s] &= \P[W_i + W_{\kappa(i)} = \xi s] \cdot
+\P[S_{i1} + S_{\kappa(i)1} = s_{J_1}] \cdot
+\P[S_{i2} + S_{\kappa(i)2} = s_{J_2}] \\
+&= \P[T = \xi s] \cdot \P[U = s_{J_1} \given T = \xi s] \cdot
+\P[V = s_{J_2} \given T = \xi s].
+\end{align*}
+\end{pf}
 
 \hrulefill
+
 
 
 
