@@ -21,6 +21,7 @@
 \newcommand{\Dsp}{\mathcal{D}}
 \newcommand{\Ssp}{\mathcal{S}}
 \newcommand{\Bsp}{\mathcal{B}}
+\newcommand{\Tsp}{\mathcal{T}}
 \newcommand{\xv}{\mathbf{x}}
 \newcommand{\yv}{\mathbf{y}}
 \newcommand{\sv}{\mathbf{s}}
@@ -35,6 +36,8 @@
 \newcommand{\iv}{\mathbf{i}}
 \newcommand{\one}{\boldsymbol{1}}
 \newcommand{\zero}{\boldsymbol{0}}
+\newcommand{\mb}{\overline{m}}
+
 %% Title matter
 \title{K-Randomization}
 \author{Maxim Zhilyaev \and David Zeber}
@@ -381,7 +384,7 @@ where the terms of the sum are independent since $R$ randomizes each vector
 component independently.
 Therefore, $A(m)$ is distributed as a sum of Multinomial random vectors:
 \begin{equation} \label{eq:Adistmn}
-A(m) \sim MN(m_1, \pv_L(1)) + \cdots + MN(m_D, \pv_L(D)),
+A_L(m) \sim MN(m_1, \pv_L(1)) + \cdots + MN(m_D, \pv_L(D)),
 \end{equation}
 where $\pv_L(j)$ denotes the $j$-th row in the transition matrix
 $\Pm_L$, \ie $\pv_L(j) = \big(p_L(j,1),\dots,p_L(j,D)\big)$.
@@ -389,7 +392,8 @@ $\Pm_L$, \ie $\pv_L(j) = \big(p_L(j,1),\dots,p_L(j,D)\big)$.
 Furthermore, we can leverage the binary recursive structure of $\Dsp$ to get a
 more specific representation.
 Let
-\[ M_i \sim MN(m_i,\; \pv_L(i)), \quad i = 1,\dots,D. \]
+\[ M_i \sim MN(m_i,\; \pv_L(i)), \quad i = 1,\dots,D \]
+be independent.
 We first show that, as a consequence of \eqref{eq:transprobs}, we can express
 the distribution of $M_i$ in terms of $\pv_{L-1}(i)$.
 This is accomplished by representing an outcome of $M_i$ as follows.
@@ -402,11 +406,11 @@ independently in each group according to a Multinomial over those $d$
 categories.
 
 For convenience, define the partial summation operator $\xi$ on $\R^D$ as
-\[ \xi x = \sum_{j \in J_1} x_j, \]
+\[ \xi x = \sum_{J_1} x_j, \]
 and denote $x_{J_k} = (x_j,\; j \in J_k)$.
 
 \begin{lem}
-Given $i \in \{1,\dots,D\}$, let
+Given $i \in J_1 \cup J_2$, let
 \[ (W, S_1, S_2) \in \{0,\dots,m_i\} \times \{0,\dots,m_i\}^d \times
 \{0,\dots,m_i\}^d \]
 be a random element distributed according to
@@ -447,50 +451,51 @@ Therefore,
 \end{equation*}
 \end{pf}
 
-Next, we extend this representation to sums of the (independent) $M_i$.
-Let $Y_i = M_i + M_{\kappa(i)}$.
+Next, we extend this representation to $Y_i := M_i + M_{\kappa(i)}$.
+To this end, define
+\[ \Ssp_r(s) = \big\{s' \in \Ssp_r^L : s'_j \leq s_j,\, j = 1,\dots,D\}, \]
+and observe that $\Ssp_r(s)$ can be decomposed as
+\begin{align}
+\Ssp_r(s) &= \bigcup_{t = 0}^r
+\big\{ s' \in \Ssp_r^L: s'_j \leq s_j,\, j = 1,\dots,D;\; \xi s' = t \big\}
+\nonumber \\
+&= \bigcup_{t = 0}^r
+\big\{ u \in \Ssp_t^{L-1}: u_j \leq s_j, \; j \in J_1(L) \} \times
+\big\{ v \in \Ssp_{r - t}^{L-1} : v_j \leq s_{\kappa(j)},\;
+j \in J_1(L) \} \nonumber \\
+&= \bigcup_{t = 0}^r \Ssp_{t}\big(s_{J_1}\big) \times
+\Ssp_{r - t}\big(s_{J_2}\big) \label{eq:sdecomp}
+\end{align}
+(note that some of the sets in the union may be empty, for example if
+$t > \xi s$).
+Also, write $\mb_i := m_i + m_{\kappa(i)}$ for $i\in J_1$.
 
 \begin{lem}
-Given $i \in \{1,\dots,d\}$, let
-\[ (T, U, V) \in \{0,\dots,m_i + m_{\kappa(i)}\} \times
-\{0,\dots,m_i + m_{\kappa(i)}\}^d \times \{0,\dots,m_i + m_{\kappa(i)}\}^d \]
+Given $i \in J_1$, let
+\[ (T, U, V) \in \{0, \dots, \mb_i\} \times
+\{0, \dots, \mb_i\}^d \times \{0, \dots, \mb_i\}^d \]
 be a random element distributed according to
 \begin{align}
 T &\sim Bin\big(m_i,\; p\big) + Bin\big(m_{\kappa(i)},\; q\big)
 \quad \text{(independent)}\nonumber\\
-U \given T = t &\sim MN\big(t,\; \pv_{L-1}(i)\big) \nonumber\\
-V \given T = t &\sim MN\big(m_i + m_{\kappa(i)} - t,\; \pv_{L-1}(i)\big),
+U \given T = t &\sim MN\big(t,\; \pv_{L-1}(i)\big) \label{eq:mndecompy} \\
+V \given T = t &\sim MN\big(\mb_i - t,\; \pv_{L-1}(i)\big),
 \nonumber
 \end{align}
 where $U$ and $V$ are conditionally independent given $T$.
-Then, for $s \in \Ssp_{m_i + m_{\kappa(i)}}^L$,
+Then, for $s \in \Ssp_{\mb_i}^L$,
 \[ \P[Y_i = s] = \P\big[(T, U, V) = (\xi s,\; s_{J_1},\; s_{J_2})
 \big]. \]
 \end{lem}
 \begin{pf}
-Let $(W_k, S_{k1}, S_{k2})$, $k = i, \kappa(i)$, be independent random elements
+Let $(W_k, S_{k1}, S_{k2})$, $k = i, \kappa(i)$, be independent and
 distributed according to \eqref{eq:mndecomp}.
-Define
-\[ \Ssp_r(s) = \big\{s' \in \Ssp_r^L : s'_j \leq s_j,\, j = 1,\dots,D\}, \]
-and observe that $\Ssp_r(s)$ can be decomposed as
-\begin{align*}
-\Ssp_r(s) &= \bigcup_{t = 0}^r
-\big\{ s' \in \Ssp_r^L: s'_j \leq s_j,\, j = 1,\dots,D;\; \xi s' = t \big\} \\
-&= \bigcup_{t = 0}^r
-\big\{ u \in \Ssp_t^{L-1}: u_j \leq s_j, \; j \in J_1(L) \} \times
-\big\{ v \in \Ssp_{r - t}^{L-1} : v_j \leq s_{\kappa(j)},\;
-j \in J_1(L) \} \\
-&= \bigcup_{t = 0}^r \Ssp_{t}\big(s_{J_1}\big) \times
-\Ssp_{r - t}\big(s_{J_2}\big)
-\end{align*}
-(note that some of the sets in the union may be empty, for example if
-$t > \xi s$).
-Now,
+We have
 \[ \P[Y_i = s] = \sum_{s'} \P[M_i = s'] \P[M_{\kappa(i)} = s - s'], \]
 where the summation runs over
 $\big\{ s' : s' \in \Ssp_{m_i}^L,\; s-s' \in \Ssp_{m_{\kappa(i)}}^L \big\}
 = \Ssp_{m_i}(s)$.
-Hence,
+Hence, indexing over the decomposition \eqref{eq:sdecomp},
 \begin{align*}
 \P[Y_i = s] &= \sum_{t = 0}^{m_i} \sum_{u \in \Ssp_t(s_{J_1})}
 \sum_{v \in \Ssp_{m_i - t}(s_{J_2})}
@@ -517,7 +522,7 @@ $\pv_{L-1}(i)$.
 Thus, given $W_i + W_{\kappa(i)} = \xi s$,
 \[ S_{i1} + S_{\kappa(i)1} \sim MN\big(\xi s,\, \pv_{L-1}(i)\big)
 \qquad\text{and}\qquad
-S_{i2} + S_{\kappa(i)2} \sim MN\big(m_i + m_{\kappa(i)} - \xi s,\,
+S_{i2} + S_{\kappa(i)2} \sim MN\big(\mb_i - \xi s,\,
 \pv_{L-1}(i)\big). \]
 Therefore,
 \begin{align*}
@@ -529,53 +534,132 @@ Therefore,
 \end{align*}
 \end{pf}
 
-\hrulefill
+Finally, we arrive at a representation for the distribution of
+$A(m) = \sum_{J_1} Y_i$.
 
+\begin{prop}
+Let $\mathbf{T} = (T_1,\dots,T_d)$ be a vector of independent random variables
+with distribution
+\[ T_i \sim Bin\big(m_i, p\big) + Bin\big(m_{\kappa(i)}, q\big), \]
+a sum of independent Binomial random variables, for each $i = 1,\dots,d$.
+Then, for $s \in \Ssp_n$,
+%\begin{align*}
+\begin{equation}\label{eq:Adistrec}
+\P[A_L(m) = s] = \sum_{t \in \Ssp_{\xi s}^{L-1}(\mb)}
+%\sum_{\substack{\mathbf{t} : 0 \leq t_j \leq \mb_j \\
+%t_1 + \cdots t_d = \xi s}}
+\P[\mathbf{T} = t]
+\P[A_{L-1}(t) = s_{J_1}] \P[A_{L-1}(\mb - t) = s_{J_2}]
+\end{equation}
+where $\mb = (m_i + m_{\kappa(i)},\, i\in J_1)$, and the summation runs over
+\[ \Ssp_{\xi s}^{L-1}(\mb) =
+\big\{ (t_1,\dots,t_d) : 0 \leq t_j \leq \mb_j,\, j = 1,\dots,d;\;
+t_1 + \cdots + t_d = \xi s \big\}. \]
+%\end{align*}
+%\begin{align*}
+%\P[A_L(m) = s] = \P\big[&T_1 + \cdots + T_d = \xi s, \\
+%&A_{L-1}\big((T_1,\dots,T_d)\big) = s_{J_1}, \\
+%&A_{L-1}\big((\mb_1 - T_1,\dots,\mb_d - T_d)\big) = s_{J_2}\big].
+%\end{align*}
+\end{prop}
+Recall from \eqref{eq:Adistmn} that $A_L(m)$ is equal in distribution to a sum
+of Multinomial random variables, the $i$-th term in the sum assigning $m_i$
+vectors from the original collection across the $D$ categories with
+probabilities $\pv_L(i)$.
 
+In light of \eqref{eq:Adistrec}, this procedure can be organized in the
+following way.
+Recall $D = 2^L$, $d = D/2 = 2^{L-1}$, and the original collection is
+partitioned into $D$ groups of identical vectors with respective sizes
+$(m_1,\dots, m_D)$.
+\begin{enumerate}
+\item
+First, group together the original vectors from partitions $i$ and $d + i$.
 
+\item
+The random variable $T_i$ determines how many of these vectors get
+randomized into categories $1,\dots,d$, with the remaining
+$m_i + m_{d + i} - T_i$ getting assigned to $d + 1,\dots, D$.
 
-%we pursue a similar result for the full distribution of $A(m)$.
-Let $M_i \sim MN(m_i,\; \pv_L(i))$ and $s\in \Ssp_n$, and write
-.
-For $a \in \{0,\dots,n\}^k$, define
-\begin{equation*}
-\Ssp(s; a) := \big\{ (s'_1,\dots,s'_k) :
-s'_j \in \Ssp_{a_j}, 1 \leq j \leq k;\ s'_1 + \cdots + s'_k \leq s \big\},
-\end{equation*}
-a collection of multinomial outcomes from various sets of trials which
-constitute a subset of the outcome $s$.
+\item
+Given $T_1,\dots,T_d$, the random arrangement of all of these vectors across
+categories $1,\dots,d$ is carried out using the procedure $A_{L-1}$.
+
+\item
+Finally, the arrangement of the remaining vectors into categories
+$d + 1,\dots,D$ is done independently, also via $A_{L-1}$.
+\end{enumerate}
+
+\begin{pf}
+Let $(T_i, U_i, V_i)$, $i = 1,\dots,d$ be independent and distributed according
+to \eqref{eq:mndecompy}.
 Observe that
-%for $s'\in \Ssp(s; a)$,
-%\[ s'_1 \in \Ssp(s, a_1),\qquad s'_2 \in \Ssp(s - s'_1, a_2), \quad\dots,\quad
-%s'_k \in \Ssp(s - (s'_1 + \cdots + s'_{k-1}), a_k). \]
-\[ \Ssp(s; a) = \big\{(s'_1,\dots, s'_k) : (s'_1,\dots,s'_{k-1}) \in 
-\Ssp(s; (a_1,\dots,a_{k-1})),\ s'_k \in \Ssp(s-(s'_1 + \cdots + s'_{k-1}); a_k)
-\big\}. \]
-Let $d = 2^{L-1}$, and take
-$a = \big(m_{i} + m_{\kappa(i)}, i = 1,\dots,d\big)$.
-Then, conditioning on the $Y_i$, we have
+\[ \P[A(m) = s] = \P[Y_1 + \cdots + Y_d = s] =
+\sum_{\sv' \in \Tsp} \P[Y_1 = s'_1] \cdots \P[Y_d = s'_d], \]
+where
+\[ \Tsp = \big\{ (s'_1,\dots,s'_d) : s'_j \in \Ssp_{\mb_j}^L,\,
+j = 1,\dots,d;\; s'_1 + \cdots + s'_d = s \big\}. \]
+Writing $\hat{s}_1 := s$ and $\hat{s}_j := s - (s'_1 + \cdots + s'_{j-1})$,
+we can express $\Tsp$ as
 \begin{align*}
-\P&[M_1 + \cdots + M_{2^L} = s] =
-\sum_{s' \in \Ssp(s; a)} \P[Y_1 = s'_1]\cdots \P[Y_d = s'_d] \\
-&= \sum_{(s'_1,\dots,s'_{d-2}) \in \Ssp(s; (a_1,\dots,a_{d-2}))}
-\P[Y_1 = s'_1]\cdots \P[Y_{d-2} = s'_{d-2}] \\
-&\hspace{8em}\cdot
-\sum_{s'_{d-1} \in \Ssp(\tilde{s}; a_{d-1})}
-\P[Y_{d-1} = s'_{d-1}] \P[Y_d = \tilde{s} - s'_{d-1}],
+\Tsp &= \big\{ (s'_1,\dots,s'_d) :
+%s'_j \in \Ssp_{\mb_j}^L(\hat{s}_j),\, j = 1,\dots,d;\;
+s'_1 \in \Ssp_{\mb_1}^L(\hat{s}_1),\, \dots,\,
+s'_{d-1} \in \Ssp_{\mb_{d-1}}^L(\hat{s}_{d-1}),\,
+s'_d = \hat{s}_d \big\} \\
+&= \Big\{ (s'_1,\dots,s'_d) : s'_j \in \textstyle\bigcup_{t_j = 0}^{\mb_j}
+\Ssp_{t_j}^{L-1}\big((\hat{s}_j)_{J_1}\big) \times
+\Ssp_{\mb_j - t_j}^{L-1}\big((\hat{s}_j)_{J_2}\big),\, j= 1,\dots,d-1;\;
+s'_d = \hat{s}_d \Big\} \\
+&= \bigcup_{t_1 = 0}^{\mb_1} \cdots \bigcup_{t_{d-1} = 0}^{\mb_{d-1}}
+\Big\{ \big((u_1,v_1),\dots,(u_d,v_d)\big) :
+u_1 \in \Ssp_{t_1}^{L-1}\big((\hat{s}_1)_{J_1}\big),\, \dots,\,
+u_{d-1} \in \Ssp_{t_{d-1}}^{L-1}\big((\hat{s}_{d-1})_{J_1}\big); \\
+&\hspace{10em}
+v_1 \in \Ssp_{\mb_1 - t_1}^{L-1}\big((\hat{s}_1)_{J_2}\big),\, \dots,\,
+v_{d-1} \in \Ssp_{\mb_{d-1} - t_{d-1}}^{L-1}\big((\hat{s}_{d-1})_{J_2}\big);\,
+(u_d,v_d) = \hat{s}_d \Big\} \\
+&= \bigcup_{t_1 = 0}^{\mb_1} \cdots \bigcup_{t_{d-1} = 0}^{\mb_{d-1}}
+\big\{ (u_1,\dots,u_d) : u_j \in \Ssp_{t_j}^{L-1},\, j = 1,\dots,d;\;
+u_1 + \cdots + u_d = s_{J_1} \big\} \times \\
+&\hspace{12em}\big\{ (v_1,\dots,v_d) : v_j \in \Ssp_{\mb_j - t_j}^{L-1},\,
+j = 1,\dots,d;\; v_1 + \cdots + v_d = s_{J_2} \big\} \\
+&= \bigcup_{\mathbf{t}} \Tsp_1(\mathbf{t}) \times \Tsp_2(\mathbf{t}),
 \end{align*}
-where $\tilde{s} = s - (s'_1 + \cdots + s'_{d-2})$.
+with the union taken over
+\[ \big\{\mathbf{t} : t_j \in \{0,\dots,\mb_j\},\, j = 1,\dots,d-1;\;
+t_d = \xi_s - (t_1 + \cdots + t_{d-1}) \geq 0 \big\} = \Ssp_{\xi s}^{L-1}(\mb),
+\]
+and the second equality following from \eqref{eq:sdecomp}.
+Consequently,
+\begin{align*}
+\P&[A(m) = s] = \sum_{\mathbf{t}\in\Ssp_{\xi s}^{L-1}(\mb)}
+\sum_{\mathbf{u} \in \Tsp_1(\mathbf{t})}
+\sum_{\mathbf{v} \in \Tsp_2(\mathbf{t})} \prod_{i = 1}^d
+\P[T_i = t_i] \P[U_i = u_i \given T_i = t_i]
+\P[V_i = v_i \given T_i = t_i] \\
+&= \sum_{\mathbf{t}\in\Ssp_{\xi s}^{L-1}(\mb)} \prod_{i = 1}^d \P[T_i = t_i]
+\cdot \bigg\{ \sum_{\mathbf{u} \in \Tsp_1(\mathbf{t})} \prod_{i = 1}^d
+\P[U_i = u_i \given T_i = t_i] \bigg\} \cdot
+\bigg\{ \sum_{\mathbf{v} \in \Tsp_2(\mathbf{t})} \prod_{i = 1}^d
+\P[V_i = v_i \given T_i = t_i] \bigg\}\\
+&= \sum_{\mathbf{t}\in\Ssp_{\xi s}^{L-1}(\mb)} \P[\mathbf{T} = \mathbf{t}]
+\cdot \P[U_1 + \cdots + U_d = s_{J_1} \given \mathbf{T} = \mathbf{t}] \cdot
+\P[V_1 + \cdots + V_d = s_{J_2} \given \mathbf{T} = \mathbf{t}].
+\end{align*}
+Finally, given $\mathbf{T} = \mathbf{t}$,
+\[ U_1 + \cdots + U_d \sim
+MN(t_1,\, \pv_{L-1}(1)) + \cdots + MN(t_d,\, \pv_{L-1}(d)) \sim
+A_{L-1}(\mathbf{t}) \]
+and
+\[ V_1 + \cdots + V_d \sim
+MN(\mb_1 - t_1,\, \pv_{L-1}(1)) + \cdots + MN(\mb_d - t_d,\, \pv_{L-1}(d)) \sim
+A_{L-1}(\mb - \mathbf{t}) \]
+combining \eqref{eq:mndecompy} with \eqref{eq:Adistmn}.
+\end{pf}
 
-\hrulefill
 
-Note that $(Y_1,\dots,Y_{2^{L-1}})$ takes values in
-Let $\tilde{s}_0 = (s'_1,\dots,s'_{2^{L-1}-2})$,
-$\tilde{s} = s'_{2^{L-1} - 1}$, and $\tilde{t} = \sum (\tilde{s}_0)_j$.
-The previous sum becomes
-
-\hrulefill
-
-
-\subsection{Next steps}
+\section{Next steps}
 
 \begin{itemize}
 \item
