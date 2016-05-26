@@ -290,10 +290,11 @@ We call $R(\xv)$ the \textbf{synthetic} collection obtained from the
 \textbf{original} collection $\xv$.
 Note that $R(\xv)$ is itself a random element of $\Dsp^n$, with distribution
 given by
-\[ \P[R(\xv) = \yv] = \prod_{i=1}^n \P[R(x_i) = y_i] =
+\begin{equation} \label{eq:Rdist}
+\P[R(\xv) = \yv] = \prod_{i=1}^n \P[R(x_i) = y_i] =
 \prod_{i=1}^n p^{L-\delta(x_i,y_i)}q^{\delta(x_i,y_i)} =
 p^{nL} \bigg(\frac{q}{p}\bigg)^{\sum_{i=1}^n \delta(x_i, y_i)}.
-\]
+\end{equation}
 Thus, $\P[R(\xv) = \yv] > 0$ for any $\yv\in\Dsp^n$, \ie any synthetic
 collection of size $n$ has a non-zero probability of being generated from any
 given original collection of the same size.
@@ -304,7 +305,9 @@ be defined as follows.
 \begin{defn}
 The randomized query $\map{A}{\Dsp^n}{\Ssp_n}$ maps collections of bit vectors
 to occurrence counts according to
-\[ A = \Phi \circ R. \]
+\begin{equation} \label{eq:Adef}
+A = \Phi \circ R.
+\end{equation}
 \end{defn}
 
 \subsection{The distribution of $A$}
@@ -697,129 +700,158 @@ Direction of maximal increase is along the line connecting $\mu_{\mv} =
 Think of the privacy range in terms of a neighbourhood of $\mu_{\mv}$.
 \end{itemize}
 
-\hrulefill
-
-\subsection{Old stuff}
 
 
-(TODO: maybe this is not useful at this point)
-Writing $m(\ell) := \sum_{i=1}^n I(\delta(x_i, y_i) = \ell)$ for
-$\ell = 0,\dots,L$, the probability can be expressed as
-\[ \P[R(\xv) = \yv] = \prod_{\ell = 0}^L \big(p^{L-\ell}q^\ell\big)^{m(\ell)}.
-\]
-Hence, the distribution is determined by the magnitudes of the pairwise
-distances, and does not depend on the ordering within the collections.
-
-\begin{align}
-&= \sum_{\yv:\Phi(\yv) = s} \prod_{i=1}^n p^{L - \delta(x_i,y_i)}\cdot
-q^{\delta(x_i,y_i)}
-= \sum_{\yv:\Phi(\yv) = s} p^{nL - \delta(\xv,\yv)}\cdot
-q^{\delta(\xv,\yv)}  \nonumber \\
-&= p^{nL}\sum_{\yv:\Phi(\yv) = s} \left(\frac{q}{p}\right)^{\delta(\xv,\yv)}
-\end{align}
-
-
-where $\delta(\xv,\yv) = \sum_{i=1}^n \delta(x_i,y_i)$ can be considered the distance between collections $\xv$ and $\yv$.
-Note that the support of $A$ is the support of a multinomial random variable with $n$ trials: \[\Ssp_n := \bigg\{s \in \Ssp : \sum_j s_j = n \bigg\},\]
-
-Define the partial aggregation function
-$\map{\Psi_m}{\Dsp^n}{\Ssp_{m_1} \times \cdots \times \Ssp_{m_{2^L}}}$ as
-\[ \Psi_m(\yv)= \Big(\Phi\big((y_1, \dots, y_{m_1})\big),
-\Phi\big((y_{m_1 + 1}, \dots, y_{m_1 + m_2})\big),\dots,
-\Phi\big((y_{n - m_{2^L} + 1}, \dots, y_{n})\big)\Big), \]
-and observe that
-\[ \Phi(\yv) = \big(\Psi_m(\yv)\big)_1 + \cdots + \big(\Psi_m(\yv)\big)_{2^L}.
-\]
-Thus, letting
-\[ \Ssp_m(s) := \big\{ (u_1,\dots,u_{2^L}) : u_j \in \Ssp_{m_j},
-u_1 + \dots + u_{2^L} = s \big\} \cont
-\Ssp_{m_1} \times \cdots \times \Ssp_{m_{2^L}}, \]
-we can write
-\[ [s] = \bigcup_{\mathbf{u} \in \Ssp_m(s)}
-\big\{ \yv : \Psi_m(\yv) = \mathbf{u} \big\} =
-\bigcup_{\mathbf{u} \in \Ssp_m(s)} \prod_{j = 1}^{2^L}
-\big\{\yv_j \in \Dsp^{m_j}: \Phi(\yv_j) = u_j \big\},
-\]
-where the product of sets denotes the Cartesian product.
-Hence,
-\begin{align*}
-\P[A(m) = s] &=
-\sum_{\mathbf{u} \in \Ssp_m(s)}
-\sum_{\substack{\yv_1 \in \Dsp^{m_1}\\ \Phi(\yv_1) = u_1}}\cdots
-\sum_{\substack{\yv_{2^L} \in \Dsp^{m_{2^L}}\\ \Phi(\yv_{2^L}) = u_{2^L}}}
-\prod_{j = 1}^{2^L} \P\big[R\big((v_j,\dots,v_j)\big) = \yv_j\big] \\
-&= \sum_{\mathbf{u} \in \Ssp_m(s)}\prod_{j = 1}^{2^L} 
-\sum_{\substack{\yv_j \in \Dsp^{m_j}\\ \Phi(\yv_j) = u_j}}
-\P\big[R\big((v_j,\dots,v_j)\big) = \yv_j\big] \\
-&= \sum_{\mathbf{u} \in \Ssp_m(s)}\prod_{j = 1}^{2^L} 
-\P[A(m^{(j)}) = u_j] \\
-&= \P[M_1 + \cdots + M_{2^L} = s],
-\end{align*}
-where $M_j \sim MN(m_j, \pv_j)$ are independent Multinmoial random variables,
-with $\pv_j$ denoting the $j$-th row in the transition matrix
-$\Pm^L$, \ie $\pv_j = (p(j,1),\dots,p(j,2^L))$, and $m^{(j)}$ represents an
-original collection of size $m_j$ consisting only of $v_j$.
 
 
 \section{The privacy ratio}
 
-We will study the differential privacy of the query $A$ in terms of the
-\textbf{privacy ratio}
-\[ \pi(s;\xv,\xv') := \frac{\P[A(\xv') = s]}{\P[A(\xv) = s]} \]
-for two collections $\xv,\xv'\in\Dsp^n$ differing in
-one row and $s \in\Ssp_n$.
-Note that $\pi$ is well-defined, since any outcome in $\Ssp_n$ occurs with
-non-zero probability starting from any collection $\xv$.
+By \eqref{eq:dpcnt}, the randomized query $A$ will be $\epsilon$-differentially
+private if
+\begin{equation} \label{eq:dpratio}
+\frac{\P[A(\xv') = s]}{\P[A(\xv) = s]} \leq \exp(\epsilon)
+\end{equation}
+over all $\xv, \xv'$ differing in one row, and all $s\in \Ssp_n$, and we
+find that this is indeed the case.
 
-Differential privacy is typically concerned with bounding the privacy ratio
-over all original and synthetic collections.
-In particular, by Proposition \ref{prop:dpcnt}, $A$ is
-$\epsilon$-differentially private if $\pi$ is bounded everywhere on $\Ssp_n$,
-with
-\[ \epsilon = \max_{\substack{s \in\Ssp_n\\ \xv,\xv' \in \Dsp^n}}
-\log\pi(s;\xv,\xv'). \]
-We take this further by studying the behaviour of the privacy ratio and how it
-varies across the support of $A$ and across collections.
-This will allow us to understand in which situations it is at or near its
-bound.
+\begin{prop}
+The randomized query defined as in \eqref{eq:Adef} is differentially private
+with $\epsilon = L \log(p/q)$.
+\end{prop}
+\begin{pf}
+TODO
+\end{pf}
+
+Note that the bound on the probability ratio in \eqref{eq:dpratio} increases
+exponentially with the dimensionality of the collected data, quickly exceeding
+the range of reasonable values recommended in the literature.
+
+TODO: give citation, quote reasonable range, give example of number of
+dimensions
+
+If this method is to be used to data consisting of multiple variables, each
+encoded using multiple bits, then either the differential privacy guarantee is
+weak enough as to provide no meaningful privacy protection, or the
+randomization noise required is so high that the collected data are not useful.
+
+TODO: give examples
+
+The majority of literature on differential privacy is concerned with
+establishing the uniform bound \eqref{eq:dpdef} over all original and
+synthetic collections, and reporting the value of $\epsilon$.
+This is typically done by selecting collections $\xv$, $\xv'$, and $s$ that
+maximize the ratio, and evaluating it.
+
+However, we find that considerable insight can be gained by studying the ratio
+in \eqref{eq:dpratio} itself, and how it varies over the space of possible
+collections.
+In particular, we arrive at the following conclusions:
+\begin{itemize}
+\item
+The maximal value of the ratio occurs in a ``corner'' of the space, involving
+synthetic collections that are highly unlikely to be observed, regardless of
+the original collection.
+
+\item
+If we restrict the space of synthetic collections $s\in \Ssp_n$ for which we
+require \eqref{eq:dpratio} to hold to all but a set of $s$ which are very
+unlikely to be observed, regardless of the original collections $\xv$ and
+$\xv'$, then we arrive at a significant reduction in the differential privacy
+bound $\epsilon$.
+
+\item
+In turn, as $\epsilon$ is a function of the randomization noise $q$, this
+connects the choice of noise level to the ``coverage confidence'' of the
+differential privacy property, allowing us to achieve a balance between privacy
+and utility.
+
+\item
+Furthermore, while the overall maximum ratio value is attained for such
+collections that it does not depend on the population size, the $\epsilon$
+selected by our probabilistic method does, meaning that a larger population
+provides greater protection, all else remaining the same.
+This encapsulates the notion that an individual should be better hidden within
+a larger population, at least in our setting of fixed-length bit vector data
+with a finite number of possible values.
+\end{itemize}
+
+Recall that we can represent collections in $\Dsp^n$ by vectors of counts
+$m\in\Ssp_n$, where $m_i$ gives the number of vectors in the collection $\xv$
+equal to $v_i$.
+Denote the standard basis vectors in $\R^D$ by
+$e_j = (0,\dots, 0, 1, 0,\dots, 0)$, and write $e_{ij} = e_j - e_i$.
+We call the vector $e_{ij}$ a \textbf{step from $i$ to $j$}; observe that
+adding a step from $i$ to $j$ to the counts vector $m$ has the effect of
+shifting one count from bucket $i$ to bucket $j$.
+
+Now, given original collections $\xv$ and $\xv'$, let $m$ and $m'$ be
+corresponding count vectors such that $\xv \equiv_{\Phi} \vv(m)$ and $\xv'
+\equiv_{\Phi} \vv(m')$.
+If $\xv$ and $\xv'$ differ in one row, then $x_k \neq x'_k$ for some $k$, and
+$x_\ell = x'_\ell$ for $\ell \neq j$.
+Suppose $x_k = v_i$ and $x'_k = v_j$, \ie the modification $\xv'$ has swapped
+a $v_i$ for a $v_j$.
+Then $m'_i = m_i - 1$ and $m'_j = m_j + 1$; \ie $m' = m + e_{ij}$.
+
+\begin{defn}
+Given $i\neq j \in \{1,\dots,D\}$, the \textbf{privacy ratio} from $i$ to $j$
+is given by
+\begin{equation} \label{eq:privratiodef}
+\pi(s, m; i, j) = \frac{\P[A(m + e_j) = s]}{\P[A(m + e_i) = s]}
+\end{equation}
+for $s \in \Ssp_n$ and $m\in\Ssp_{n-1}$.
+\end{defn}
+
+Note that $m$ in \eqref{eq:privratiodef} represents the portion of the original
+collection that is not modified, and lives in a different space from $s$.
+
+Conditioning on the outcome of randomizing the modified original record, we
+can express the privacy ratio as
+\[ \pi(s, m; i, j) =
+\frac{\displaystyle\sum_{k = 1}^D p(j, k) \P[A(m) = s_{-k}]}
+{\displaystyle\sum_{k = 1}^D p(i, k) \P[A(m) = s_{-k}]},
+\]
+where $s_{-k} := s - e_k$.
+We understand that $\P[A(m) = s_{-k}] = 0$ if $s_k = 0$.
+
+In general, we can write
+\[ \P[A(m + e_\ell) = s] = \sum_{k \in J_1} p(\ell, k) \P[A(m) = s_{-k}] +
+\sum_{k \in J_2} p(\ell, k) \P[A(m) = s_{-k}]. \]
+Using the representation \eqref{eq:Adistrec}, the first term becomes
+\begin{align*}
+\sum_{k \in J_1} &p(\ell, k) \P[A(m) = s_{-k}] \\
+&= \sum_{k \in J_1} p_L(\ell, k) \sum_{t \in \Ssp_{\xi s - 1}(\mb)}
+\P[T = t] \P[A_{L-1}(t) = (s_{-k})_{J_1}] \P[A_{L-1}(\mb - t) = s_{J_2}] \\
+&= p^{I(\ell \in J_1)}q^{I(\ell\in J_2)} \sum_{t \in \Ssp_{\xi s - 1}(\mb)}
+\P[T = t] \bigg\{ \sum_{k \in J_1} p_{L-1}(\chi(\ell), k)
+\P[A_{L-1}(t) = (s_{-k})_{J_1}] \bigg\} \\
+&\hspace{12em} \cdot \P[A_{L-1}(\mb - t) = s_{J_2}] \\
+&= p^{I(\ell \in J_1)}q^{I(\ell\in J_2)} \sum_{t \in \Ssp_{\xi s - 1}(\mb)}
+\P[T = t] \P[A_{L-1}(t + e_{\chi(\ell)}) = s_{J_1}]
+\P[A_{L-1}(\mb - t) = s_{J_2}],
+\end{align*}
+and similarly, for the second term,
+\begin{align*}
+\sum_{k \in J_2} &p(\ell, k) \P[A(m) = s_{-k}] \\
+&= \sum_{k \in J_2} p_L(\ell, k) \sum_{t \in \Ssp_{\xi s}(\mb)}
+\P[T = t] \P[A_{L-1}(t) = s_{J_1}] \P[A_{L-1}(\mb - t) = (s_{-k})_{J_2}] \\
+&= q^{I(\ell \in J_1)}p^{I(\ell\in J_2)} \sum_{t \in \Ssp_{\xi s}(\mb)}
+\P[T = t] \P[A_{L-1}(t) = s_{J_1}] \\
+&\hspace{12em} \cdot \bigg\{ \sum_{k \in J_1} p_{L-1}(\chi(\ell), k)
+\P[A_{L-1}(\mb - t) = (s_{-\kappa(k)})_{J_2}] \bigg\} \\
+&= q^{I(\ell \in J_1)}p^{I(\ell\in J_2)} \sum_{t \in \Ssp_{\xi s}(\mb)}
+\P[T = t] \P[A_{L-1}(t) = s_{J_1}]
+\P[A_{L-1}(\mb + e_{\chi(\ell)} - t) = s_{J_2}]
+\end{align*}
+
 
 \hrulefill
 
-Without loss of generality (in light of \eqref{eq:Adist}), assume that the
-element differing between $\xv$ and $\xv'$ is the first one, and denote $\xvt =
-(x_2,\dots,x_n)$.  Then $\xv = (x,\xvt)$ and $\xv' = (x', \xvt)$.  Also write
-$\one_j = (0,\dots,0,1,0,\dots,0)$, the vector with a $1$ in the $j$-th
-position and the rest $0$, and let $\sv_{-j} := \sv - \one_j$.
-%For convenience, introduce the notation $\sm_j = (s_1,\dots,s_{j-1},s_j -
-%1,s_{j+1},\dots,s_{2^L})$.
-
-Conditioning on the value of the modified record, the privacy ratio becomes
-\begin{equation} \label{eq:prcond}
-\pi(\sv;\xvt,x,x') = \frac{\displaystyle\sum_{j=1}^{2^L}
-\P[A(x') = \one_j] \P[A(\xvt) = \sv_{-i}]}
-{\displaystyle\sum_{j=1}^{2^L}
-\P[A(x) = \one_j] \P[A(\xvt) = \sv_{-i}]}
-= \frac{\displaystyle\sum_{j=1}^{2^L}
-\P[R(x') = d_j] \P[A(\xvt) = \sv_{-i}]}
-{\displaystyle\sum_{j=1}^{2^L}
-\P[R(x) = d_j] \P[A(\xvt) = \sv_{-i}]},
-\end{equation}
-where we understand $\P[A(\xvt) = \sv_{-i}] = 0$ if $\sv_i = 0$.
-For convenience, we introduce the notation $p_j := \P[R(x) = d_j]$,
-$p'_j := \P[R(x') = d_j]$, and $P(\sv, \xv) := \P[A(\xv) = \sv]$, and express
-the privacy ratio as
-\[ \pi(\sv;\xv,x,x') = \frac{\displaystyle\sum_{j=1}^{2^L}
-p'_j P(\sv_{-i},\xv)}{\displaystyle\sum_{j=1}^{2^L} p_j P(\sv_{-i},\xv)}, \]
-dropping the tilde so that $\xv$ now denotes a collection of size $n-1$.
-
-Denote $p_{ij} := \P[R(d_i) = d_j]$ and $P_n(\sv,\mv) := \P[A_n(\mv) = \sv]$.
 
 \subsection{The space $\Ssp_n$}
 
 Recall that we consider the randomized query $A$ a mapping from the simplex
 subset $\Ssp_n$ to itself.
-Denote the standard basis vectors in $\R^{2^L}$ by
-$\ev_j = (0,\dots, 0, 1, 0,\dots, 0)$.
 
 Viewing a point $\sv = (s_1,\dots,s_{2^L}) \in\Ssp_n$ as a vector of counts,
 we consider as its ``neighbours'' those points $\sv'$ for which one of the
@@ -1951,6 +1983,64 @@ for all $x,x' \in D$ and $s \in \boldsymbol{S}_0$.
 This is the formulation used in the RAPPOR paper that applies to differences between individual records rather than collections differing on a single element.
 
 
+\hrulefill
+
+Writing $m(\ell) := \sum_{i=1}^n I(\delta(x_i, y_i) = \ell)$ for
+$\ell = 0,\dots,L$, the probability can be expressed as
+\[ \P[R(\xv) = \yv] = \prod_{\ell = 0}^L \big(p^{L-\ell}q^\ell\big)^{m(\ell)}.
+\]
+Hence, the distribution is determined by the magnitudes of the pairwise
+distances, and does not depend on the ordering within the collections.
+
+\begin{align}
+&= \sum_{\yv:\Phi(\yv) = s} \prod_{i=1}^n p^{L - \delta(x_i,y_i)}\cdot
+q^{\delta(x_i,y_i)}
+= \sum_{\yv:\Phi(\yv) = s} p^{nL - \delta(\xv,\yv)}\cdot
+q^{\delta(\xv,\yv)}  \nonumber \\
+&= p^{nL}\sum_{\yv:\Phi(\yv) = s} \left(\frac{q}{p}\right)^{\delta(\xv,\yv)}
+\end{align}
+
+
+where $\delta(\xv,\yv) = \sum_{i=1}^n \delta(x_i,y_i)$ can be considered the distance between collections $\xv$ and $\yv$.
+Note that the support of $A$ is the support of a multinomial random variable with $n$ trials: \[\Ssp_n := \bigg\{s \in \Ssp : \sum_j s_j = n \bigg\},\]
+
+Define the partial aggregation function
+$\map{\Psi_m}{\Dsp^n}{\Ssp_{m_1} \times \cdots \times \Ssp_{m_{2^L}}}$ as
+\[ \Psi_m(\yv)= \Big(\Phi\big((y_1, \dots, y_{m_1})\big),
+\Phi\big((y_{m_1 + 1}, \dots, y_{m_1 + m_2})\big),\dots,
+\Phi\big((y_{n - m_{2^L} + 1}, \dots, y_{n})\big)\Big), \]
+and observe that
+\[ \Phi(\yv) = \big(\Psi_m(\yv)\big)_1 + \cdots + \big(\Psi_m(\yv)\big)_{2^L}.
+\]
+Thus, letting
+\[ \Ssp_m(s) := \big\{ (u_1,\dots,u_{2^L}) : u_j \in \Ssp_{m_j},
+u_1 + \dots + u_{2^L} = s \big\} \cont
+\Ssp_{m_1} \times \cdots \times \Ssp_{m_{2^L}}, \]
+we can write
+\[ [s] = \bigcup_{\mathbf{u} \in \Ssp_m(s)}
+\big\{ \yv : \Psi_m(\yv) = \mathbf{u} \big\} =
+\bigcup_{\mathbf{u} \in \Ssp_m(s)} \prod_{j = 1}^{2^L}
+\big\{\yv_j \in \Dsp^{m_j}: \Phi(\yv_j) = u_j \big\},
+\]
+where the product of sets denotes the Cartesian product.
+Hence,
+\begin{align*}
+\P[A(m) = s] &=
+\sum_{\mathbf{u} \in \Ssp_m(s)}
+\sum_{\substack{\yv_1 \in \Dsp^{m_1}\\ \Phi(\yv_1) = u_1}}\cdots
+\sum_{\substack{\yv_{2^L} \in \Dsp^{m_{2^L}}\\ \Phi(\yv_{2^L}) = u_{2^L}}}
+\prod_{j = 1}^{2^L} \P\big[R\big((v_j,\dots,v_j)\big) = \yv_j\big] \\
+&= \sum_{\mathbf{u} \in \Ssp_m(s)}\prod_{j = 1}^{2^L} 
+\sum_{\substack{\yv_j \in \Dsp^{m_j}\\ \Phi(\yv_j) = u_j}}
+\P\big[R\big((v_j,\dots,v_j)\big) = \yv_j\big] \\
+&= \sum_{\mathbf{u} \in \Ssp_m(s)}\prod_{j = 1}^{2^L} 
+\P[A(m^{(j)}) = u_j] \\
+&= \P[M_1 + \cdots + M_{2^L} = s],
+\end{align*}
+where $M_j \sim MN(m_j, \pv_j)$ are independent Multinmoial random variables,
+with $\pv_j$ denoting the $j$-th row in the transition matrix
+$\Pm^L$, \ie $\pv_j = (p(j,1),\dots,p(j,2^L))$, and $m^{(j)}$ represents an
+original collection of size $m_j$ consisting only of $v_j$.
 
 
 \end{document}
