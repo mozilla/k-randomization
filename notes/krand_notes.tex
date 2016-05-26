@@ -763,22 +763,35 @@ original collection of size $m_j$ consisting only of $v_j$.
 
 \section{The privacy ratio}
 
-We will study the differential privacy of the query $A$ in terms of the \textbf{privacy ratio}
-\[ \pi(\sv;\xv,\xv') := \frac{\P[A(\xv') = \sv]}{\P[A(\xv) = \sv]} \]
-for two collections $\xv,\xv'\in\Dsp^n$ differing in one row and $\sv \in\Ssp_n$.
-Note that $\pi$ is well-defined, since any outcome in $\Ssp_n$ occurs with non-zero probability starting from any collection $\xv$.
+We will study the differential privacy of the query $A$ in terms of the
+\textbf{privacy ratio}
+\[ \pi(s;\xv,\xv') := \frac{\P[A(\xv') = s]}{\P[A(\xv) = s]} \]
+for two collections $\xv,\xv'\in\Dsp^n$ differing in
+one row and $s \in\Ssp_n$.
+Note that $\pi$ is well-defined, since any outcome in $\Ssp_n$ occurs with
+non-zero probability starting from any collection $\xv$.
 
-Differential privacy is typically concerned with bounding the privacy ratio over all original and synthetic collections.
-In particular, by Proposition \ref{prop:dpcnt}, $A$ is $\epsilon$-differentially private if $\pi$ is bounded everywhere on $\Ssp_n$,
+Differential privacy is typically concerned with bounding the privacy ratio
+over all original and synthetic collections.
+In particular, by Proposition \ref{prop:dpcnt}, $A$ is
+$\epsilon$-differentially private if $\pi$ is bounded everywhere on $\Ssp_n$,
 with
-\[ \epsilon = \max_{\substack{\sv\in\Ssp_n\\ \xv,\xv' \in \Dsp^n}} \log\pi(\sv;\xv,\xv'). \]
-We take this further by studying the behaviour of the privacy ratio and how it varies across the support of $A$ and across collections. This will allow us to understand in which situations it is at or near its bound.
+\[ \epsilon = \max_{\substack{s \in\Ssp_n\\ \xv,\xv' \in \Dsp^n}}
+\log\pi(s;\xv,\xv'). \]
+We take this further by studying the behaviour of the privacy ratio and how it
+varies across the support of $A$ and across collections.
+This will allow us to understand in which situations it is at or near its
+bound.
 
-Without loss of generality (in light of \eqref{eq:Adist}), assume that the element differing between $\xv$ and $\xv'$ is the first one, and denote $\xvt = (x_2,\dots,x_n)$.
-Then $\xv = (x,\xvt)$ and $\xv' = (x', \xvt)$.
-Also write $\one_j = (0,\dots,0,1,0,\dots,0)$, the vector with a $1$ in the $j$-th position and the rest $0$, and let $\sv_{-j} := \sv - \one_j$.
-%For convenience, introduce the notation
-%$\sm_j = (s_1,\dots,s_{j-1},s_j - 1,s_{j+1},\dots,s_{2^L})$.
+\hrulefill
+
+Without loss of generality (in light of \eqref{eq:Adist}), assume that the
+element differing between $\xv$ and $\xv'$ is the first one, and denote $\xvt =
+(x_2,\dots,x_n)$.  Then $\xv = (x,\xvt)$ and $\xv' = (x', \xvt)$.  Also write
+$\one_j = (0,\dots,0,1,0,\dots,0)$, the vector with a $1$ in the $j$-th
+position and the rest $0$, and let $\sv_{-j} := \sv - \one_j$.
+%For convenience, introduce the notation $\sm_j = (s_1,\dots,s_{j-1},s_j -
+%1,s_{j+1},\dots,s_{2^L})$.
 
 Conditioning on the value of the modified record, the privacy ratio becomes
 \begin{equation} \label{eq:prcond}
