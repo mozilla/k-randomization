@@ -1,0 +1,169 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 
+%% Package to support notes and papers related to Differential Privacy
+%% projects at Mozilla.
+%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mozdp}[2015/10/19 Custom commands and formatting]
+
+
+%% Better math styling.
+\RequirePackage{amsmath}
+\RequirePackage{amsthm}
+\RequirePackage{amssymb}
+
+%% Change paragraph breaks to vertical gap with no indentation
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2ex}
+
+%% Create hyperlinks when compiled to PDF.
+\RequirePackage{ifpdf}
+\ifpdf
+    \RequirePackage{hyperref}
+\fi
+
+%% Number things according to sections.
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Text commands and shortcuts
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\ie}{i.e.,\ }
+\newcommand{\eg}{e.g.,\ }
+\newcommand{\cf}{cf.\ }
+
+
+%% Page references
+% \newcommand{\p}{p.~}
+% \newcommand{\refp}[1]{\ref{#1} (\p \pageref{#1})}
+% \newcommand{\eqrefp}[1]{\eqref{#1} (\p \pageref{#1})}
+% \newcommand{\refpc}[1]{\ref{#1}, \p \pageref{#1}}
+% \newcommand{\eqrefpc}[1]{\eqref{#1}, \p \pageref{#1}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Math commands and shortcuts
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% Math mode text.
+\newcommand{\st}{\text{\ s.\, t.\ }}
+\newcommand{\mand}{\qquad\text{and}\qquad}
+
+%% Given symbol.
+\newcommand{\biggiven}{\; \bigg|\,}
+\newcommand{\biggergiven}{\; \Bigg|\;}
+\newcommand{\given}{\,|\,}
+\newcommand{\bigggiven}{\; \right|\left.\,}
+\newcommand{\bgiven}{\, \big| \,}
+\newcommand{\Bgiven}{\, \Big| \,}
+%% Alternative empty set. 
+\renewcommand{\emptyset}{\varnothing}
+
+%% Align environment: 
+% \def\ba #1\ea{\begin{align*}#1\end{align*}}
+%% Multline environment: 
+% \def\bml #1\eml{\begin{multline*}#1\end{multline*}}
+
+
+%% Operators: 
+%% Set complement.
+\newcommand{\comp}[1]{#1^{\mathrm{c}}}
+%% Inverse.
+\newcommand{\inv}[1]{#1^{-1}}
+%% Generalized inverse.
+\newcommand{\ginv}[1]{#1^{\leftarrow}}
+%% Mapping.
+\newcommand{\map}[3]{#1:#2\rightarrow #3}
+%% Indicator function.
+\DeclareMathOperator{\indfn}{\mathbf{1}}
+%% Indicator function macro - puts argument in braces as subscript to bold 1
+%% Optional argument is sizing command for braces, eg. [\big]
+\newcommand{\ind}[2][]{\indfn_{#1\{#2#1\}}}
+%% Absolute value bars: fixed size and variable size
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+\newcommand{\abss}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\norms}[1]{\left\lVert #1 \right\rVert}
+%% Sign function
+\DeclareMathOperator{\sgn}{sgn}
+%% Probability operators
+\let\P\relax
+\DeclareMathOperator{\P}{\mathsf{P}} % underlying prob measure
+\DeclareMathOperator{\EP}{\mathsf{E}} % expectation operator wrt \P
+\DeclareMathOperator{\Var}{\mathsf{Var}} % variance operator
+
+%% Convenience aliases: 
+\newcommand{\cont}{\subset}
+\newcommand{\goesto}{\rightarrow}
+\newcommand{\conv}{\longrightarrow}
+\newcommand{\convd}{\stackrel{d}{\longrightarrow}}
+\newcommand{\wc}{\Rightarrow}
+\newcommand{\indep}{\mbox{$\perp\!\!\!\perp$}}
+\newcommand{\eqdist}{\stackrel{d}{=}}
+\newcommand{\iid}{\stackrel{\text{iid}}{\sim}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Theorems, etc.
+
+%%%%%%%%%%%%%%%%%
+
+
+%% Numbered theorem aliases.
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}{Lemma}[section]
+\newtheorem{cor}{Corollary}[section]
+\newtheorem{prop}{Proposition}[section]
+%% Non-numbered variants. 
+\newtheorem*{claim}{Claim}
+\newtheorem*{propnn}{Proposition}
+\newtheorem*{thmnn}{Theorem}
+
+%% Definition style aliases (non-numbered).
+\theoremstyle{definition}
+\newtheorem*{defn}{Definition}
+\newtheorem*{rmk}{Remark}
+\newtheorem{cond}{Condition}[section]
+\newtheorem*{fact}{Fact}
+\newtheorem{exa}{Example}[section]
+
+%% Proof environment that starts with the specified heading and ends with an
+%% empty square tombstone.
+\newenvironment{pf}[1][Proof]{\begin{proof}[\textit{\textbf{#1}}]}{\end{proof}}
+
+%% Custom style for examples.
+\newtheoremstyle{example}{10pt}{3pt}% Spacing
+	{}% Body font
+	{}% Indent
+	{\itshape\bfseries}% Thm head font
+	{.}%        Punctuation after thm head
+	{0.5em}%     Space after thm head
+	{}%         Thm head spec (can be left empty, meaning `normal')
+\theoremstyle{example}
+\newtheorem*{exnotnumbered}{Example}
+\newtheorem{exnumbered}{Example}[section]
+%% Numbered and non-numbered examples that start with a heading and end
+%% with a tombstone.
+\newenvironment{exnum}{\pushQED{\qed}\begin{exnumbered}}
+    {\qedhere\end{exnumbered}}
+\newenvironment{ex}{\pushQED{\qed}\begin{exnotnumbered}}
+    {\qedhere\end{exnotnumbered}}
+\newtheorem{step}{Step}
+
+%% Arrows to indicate direction in an iff proof.
+\newcommand{\pfrightdir}{$(\Rightarrow)\ \ $}
+\newcommand{\pfleftdir}{$(\Leftarrow)\ \ $}
+

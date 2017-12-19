@@ -26,6 +26,7 @@
 %% Title matter
 \title{Sufficient Differential Privacy}
 \author{Maxim Zhilyaev \and David Zeber}
+\date{}
 
 \usepackage[english]{babel}
 \usepackage{graphicx}
@@ -48,7 +49,7 @@ We consider a dataset or collection $D$ consisting of the original, unprotected 
 The data are ``reported'' by a mechanism $\map{A}{\Dsp^N}{\Ssp}$ which applies a transformation to the original dataset $D$. For example, $A$ may compute an aggregate statistic, or it may simply report a transformed version of $x_i$ for each user in the collection.
 The transformation $A$ is assumed to be randomized, in the sense that the outcome $A(D)$ is a random element of $\Ssp$. This is typically done by injecting random noise in the process of computing $A(D)$.
 
-The privacy guaranteed offered by DP limits how much the outcome of applying $A$ can change when a single user's record is modified, which in turn limits how easily an individual's data value can be determined based on the outcome $A(D)$. 
+The privacy guarantees offered by DP limits how much the outcome of applying $A$ can change when a single user's record is modified, which in turn limits how easily an individual's data value can be determined based on the outcome $A(D)$.
 We represent this modification by a collection $D_m$ formed by modifying the data for exactly one user: $D_m = (x_1,\dots,x_{r-1},x'_r,x_{r+1},\dots,x_N)$ for some $r \in \{1,\dots,N\}$.
 The randomized data collection mechanism $A$ satisfies $\epsilon$-\textbf{differential privacy} if
 \begin{equation} \label{eq:dpdeftraditional}
@@ -453,7 +454,7 @@ q = \frac{1}{1 + \frac{(\phi+1) + \sqrt{(\phi+1)^2 -4}}{2}}.
  \[
   \begin{matrix}N = 1000 & q = 0.2446 & p(R(S) \ge \lambda) = 0.006 \\
   N= 3000 & q = 0.2109 & p(R(S) \ge \lambda) = 0.0048  \\
-  N=5000 & q = 0.1778 & p(R(S) \ge \lambda) =0.0045 \end{matrix} 
+  N=5000 & q = 0.1778 & p(R(S) \ge \lambda) =0.0045 \end{matrix}
  \]
  
 \includegraphics[scale =  0.25]{xyz.png}
@@ -468,8 +469,47 @@ q = \frac{1}{1 + \frac{(\phi+1) + \sqrt{(\phi+1)^2 -4}}{2}}.
  
  \includegraphics[scale =  0.25]{nPn5.png}
  
- \textbf{Remark}  I believe we can prove concentration phenomena more formally by using Hoeffding's inequality (\url{https://en.wikipedia.org/wiki/Hoeffding%27s_inequality
-}) and proving that probabilities are falling exponentially with enough distance from the mean.  Leaving it untouched for now. 
+ \subsection{concentration inequality and choice of $\sigma$ multiples}
+ We have been using a reference point of expectation plus $3\sigma$ to extract noise parameter.  Let's furnish a better argumentation of how to choose multiple of $\sigma$ to insure sufficient privacy condition:
+ \begin{equation*}
+\P[R(T) > e^\epsilon] \leq \eta,
+\end{equation*}
+
+Per Maurer's results http://www.andreas-maurer.eu/Inequality1202.pdf, the deviation of sum of independent random variables from its expectation is bounded as below:
+ \begin{equation*}
+\P[E(S) -S > t] \leq  \exp \left (- \frac{t^2} {2 \sum_i E(X_i^2)} \right )
+\end{equation*}
+
+We replace $t$ in this bound with multiples of sigma and re-write the bound using second moments of contributing variables $X_0$ and $X_1$.  Setting:
+ \begin{align*}
+ t = \beta \sigma \\
+\frac{p^3 + q^3}{pq} = \phi \\
+\frac{p^35+ q^5}{(pq)^2} = \phi^2 + \phi -1
+\end{align*}
+
+We can express the bound as
+ \begin{align*}
+\P[E(S) -S > t] \leq  \exp \left (- \frac{\beta^2 \sigma^2} {2 [ (N-1) \phi^L + ( \phi^2 + \phi -1)^L]} \right ) \\
+\P[E(S) -S > t] \leq  \exp \left (- \frac{\beta^2 ((N-1) ( \phi^L - 1) +  ( \phi^2 + \phi -1)^L - \phi^{2L}) } {2 [ (N-1) \phi^L + ( \phi^2 + \phi -1)^L]} \right )
+ \end{align*}
+ \begin{align}
+\P[E(S) -S > t] \leq  \exp \left (-  \frac{\beta^2}{2} \left [ 1 - \frac{(N-1) + \phi^L}{(N-1)\phi^L +  ( \phi^2 + \phi -1)^L} \right ] \right )
+ \end{align}
+
+Using the experimental setup for $\lambda = 2$, we can compare real probabilities and those given by the bound:
+
+   \[
+  \begin{matrix}N = 1000 & q = 0.1692 & p(R(S) \ge \lambda) = 0.0037  & \text{bound} = 0.052 \\
+  N= 3000 & q = 0.1424 & p(R(S) \ge \lambda) = 0.0062   & \text{bound} = 0.057\\
+  N=5000 & q = 0.1310 & p(R(S) \ge \lambda) = 0.0074  & \text{bound} = 0.062 \end{matrix}
+ \]
+
+So, the bound is pretty loose for small $L$ and $N$,  However, for high dimensionality the bound becomes much tighter.  For large $L$ the following holds:
+ \begin{equation*}
+ \exp \left (-  \frac{\beta^2}{2} \left [ 1 - \frac{(N-1) + \phi^L}{(N-1)\phi^L +  ( \phi^2 + \phi -1)^L} \right ] \right ) \approx  \exp \left (-  \frac{\beta^2}{2}  \right )
+\end{equation*}
+
+For example, setting $L=40$ and $N=10M$, and computing the bound, shows that for $\beta = 3.05$, the bounding probability is $0.0096$ which is under 1\% of populations. Setting $\beta = 3.5$ gives the bounding probability of $0.002$ and does not substantially increase the noise  ($q$ increased by $0.0025$).  This, in our opinion, justifies use of the bound for $L>20$.
 
 \section{Precision gain}
 
@@ -533,6 +573,52 @@ In fact, if can shown that if an original vector is not allowed to have more tha
 
 \textbf{Remark}  Intuitively this claim makes sense.  We still may want to show formally that $R(S)$ expression for those setups are equivalent. 
 
+\section{k-randomization}
+
+We now study an intriguing technique which allows further reduction of the estimate error by letting original vectors submit multiple randomizations.  Let's keep $D_m$ as  $D$ same and generate $k$ synthetic vectors from each original.  The synthetic output $S$ multiples in volume by $k$.  Since randomization of the same data was repeated $k$-times, the expected sum $M$ of signal bits generated from $d$ original set bits is expressed as:
+\[ \EP M = p \cdot kd + q \cdot k(N-d) \]
+Hence, we can estimate $d$ as
+\[ \hat{d} = \frac{M/k-qN}{p-q}. \]
+The expectation and standard deviation of the estimate $\hat{d}$ are given by:
+\begin{align*}
+\EP \hat{d} &= d \\
+\sigma( \hat{d}) & = \sqrt{\frac{N}{k}} \frac{\sqrt{qp}}{p-q}
+\end{align*}
+
+Note that $\sigma$ of the estimate is reduced by $\sqrt{k}$ which explains the rational behind the approach.  If repeating randomization does not cause significant increase in noise $q$ to protect same level of privacy, we can achieve necessary precision by simply resubmitting yet another randomization of user data.  This removes an old privacy dilemma - privacy vs. utility tradeoff.  Instead we can trade volume for utility while keeping sufficient privacy the same.
+
+In what follows we consider a random variable $R(S^k)$ representing probabilistic ratio of generating $kN$ synthetic vectors from $D^k_m$ vs. $D^k$.  Where $D^k$ still consists of $kN$ zero vectors $\zv$, and  the modified collection $D^k_m$ consists of $k$ unit vectors $\uv$ and $kN - k$ zero vectors $\zv$.  The detailed method of computing moments of $ R(S^k)$ is given it Appendix II.   Here we present the moments of $R(S^k)$ below:
+
+\begin{align}
+\EP R(S^k)  \le  \left ( 1 +  \frac{ 1 }{kN} \left ( \frac{q^3 + p^3} {qp} \right )^{L} \right )^k \\
+\Var R(S^k) \le \left [  \frac{1}  {(kN)} \left ( \frac{q^3 + p^3} {qp} \right )^L +   \frac{1} {(kN)^{2}}  \left ( \frac{q^5 + p^5} {(qp)^2} \right )^{L}  \right ]^k -  \left [  \frac{1}  {(kN)} +   \frac{1} {(kN)^{2}}  \left ( \frac{q^3 + p^3} {qp} \right )^{2L}  \right ]^k
+\end{align}
+
+Using the change of variable we performed before:
+\begin{align*}
+\phi = \frac{p^3 + q^3}{pq} \\
+ \frac{p^5 + q^5}{(pq)^2} = \left (  \frac{p^3 + q^3}{pq}  + 1 \right )^2 -  \frac{p^3 + q^3}{pq} - 2 = \phi^2  + \phi - 1
+\end{align*}
+
+
+\begin{align*}
+\EP R(S^k) \le \left ( 1 +  \frac{ \phi^L}{kN} \right )^k \\
+\Var R(S^k) \le  \left ( \frac{ \phi^L}{kN} +  \frac{( \phi^2 + \phi - 1)^L}{(kN)^2}\right )^k -  \left (  \frac{1}  {(kN)} +   \frac{\phi^{2L}} {(kN)^{2}}  \right )^k
+\end{align*}
+
+From here the sufficient privacy condition becomes:
+\begin{align}
+\left ( 1 +  \frac{ \phi^L}{kN} \right )^k  + 3 \sqrt{  \left ( \frac{ \phi^L}{kN} +  \frac{( \phi^2 + \phi - 1)^L}{(kN)^2}\right )^k -  \left (  \frac{1}  {(kN)} +   \frac{\phi^{2L}} {(kN)^{2}}  \right )^k } \le \lambda
+\end{align}
+
+The above equation can be solved numerically for $\phi$ and the amount of noise $q$ is computed with $3.16$.
+
+\subsection{Experimental results}
+We now run numbers to understand which precision boost k-randomization provides when the privacy level is required to stay the same.   Choosing $\lambda=2$ and $N=1,000,000$, we compute corresponding values of $q$ and resulting gain (or loss) in estimate precision.  Consider the example we saw before: $L=40$ and $N=10M$ and $\lambda = e^2$.   We discovered that the sufficient noise is $q=0.351$ which allows a measurer to estimate 1\% of population with 10\% error rate.  We now compute the noise necessary to provide same level of sufficient privacy for values of $k$ changeling from $1$ to $200$.
+
+ \includegraphics[scale =  0.4]{q_vs_k.png}
+
+ We observe a slight decrease of necessary noise with the asymptotic leveling at low bound.  The gain introduced by noise reduction is actually very minor, a far larger advantage comes from the fact that $\sigma$ of estimate is reduced by $\sqrt{k}$.  For our particular example, if business application requires minimal precision down to 0.5\% of population, devices may submit their randomizations $4$ times to achieve desired precision.
 
 \section{Appendix 1 - expectations and variances for $X_0$ and $X_1$ contributions}
 
@@ -556,6 +642,184 @@ In a similar fashion one derives expectation and variance for $X_1$:
 E(X_1)=  =   \left ( \frac{p^3 + q^3}{pq} \right )^L\\
 VAR(X_1) = \left ( \frac{p^5 + q^5}{(pq)^2} \right )^{L}  - \left ( \frac{p^3 + q^3}{pq} \right )^{2L} 
 \end{align}
+
+\section{Appendix II - k-randomization}
+
+We simplify computation of expectation and variance for $R(S)$ given in $2.1$ by employing moment generating functions. Then we generalize the approach to estimate moments of $R(S)$ for $k>1$.
+
+Suppose $X$ is a random variable with know moment generating function (\textbf{MGF}) $M(t) = E(e^{tX})$.
+Consider a random variable $Y=c^X$, where $c$ is constant
+\begin{align}
+\EP Y = E(c^X) = E(e^{\ln{c}X}) = M(\ln{c}) \\
+\EP Y^2 =  E(c^{2X}) = E(e^{\ln{c^2}X}) = M(2\ln{c}) \\
+\Var Y = \EP Y^2 - \left [ \EP Y \right ]^2 = M(2\ln{c}) -  \left [ M(\ln{c}) \right ]^2
+\end{align}
+
+Consider the expression for $R(S)$ again:
+\begin{equation}
+R(S) = \frac{P(S|D_m)}{P(S|D)} =  \frac{P(S|D' \cup \{\uv\})}{P(S|D' \cup \{\zv\})}.
+\end{equation}
+
+Enumerate synthetic output $S$ with individual synthetic vectors:
+\[ S = \{s_1, s_2, ... s_n\} \]
+
+Since $D$ consists of $N$ zero vectors $\zv$, then any permutation of original vectors will generate same sequence of synthetic output with the same probability $ \prod_{i=1}^N p(s_i| {\zv} )$.  Since there are $N!$ distinct arrangements of  $D$, we have for $P(S|D$:
+\begin{equation}
+P(S|D) = N! \prod_{i=1}^N p(s_i| {\zv} )
+\end{equation}
+
+Now, for $P(S|D_m)$ we can condition on each $s_i$ being generated from $\uv$.
+\begin{align*}
+P(S|D_m) = p(s_1|\uv) \cdot (N-1)! \prod_{i=1, i \ne 1}^N p(s_i| {\zv} ) + p(s_2|\uv)  \cdot (N-1)! \prod_{i=1, i \ne 2}^N p(s_i| \zv ) + \cdots \\
+P(S|D_m) =  \sum_{j=1}^{N}  p(s_j|\uv)  \cdot (N-1)! \prod_{i=1, i \ne j}^{N} p(s_i| \zv )
+\end{align*}
+
+Taking the ratio gives essentially same result as in $3.1$:
+\begin{equation}
+R(S) = \frac{P(S|D_m)}{P)S|D)} = \frac{ \sum_{j=1}^{N}  p(s_j|\uv)  \cdot (N-1)! \prod_{i=1, i \ne j}^{N} p(s_i| \zv )} {N! \prod_{i=1}^N p(s_i| {\zv} )} =  \frac{1}{N} \sum_{j=1}^N \frac{p(s_j | \uv)} {p(s_j|\zv)}
+\end{equation}
+
+Using formula $3.2$, we arrive to same result as in $3.4$
+\begin{align}
+R(S) = \frac{1}{N} \sum_{i=1}^N \frac{p(s_i | \uv)} {p(s_i|\zv)} = \frac{1}{N}  \sum_{i=1}^N \left ( \frac{q} {p} \right )^{L - 2l_i}  \\
+R(S) = \frac{1}{N}  \left ( \frac{q} {p} \right )^{L}  \sum_{i=1}^N \left ( \frac{p} {q} \right )^{2l_i}
+\end{align}
+Where $l_i$ is the number of set synthetic bits in a synthetic vector $s_i$.
+
+Recall that $X_0$ and $X_1$ are random variables for contribution that $\zv$ and $\uv$ make to the sum $X =  \sum_{i=1}^N \left ( \frac{q} {p} \right )^{L - 2l_i} $
+We can easily find moments of these random variables by utilizing \textbf{MGF} for a random variable representing a number of set synthetic bits found in  the result of the randomization.
+
+Denote $L_0$ to be a random variable representing number of set bits in a synthetic vector generated by $\zv$. It's distributed binomially with $Bin(L,q)$ and corresponding MGF function $M_0$:
+\[ M_0(t) = (p + q \cdot e^t)^L \]
+
+Using we can express moments of $Y_0 = \left ( \frac{p} {q} \right )^{2L_0}$ using MGF of $L_0$ per notion developed in $8.3$.
+\begin{align}
+ \EP Y_0 = \EP \left ( \frac{p} {q} \right )^{2L_0} = M_0 \left (\ln{ \left ( \frac{p} {q} \right )^2} \right) = \left (p + q \left ( \frac{p} {q} \right )^2 \right )^L =  \left ( \frac{p} {q} \right )^L \\
+ \EP Y_0^2 = M_0 \left (2 \cdot \ln{ \left ( \frac{p} {q} \right )^2} \right) = \left (p + q \left ( \frac{p} {q} \right )^4 \right )^L =  \left ( \frac{pq^3 + p^4} {q^3} \right )^L
+\end{align}
+
+And consequently
+\begin{align}
+ \EP X_0 =  \EP \left [  \left ( \frac{q} {p} \right )^{L}  \cdot Y_0  \right ]  =  \left ( \frac{q} {p} \right )^{L}   \cdot \left ( \frac{p} {q} \right )^L = 1 \\
+ \EP X_0^2 = \EP \left [  \left ( \frac{q} {p} \right )^{L}  \cdot Y_0   \right ]  =  \left ( \frac{q} {p} \right )^{2L}  \cdot  \left ( \frac{pq^3 + p^4} {q^3} \right )^L =  \left ( \frac{q^3 + p^3} {qp} \right )^L \\
+ \Var X_0 =   \left ( \frac{q^3 + p^3} {qp} \right )^L  - 1
+ \end{align}
+
+
+Similarly, we can express moments of $X_1$ by using the distribution $L_1$ of the number of set synthetic bits that $\uv$ can generate using $L_1$ \textbf{MGF}:
+
+\begin{align}
+M_1(t) = (q + p \cdot e^t)^L \\
+ \EP Y_1 = \EP \left ( \frac{p} {q} \right )^{2L_1} = M_1 \left (\ln{ \left ( \frac{p} {q} \right )^2} \right) = \left (q + p \left ( \frac{p} {q} \right )^2 \right )^L =  \left ( \frac{q^3 + p^3} {q^2} \right )^L \\
+ \EP Y_1^2 = M_0 \left (2 \cdot \ln{ \left ( \frac{p} {q} \right )^2} \right) = \left (q + p \left ( \frac{p} {q} \right )^4 \right )^L =  \left ( \frac{q^5 + p^5} {q^4} \right )^L
+\end{align}
+
+And consequently
+\begin{align}
+ \EP X_1 =   \left ( \frac{q} {p} \right )^{L}   \cdot  \left ( \frac{q^3 + p^3} {q^2} \right )^L =  \left ( \frac{q^3 + p^3} {qp} \right )^L\\
+ \EP X^2_1 ==  \left ( \frac{q} {p} \right )^{2L}  \cdot \left ( \frac{q^5 + p^5} {q^4} \right )^L =  \left ( \frac{q^5 + p^5} {(qp)^2} \right )^L\\
+ \Var X_1 =  \left ( \frac{q^5 + p^5} {(qp)^2} \right )^L - \left ( \frac{q^3 + p^3} {qp} \right )^{2L}
+ \end{align}
+
+The purpose of these exercise was to show how the method derives exact same expressions for $X_0$ and $X_1$ moments.  The same methodology enables us to compute central moments for the case when $D_M$ is reporting multiple randomizations of the same data.
+
+\subsection{Moments of $R(S)$ from k-time randomized reports}
+
+
+Let's consider a collection $D^k$ that consists of $kN$ $\zv$ records. Such collection generates output $S^k$ of $kN$ synthetic records.
+\[ S^k = \{s_1, s_2, \cdots , s_{kN} \} \]
+
+Again the probability of $P(S^k|D^k)$ is as before:
+\[ P(S^k|D^k) = (kN)! \prod_{i=1}^{kN} p(s_i| \zv ) \]
+
+
+To simulate k-randomization, we change $k$ records in $D^k$ to $\uv$.   These $k$ $\uv$ original records could generate any $k$ synthetic records in $S^k$ which allows to expressed $P(S^k|D^k_m)$ as probability conditioned on $k$ $\uv$ vectors generating any ordering of $k$ synthetic vectors.  We sum probabilities over $\binom{kN}{k}$ district subsets of $S^k$ being generated from $\uv$ vectors.  We enumerate such $k$-size subsets with index $j$ and denote each particular subset as $S_j$
+
+\[ P(S^k|D^k_m) = \sum_{j=1}^{\binom{kN}{k}}  \prod_{s_i \in S_j} p(s_i| \uv ) \cdot (kN -k)! \cdot \prod_{s_i \notin S_j} p(s_i| \uv ) \]
+
+The privacy ratio of $k$-randomization case is expressed as:
+\begin{align}
+R(S^k) = \frac {\sum_{j=1}^{\binom{kN}{k}}  \prod_{s_i \in S_j} p(s_i| \uv ) \cdot (kN -k)! \cdot \prod_{s_i \notin S_j} p(s_i| \uv ) } { (kN)! \prod_{i=1}^{kN} p(s_i| \zv)  }  \\
+R(S^k) = \frac{ (kN-k)! }{(kN)!}   \sum_{j=1}^{\binom{kN}{k}}  \prod_{s_i \in S_j} \frac{ p(s_i| \uv ) }{ p(s_i|\zv)}  \\
+R(S^k) = \frac{ (kN-k)! }{(kN)!}   \left ( \frac{q}{p} \right )^{kL} \sum_{j=1}^{\binom{kN}{k}}   \left ( \frac{p}{q} \right )^{2 \cdot (l_1 + l_2  + l_3 + \cdots + l_k)}
+\end{align}
+
+We arrived to the generalization of $6.6$ for $k$ repeated randomization of the same data.  Consider the term of the sum:
+\[  \left ( \frac{p}{q} \right )^{2 \cdot (l_1 + l_2  + l_3 + \cdots + l_k)}  \]
+
+The power is simply a doubled sum of the number of synthetic bits found in each synthetic vector that belongs to a particular arrangement $S_j$.   Since each $l$ comes from an independent binomial distribution, we can find expectation and variance of the sum from its terms.  More formally, denote $L_r$ to be a random variable representing sum of synthetic bits in $k$ randomly chosen synthetic vectors, such that $m$  of synthetic vectors are generated by $\zv$ originals and $r$ synthetic vectors come from $\uv$ originals.
+\begin{align}
+m + r = k \\
+L_r = m \cdot L_0 + r \cdot L_1 \\
+\EP L_r =  m \cdot q^L + r \cdot p^L \\
+M_r(t) = (p + q \cdot e^t)^{mL}\cdot (q + p\cdot e^t)^{rL}
+\end{align}
+
+Now, denote $X_r$ a random variable of the form:
+\[  X_r =   \left ( \frac{q}{p} \right )^{kL}  \cdot \left ( \frac{p}{q} \right )^{2 \cdot L_r}  \]
+
+And find moments of $X_r$ through the \textbf{MGF} of $L_r$
+\begin{align}
+\EP X_r =   \left ( \frac{q}{p} \right )^{kL}  M_k(2 \ln { \frac{p}{q}}) =  \left ( \frac{q}{p} \right )^{kL}  \left (p + q \cdot   \left ( \frac{p}{q} \right )^2 \right )^{mL}\cdot \left (q + p\cdot   \left ( \frac{p}{q} \right )^2 \right)^{rL} = \left ( \frac{q^3 + p^3} {qp} \right )^{rL} \\
+\EP X^2_r =  \left ( \frac{q}{p} \right )^{kL}  M_k(4 \ln { \frac{p}{q}})  = \left ( \frac{q}{p} \right )^{kL}  \left (p + q \cdot   \left ( \frac{p}{q} \right )^4 \right )^{mL}\cdot \left (q + p\cdot   \left ( \frac{p}{q} \right )^4 \right)^{rL} =  \left ( \frac{q^3 + p^3} {qp} \right )^{mL} \cdot  \left ( \frac{q^5 + p^5} {(qp)^2} \right )^{rL}  \\
+\Var X_r = \left ( \frac{q^3 + p^3} {qp} \right )^{mL} \cdot  \left ( \frac{q^5 + p^5} {(qp)^2} \right )^{rL}  - \left ( \frac{q^3 + p^3} {qp} \right )^{2rL}
+\end{align}
+
+We now ready to express the moments of $R(S^k)$.   For any given value of $r$ there are exactly $\binom{k}{r} \cdot \binom{kN-k}{k-r}$ terms in the sum in $6.20$ where $r$ synthetic vectors are generated from $r$ original $\uv$s.  Hence, we can express expectation of $R(S^k)$ as:
+\begin{align}
+\EP R(S^k) =  \EP \frac{ (kN-k)! }{(kN)!}   \sum_{r=0}^{r=k} \binom{k}{r} \binom{Nk-k}{k-r} X_r = \frac{ (kN-k)! }{(kN)!}   \sum_{r=0}^{r=k} \binom{k}{r} \binom{Nk-k}{k-r} \EP X_r \\
+\EP R(S^k) =  \frac{ (kN-k)! }{(kN)!}  \sum_{r=0}^{r=k} \binom{k}{r} \binom{Nk-k}{k-r} \left ( \frac{q^3 + p^3} {qp} \right )^{rL}
+\end{align}
+
+We now bound the expression $6.29$ by noticing the following facts:
+\begin{align}
+\left ( \frac{1} { kN} \right )^k \le  \frac{ (kN-k)! }{(kN)!}   = \frac{1} { kN (kN - 1)(kN-2) \cdots (kN -k + 1)}  \le \left ( \frac{1} { k(N - 1)} \right )^k  \\
+ \text{for } N >> k  \\
+  \frac{ (kN-k)! }{(kN)!}   \approx \left ( \frac{1} { kN} \right )^k  \approx \left ( \frac{1} { k(N - 1)} \right )^k
+\end{align}
+
+Also note lower and upper bounds for the $ \binom{Nk-k}{k-r} $:
+\begin{align}
+ \binom{Nk-k}{k-r} \ge \left ( \frac{Nk-k}{k-r} \right )^{k-r} \ge \left ( \frac{Nk-k}{k} \right )^{k-r}  =  \left ( {N-1} \right )^{k-r}  \\
+  \binom{Nk-k}{k-r} \le \frac{(Nk-k)^{k-r}} {(k-r)!} \le (Nk-k)^{k-r}
+\end{align}
+
+Using this we can produce an upper bound for $R(S^k)$:
+\begin{align*}
+\EP R(S^k) \approx \left ( \frac{1} { kN} \right )^k  \cdot \sum_{r=0}^{r=k} \binom{k}{r} \binom{Nk-k}{k-r} \left ( \frac{q^3 + p^3} {qp} \right )^{rL} \\
+\EP R(S^k)  \le  \sum_{r=0}^{r=k} \binom{k}{r} \frac{ (Nk-k)^{k-r} }{ (kN)^k} \left ( \frac{q^3 + p^3} {qp} \right )^{rL}  \le  \sum_{r=0}^{r=k} \binom{k}{r} \frac{ 1 }{ (kN)^r} \left ( \frac{q^3 + p^3} {qp} \right )^{rL} = \left ( 1 +  \frac{ 1 }{kN} \left ( \frac{q^3 + p^3} {qp} \right )^{L} \right )^k
+\end{align*}
+\begin{align}
+\EP R(S^k)  \le  \left ( 1 +  \frac{ 1 }{kN} \left ( \frac{q^3 + p^3} {qp} \right )^{L} \right )^k
+\end{align}
+
+Using similar technic we can upper bound the variance of $R(S^k)$ as folows:
+\begin{align*}
+\Var R(S^k) =  \Var \frac{ (kN-k)! }{(kN)!}   \sum_{r=0}^{r=k} \binom{k}{r} \binom{Nk-k}{k-r} X_r = \left [ \frac{ (kN-k)! }{(kN)!}  \right ]^2  \cdot \sum_{r=0}^{r=k} \binom{k}{r} \binom{Nk-k}{k-r} \Var X_r \\
+\Var R(S^k) =   \left [ \frac{ (kN-k)! }{(kN)!}  \right ]^2  \cdot \sum_{r=0}^{r=k} \binom{k}{r} \binom{Nk-k}{k-r} \left [   \left ( \frac{q^3 + p^3} {qp} \right )^{(k-r)L} \left ( \frac{q^5 + p^5} {(qp)^2} \right )^{rL}  - \left ( \frac{q^3 + p^3} {qp} \right )^{2rL}  \right ] \le \\
+\sum_{r=0}^{r=k} \binom{k}{r} \frac{(kN-k)^{k-r}}  {(kN)^{2(k-r)}}  \frac{1} {(kN)^{2r}} \left [  \left ( \frac{q^3 + p^3} {qp} \right )^{(k-r)L} \left ( \frac{q^5 + p^5} {(qp)^2} \right )^{rL}  - \left ( \frac{q^3 + p^3} {qp} \right )^{2rL}  \right ] \le \\
+\sum_{r=0}^{r=k} \binom{k}{r} \frac{1}  {(kN)^{(k-r)}}  \frac{1} {(kN)^{2r}} \left [  \left ( \frac{q^3 + p^3} {qp} \right )^{(k-r)L} \left ( \frac{q^5 + p^5} {(qp)^2} \right )^{rL}  - \left ( \frac{q^3 + p^3} {qp} \right )^{2rL}  \right ]  = \\
+\sum_{r=0}^{r=k} \binom{k}{r} \left [ \frac{1}  {(kN)} \left ( \frac{q^3 + p^3} {qp} \right )^L \right ]^{k-r}   \left [   \frac{1} {(kN)^{2}}  \left ( \frac{q^5 + p^5} {(qp)^2} \right )^{L}  \right ]^r     - \sum_{r=0}^{r=k} \binom{k}{r}  \frac{1}  {(kN)^{(k-r)}} \left [   \frac{1} {(kN)^{2}}  \left ( \frac{q^3 + p^3} {qp} \right )^{2L}  \right ]^r = \\
+\left [  \frac{1}  {(kN)} \left ( \frac{q^3 + p^3} {qp} \right )^L +   \frac{1} {(kN)^{2}}  \left ( \frac{q^5 + p^5} {(qp)^2} \right )^{L}  \right ]^k -  \left [  \frac{1}  {(kN)} +   \frac{1} {(kN)^{2}}  \left ( \frac{q^3 + p^3} {qp} \right )^{2L}  \right ]^k
+\end{align*}
+
+We now ready to express sufficient privacy condition.  Using the change of variable we performed before:
+\begin{align*}
+\phi = \frac{p^3 + q^3}{pq} \\
+ \frac{p^5 + q^5}{(pq)^2} = \left (  \frac{p^3 + q^3}{pq}  + 1 \right )^2 -  \frac{p^3 + q^3}{pq} - 2 = \phi^2  + \phi - 1
+\end{align*}
+
+We express upper bounds for expectation and variance as:
+\begin{align*}
+\EP R(S^k) \le \left ( 1 +  \frac{ \phi^L}{kN} \right )^k \\
+\Var R(S^k) \le  \left ( \frac{ \phi^L}{kN} +  \frac{( \phi^2 + \phi - 1)^L}{(kN)^2}\right )^k -  \left (  \frac{1}  {(kN)} +   \frac{\phi^{2L}} {(kN)^{2}}  \right )^k
+\end{align*}
+
+From here the sufficient privacy condition becomes:
+\begin{align}
+\left ( 1 +  \frac{ \phi^L}{kN} \right )^k  + 3 \sqrt{  \left ( \frac{ \phi^L}{kN} +  \frac{( \phi^2 + \phi - 1)^L}{(kN)^2}\right )^k -  \left (  \frac{1}  {(kN)} +   \frac{\phi^{2L}} {(kN)^{2}}  \right )^k } \le \lambda
+\end{align}
+
 
 \end{document}
 
