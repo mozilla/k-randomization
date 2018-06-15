@@ -248,7 +248,7 @@ allpmfs <- function(n, q) {
 ## - for a collection of size n and lie probability q
 ## - where the original collection has m 1s
 ## - and the modification changes a 1 to a 0.
-## The privacy ratio P[A(m) = s]/P[A(m+1) = s] is computed across all
+## The privacy ratio P[A(m+1) = s]/P[A(m) = s] is computed across all
 ## outcome values s = 0,...,n and over all original collections m = 0,...,n-1.
 ## As in the notation of section 3.1, A is a rv with distribution 
 ## Bin(m, 1-q) + Bin(N-m, q).
@@ -257,10 +257,11 @@ allpmfs <- function(n, q) {
 ## Some of the privacy ratio values may evaluate as NaN when they are the
 ## ratio of two very small numbers. These are replaced with NA.
 privratio <- function(pmfs) {
-    ## The privacy ratio is pmfA[[m]]/pmfA[[m+1]] for m = 1,...,n.
+    ## The privacy ratio is pmfA[[m+1]]/pmfA[[m]] for m = 0,...,n-1.
+    ## This corresponds to indices 1:n under 1-based indexing.
     n <- length(pmfs) - 1
     d <- rbindlist(lapply(1:n, function(m) {
-        data.table(m = m, s = 0:n, pr = pmfs[[m]] / pmfs[[m+1]])
+        data.table(m = m, s = 0:n, pr = pmfs[[m+1]] / pmfs[[m]])
     }))
     ## Remove NaNs.
     d[is.nan(pr), pr := NA]
