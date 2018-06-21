@@ -821,7 +821,7 @@ dev.off()
 
 ##########################################################
 
-## Simulations for the n=1 case, distribution of nu (v).
+## Simulations for the n = 1 case, distribution of nu (v).
 ##
 ## P_y[v(S, y, x) = -d(x,y) + 2m] = P[Bin(d(x,y), q) = m]
 ##
@@ -883,7 +883,7 @@ maximal_d_for_lambda <- function(L, q, min_lambda = 0) {
         .(idx_max = which.max(.SD)),
             by = lambda]
     d_max_prob[, .(
-        lambda, 
+        lambda,
             lambda_range = sprintf("%s <= lambda < %s", lambda, lambda + 1),
             nu_range = sprintf("nu >= %s", lambda + 1),
             d_max_prob = idx_max)]
@@ -914,7 +914,7 @@ plot_max_d_by_q <- function(L, qvals, min_lambda = -(L-1)) {
 }
 
 L <- 10
-q <- 0.25 
+q <- 0.25
 b <- full_v_dist(L, q)
 n <- 3
 
@@ -925,4 +925,436 @@ nuvals[, r1 := (q / (1-q))^nu1][, r2 := (q / (1-q))^nu2]
 nuvals[, r3 := (q / (1-q))^nu3]
 nuvals[, r := n / (1/r1 + 1/r2 + 1/r3)]
 
+
+###############################################################
+
+## Simulations for the general n case, where x = (x,x,...,x).
+## (outlier case).
+##
+## The privacy ratio can be expressed as
+## R(S, x, x') = n / [r(S_1, x', x) + ... + r(S_n, x', x)]
+## where r(S, x, x') = (q/p)^(-d + 2Y_d) in distribution with respect to
+## P_x, where Y_d ~ Bin(d = d(x, x'), q) and S_k are independent.
+## Note that the order of x and x' are switched in the denominator of
+## R(S,x,x').
+
+## The goal here is to simulate the distribution P_x[R(S,x,x') > u] via
+## Monte Carlo, in order to verify that this is maximized when d = L.
+
+q <- 0.25
+n <- 3
+L <- 10
+d <- 5
+
+## Simulate a realization of R(S, x x') given n, q, and d = d(x, x')
+## (relative to P_x).
+simulate_pr <- function(n, q, d) {
+    binom_samp <- rbinom(n, d, q)
+    indiv_prs <- (q/(1-q))^(-d + 2*binom_samp)
+    n / sum(1 / indiv_prs)
+}
+
+## Simulate the exceedence probability by the privacvy ratio R(S,x,x')
+## of a vector of levels u.
+simulate_pr_prob <- function(uvals, n, q, dvals, nreps = 100000) {
+    pr_reps <- lapply(dvals, function(d) {
+        as.numeric(lapply(1:nreps, function(i) simulate_pr(n, q, d)))
+    })
+    names(pr_reps) <- sprintf("d=%s", dvals)
+    probs <- rbindlist(lapply(uvals, function(u) {
+        lapply(pr_reps, function(prr) { mean(prr > u) })
+    }))
+    cbind(u = uvals, probs)
+}
+
+## Reproduce the probabilities for n=1.
+nulevels <- (q/(1-q))^(-(0:(L-1)))
+simulate_pr_prob(rev(nulevels), 1, q, 1:L)
+
+lambda_exceedance_probs(L, q)
+
+
+plot_pr_max_d_by_q <- function(qvals, n, L) {
+    step_coef <- log((1 - q) / q)
+    step_ind <- seq(-3, L-1, length.out = 20)
+    u_levels <- exp(step_ind * step_coef)
+    max_d_varying_q <- rbindlist(lapply(qvals, function(q) {
+        pr_probs <- simulate_pr_prob(u_levels, n, q, 1:L)
+        ## Check for max from the end first.
+        ## If all probabilities are 0, select the last one as the max.
+        pr_probs <- pr_probs[, .(idx_max = L - which.max(rev(.SD))), by = u][,
+            q := q]
+        pr_probs <- pr_probs[, uind := step_ind]
+        pr_probs
+    }))
+
+    ggplot(max_d_varying_q, aes(uind, idx_max)) +
+        geom_line() + geom_point() +
+        facet_wrap(~ factor(q), labeller = function(labs) {
+            lapply(labs, function(labcol) { sprintf("q = %s", labcol) })
+        }) +
+        scale_x_continuous(
+            #breaks = intbreaks,
+            labels = function(v) { exp(v * step_coef) }) +
+        scale_y_continuous(limits = c(0, L), breaks = intbreaks) +
+        labs(title = paste("The value d = d(x,y) for which",
+            "P_x[R(S, x, x') > u] is maximized\n",
+            sprintf("by noise level q (L = %s, n = %s)", L, n)),
+            x = "u",
+            y = "d(x,y) maximizing probability")
+}
+
+qvals <- c(0.05, 0.1, 0.2, 0.25, 0.3, 0.4, 0.45)
+plot_pr_max_d_by_q(qvals, 1, 10)
+
+
+############################################################################
+
+
+## Take a look at the distribution of r(S,x,x') r(S,d), where d = d(x,x').
+##
+## In the n=1 case, we proved P_x[r(S,d) > u] <= P_x[r(S,L) > u] for d <= L.
+## Recall r(S,d) = (q/p)^v(S,d) ~ (q/p)^(-d + 2Y_d), where Y_d ~ Bin(d,q).
+##
+## full_v_dist() generates a table showing the distribution of v(d), with
+## columns indexed by d.
+
+source("~/git/work-tools/R/utils/ggplot.R")
+source("~/git/work-tools/R/utils/utils.R")
+theme_set(theme_dzplot())
+
+
+## Given vectors of y (x-axis) and p (y-axis), find the linearly-interpolated
+## value of p corresponding to the given value 'val'.
+interpolate_p <- function(val, y, p) {
+    increasing <- y[2] > y[1]
+    yind <- if(increasing) {
+        exc_vals <- which(y <= val)
+        if(length(exc_vals) == 0) NA else max(exc_vals)
+    } else {
+        exc_vals <- which(y > val)
+        if(length(exc_vals) == 0) NA else min(exc_vals)
+    }
+    if(is.na(yind)) return(NA_real_)
+    lambda <- (val - y[yind]) / (y[yind + 1] - y[yind])
+    p[yind] +  lambda * (p[yind + 1] - p[yind])
+}
+
+## Create a table listing probabilities for the binomial distribution
+## Y_d = Bin(d, q), for d=1,...,L.
+## Row i gives the probabilities P[Y_d = i] with a column for each d.
+## If cdf = TRUE, probabilities are cumulative (relative to Y).
+## If long = TRUE, table is melted to contain:
+## - a column 'dlab' containing strings of the form "d=<d>"
+## - a column 'd' listing the numeric d values
+## - a column 'p' giving the probabilities
+## - a column 'nu' giving the nu values -d + 2y.
+## - a column 'r' giving the r values (q/p)^(-d + 2y).
+## - If cdf = TRUE, an additional column cdf_r giving the cumulative
+##   distribution for r (which is in reverse order from Y).
+binom_dist_table <- function(L = 10, q = 0.25, cdf = FALSE, long = TRUE) {
+    binom_dist <- data.table(y = 0:L)
+    probfun <- if(cdf) pbinom else dbinom
+    for(d in 1:L) {
+        binom_dist <- binom_dist[, sprintf("d=%s", d) := probfun(y, d, q)]
+    }
+    if(long) {
+        binom_dist <- melt(binom_dist, id.vars = "y", variable.name = "dval",
+        value.name = "p")
+        binom_dist[, d := as.numeric(sub("d=", "", dval))][,
+            nu := -d + 2*y][,
+            r := (q/(1-q))^nu]
+        ## If we have cumulative probabilities, add a separate column for
+        ## CDF of r, whose values are in reverse order.
+        ## This is currently just a hack.
+        if(cdf) {
+            binom_dist[, cdf_r := rev(cumsum(rev(diff(c(0, p))))), by = d]
+        }
+        ## Add a visual indication of whether d is odd or even, for easily
+        ## matching d with d+2.
+        binom_dist[, odd := d %% 2 == 0]
+    }
+    binom_dist[]
+}
+
+
+## Given a long distribution table generated by binom_dist_table(),
+## compute a table of means and (mean + sd) with p value interpolated such
+## that it will get plotted on the distribution line.
+## Final table contains:
+## - column 'dval'
+## - columns 'ymean' and 'pmean' giving the y and p coordinates for plotting
+##   the mean (ymean is the mean, pmean is the interpolated probability for
+##   this value so that it appears on the line)
+## - columns 'ymsd' and 'pmsd' giving interpolated values for the value
+##   mean + sd.
+mean_sd_table <- function(binom_dist, valcol = "y", cdf=FALSE) {
+    binom_dist[, {
+            yv <- get(valcol)
+            probs <- if(cdf) diff(c(0, p)) else p
+            mn <- sum(yv * probs)
+            sd <- sqrt(sum(yv^2 * probs) - sum(yv * probs)^2)
+            mn_p <- interpolate_p(mn, yv, p)
+            mnsd <- mn + sd
+            mnsd_p <- interpolate_p(mnsd, yv, p)
+            list(ymean = mn, pmean = mn_p, ymsd = mnsd, pmsd = mnsd_p)
+        },
+        by = .(dval, d)][,
+            odd := d %% 2 == 0][]
+}
+
+mean_geom <- function(dt_mean) {
+    geom_point(aes(x = ymean, y = pmean, colour = dval),
+        size = 3, shape = 18, data = dt_mean)
+}
+
+## First, take a look at the underlying binomial distributions.
+
+## Plot the probability mass functions and means for binomial distributions
+## of Y_d, d = 1,...,L.
+plot_binom_probs <- function(L = 10, q = 0.25) {
+    dt_binom <- binom_dist_table(L, q)
+    dt_mean <- mean_sd_table(dt_binom)
+
+    ggplot(dt_binom, aes(y, p, colour = dval, linetype = odd)) +
+        geom_line() +
+        mean_geom(dt_mean) +
+        scale_x_continuous(breaks = intervalBreaks(2)) +
+        scale_linetype_discrete(guide = FALSE) +
+        labs(title = multiline(
+                sprintf("PMF of Y_d for d = 1,...,L  (L = %s)", L),
+                "(with points indicating means)"),
+            x = "y",
+            y = "P[Y_d = y]",
+            colour = "d")
+}
+
+## Plot the CDFs for the binomial distributions Y_d, d = 1,...,L.
+plot_binom_cumprobs <- function(L = 10, q = 0.25) {
+    dt_binom <- binom_dist_table(L, q, cdf = TRUE)
+    ## Add an indication of whether the condition on q is met such that
+    ## P[Y_d <= j] <= P[Y_{d+2} <= j+1].
+    dt_binom[, meets_q_cond := (d-y) / (d+1) >= q]
+    dt_mean <- mean_sd_table(dt_binom, cdf = TRUE)
+
+    ggplot(dt_binom, aes(y, p, colour = dval, linetype = odd)) +
+        geom_line() +
+        geom_point(size = 0.8) +
+        geom_point(aes(y, p), colour = "black", size = 0.8,
+            data = dt_binom[meets_q_cond == FALSE]) +
+        mean_geom(dt_mean) +
+        scale_x_continuous(breaks = intervalBreaks(2)) +
+        scale_y_continuous(breaks = intervalBreaks(0.2)) +
+        scale_linetype_discrete(guide = FALSE) +
+        labs(title = multiline(
+                sprintf("CDF of Y_d for d = 1,...,L  (L = %s)", L),
+                "(with points indicating means)",
+                "(points not meeting the q condition in black)"),
+            x = "y",
+            y = "P[Y_d <= y]",
+            colour = "d")
+}
+
+
+###################
+
+## Next, look at the distributions of v(d) = -d + 2 Y_d.
+
+
+## Plot the probability mass functions and means for the distributions of
+## of v(d) = -d + 2 Y_d, d = 1,...,L.
+## These are just translated and scaled versions of the corresponding
+## binomial distributions.
+plot_nu_probs <- function(L = 10, q = 0.25) {
+    dt_binom <- binom_dist_table(L, q)
+    dt_mean <- mean_sd_table(dt_binom, valcol = "nu")
+
+    ggplot(dt_binom[p > 0], aes(nu, p, colour = dval, linetype = odd)) +
+        geom_line() + geom_point(size = 0.8) +
+        mean_geom(dt_mean) +
+        scale_x_continuous(breaks = intervalBreaks(2)) +
+        scale_linetype_discrete(guide = FALSE) +
+        labs(title = multiline(
+                sprintf("PMF of nu_d = -d + 2Y_d for d = 1,...,L  (L = %s)",
+                    L),
+                "(with points indicating means)"),
+            x = "y",
+            y = "P[nu_d = y]",
+            colour = "d")
+}
+
+## Plot the CDFs for the distributions of nu_d = -d + 2Y_d, d = 1,...,L.
+plot_nu_cumprobs <- function(L = 10, q = 0.25) {
+    dt_binom <- binom_dist_table(L, q, cdf = TRUE)
+    ## Add an indication of whether the condition on q is met such that
+    ## P[Y_d <= j] <= P[Y_{d+2} <= j+1].
+    dt_binom[, meets_q_cond := (d-y) / (d+1) >= q]
+    dt_mean <- mean_sd_table(dt_binom, valcol = "nu", cdf = TRUE)
+
+    ggplot(dt_binom, aes(nu, p, colour = dval, linetype = odd)) +
+        geom_step() +
+        geom_point(size = 0.8) +
+        geom_point(aes(nu, p), colour = "black", size = 0.8,
+            data = dt_binom[meets_q_cond == FALSE]) +
+        mean_geom(dt_mean) +
+        scale_x_continuous(breaks = intervalBreaks(2)) +
+        scale_y_continuous(breaks = intervalBreaks(0.2)) +
+        scale_linetype_discrete(guide = FALSE) +
+        labs(title = multiline(
+                sprintf("CDF of nu_d = -d + 2Y_d for d = 1,...,L  (L = %s)",
+                    L),
+                "(with points indicating means)",
+                "(points not meeting the q condition in black)"),
+            x = "y",
+            y = "P[nu_d <= y]",
+            colour = "d")
+}
+
+
+###################
+
+## Now, make the same plots for the distribuion of r_d = (q/p)^nu_d.
+
+
+## Plot the probability mass functions and means for the distributions of
+## of r_d = (q/p)^(-d + 2 Y_d), d = 1,...,L.
+plot_r_probs <- function(L = 10, q = 0.25) {
+    dt_binom <- binom_dist_table(L, q)
+    dt_mean <- mean_sd_table(dt_binom, valcol = "r")
+
+    ggplot(dt_binom[p > 0], aes(r, p, colour = dval, linetype = odd)) +
+        geom_line() + geom_point(size = 0.8) +
+        mean_geom(dt_mean) +
+        #scale_x_log10() +
+        scale_linetype_discrete(guide = FALSE) +
+        labs(title = multiline(
+                sprintf(paste("PMF of r_d = (q/p)^(-d + 2Y_d)",
+                        "for d = 1,...,L  (L = %s)"),
+                    L),
+                "(with points indicating means)"),
+            x = "u",
+            y = "P[r_d = u]",
+            colour = "d")
+}
+
+## Plot the 1-CDFs for the distributions of r_d = (q/p)^(-d + 2 Y_d),
+## d = 1,...,L.
+plot_r_cumprobs <- function(L = 10, q = 0.25) {
+    dt_binom <- binom_dist_table(L, q, cdf = TRUE)
+    ## Add an indication of whether the condition on q is met such that
+    ## P[Y_d <= j] <= P[Y_{d+2} <= j+1].
+    dt_binom[, meets_q_cond := (d-y) / (d+1) >= q]
+    dt_mean <- mean_sd_table(dt_binom, valcol = "r", cdf = TRUE)
+
+    ggplot(dt_binom, aes(r, 1-cdf_r, colour = dval, linetype = odd)) +
+        geom_step() +
+        geom_point(size = 0.8) +
+        geom_point(aes(r, 1-cdf_r), colour = "black", size = 0.8,
+            data = dt_binom[meets_q_cond == FALSE]) +
+        #mean_geom(dt_mean) +
+        scale_x_log10() +
+        scale_y_continuous(breaks = intervalBreaks(0.2)) +
+        scale_linetype_discrete(guide = FALSE) +
+        labs(title = multiline(
+                sprintf(paste("1-CDF of r_d = (q/p)^(-d + 2Y_d)",
+                        "for d = 1,...,L  (L = %s)"),
+                    L),
+                "(with points indicating means)",
+                "(points not meeting the q condition in black)"),
+            x = "u",
+            y = "P[r_d > u]",
+            colour = "d")
+}
+
+
+###################
+
+## Compute the distribution of R(S, x, x') for n = 2.
+## R_n(S,x,x') = n / \sum_{k=1}^n 1/r(S_k, d)
+
+L <- 10
+q <- 0.25
+n <- 2
+
+## Expand (cross-join) the univariate binom_dist table for a single d value.
+## To be used in computing the distribution of R as a function of multiple
+## independent copies of r.
+## Returns a table with 3n columns, with names ("nu_<k>", "r_<k>", "p_<k>")
+## for k = 1,...,n.
+## At this point, no aggregation has been done, so p_<k> is just a copy of
+## the univariate probability P_x[r(S, d) = r_<k>].
+expand_mv <- function(DT, n) {
+    expand_cols <- c("nu", "r", "p")
+    DT <- DT[, expand_cols, with = FALSE]
+    dt_base <- copy(DT)
+    dt_mv <- DT
+    for(k in 1:n) {
+        k_cols <- sprintf("%s_%s", expand_cols, k)
+        if(k == 1) {
+            setnames(dt_mv, k_cols)
+        } else {
+            setnames(dt_base, k_cols)
+            dt_mv <- dt_mv[,
+                dt_base[, k_cols, with = FALSE],
+                    by = names(dt_mv)]
+        }
+    }
+    dt_mv
+}
+
+## Compute the probability mass function of R, for d = 1,...,L.
+## Returns a table with columns:
+## - d, the row's value of d
+## - dval, a string representation of the current d value,
+## - R, listing the unique values of R
+## - p, the probability P_x[R(S, d) = R].
+R_dist_table <- function(n, L = 10, q = 0.25) {
+    dt_binom <- binom_dist_table(L, q)[p > 0]
+    dt_mv <- rbindlist(lapply(1:L, function(dd) {
+        d_rows <- dt_binom[d == dd]
+        dt_mv_d <- expand_mv(d_rows, n)
+        dt_mv_d <- dt_mv_d[, d := dd][,
+            dval := d_rows[1, dval]]
+        dt_mv_d
+    }))
+    dt_mv[, R := n / Reduce(`+`, lapply(.SD, function(v) 1/v)),
+        .SDcols = sprintf("r_%s", 1:n),
+        by = .(d, dval)]
+    dt_mv[,
+        .(p = sum(Reduce(`*`, .SD))),
+        .SDcols = sprintf("p_%s", 1:n),
+        by = .(d, dval, R = round(R, 8))][,
+        ## Add a visual indication of whether d is odd or even, for easily
+        ## matching d with d+2.
+        odd := d %% 2 == 0][]
+}
+
+## Plot the 1-CDF for the distributions of
+## R_n(S,d) = n / \sum_{k=1}^n 1/r_d(k), d = 1,...,L where r_d(k) are
+## independent copies of r_d.
+plot_R_cumdist <- function(n = 2, L = 10, q = 0.25) {
+    dt_rdist <- R_dist_table(n, L, q)
+    dt_rdist <- dt_rdist[order(d, R)][, cdf_R := cumsum(p), by = d]
+    #dt_mean <- mean_sd_table(dt_binom, valcol = "r")
+
+    ggplot(dt_rdist, aes(R, 1-cdf_R, colour = dval, linetype = odd)) +
+        geom_step() +
+        geom_vline(xintercept = 1) +
+        geom_point(size = 0.8) +
+        #geom_point(aes(r, 1-cdf_R), colour = "black", size = 0.8,
+        #    data = dt_binom[meets_q_cond == FALSE]) +
+        #mean_geom(dt_mean) +
+        scale_x_log10() +
+        scale_y_continuous(breaks = intervalBreaks(0.2)) +
+        scale_linetype_discrete(guide = FALSE) +
+        labs(title = #multiline(
+                sprintf(paste("1-CDF of R_n(d) = n/(1/r1 + ... + 1/rn)",
+                        "for d = 1,...,L  (L = %s)"),
+                    L),
+                #"(with points indicating means)",
+                #"(points not meeting the q condition in black)"),
+            x = "u",
+            y = "P[R_n(d) > u]",
+            colour = "d")
+}
 
